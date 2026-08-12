@@ -1,0 +1,513 @@
+{
+  "schema": 1,
+  "git": {
+    "commit": null,
+    "branch": null,
+    "dirty": null
+  },
+  "environment": {
+    "python": "3.11.12",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "cuequivariance_available": true,
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "gpu_count": 1
+  },
+  "precision": {
+    "float32_matmul_precision": "highest",
+    "allow_tf32_matmul": false,
+    "allow_tf32_cudnn": false
+  },
+  "cuequivariance_present": true,
+  "fixture_metadata": {
+    "source_package": "MSA_Pairformer",
+    "torch_version": "2.13.0",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.11.14",
+    "triangle_path": "vanilla",
+    "shapes": {
+      "B": 1,
+      "S": 6,
+      "N": 10,
+      "dim_msa": 464,
+      "dim_pairwise": 256
+    }
+  },
+  "configurations": [
+    {
+      "device": "cpu",
+      "requested_cuequivariance": false,
+      "effective_cuequivariance": false,
+      "shape": "fixture",
+      "cases": {
+        "core.Transition": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 6.854534149169922e-07,
+              "max_rel": 0.010333607904613018,
+              "mean_abs": 8.628735770344065e-08
+            }
+          }
+        },
+        "core.SwiGLU": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.9073486328125e-06,
+              "max_rel": 0.0003329454630147666,
+              "mean_abs": 5.553051352080729e-08
+            }
+          }
+        },
+        "pairwise_operations.MSAPairWeightedAveraging": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 2.086162567138672e-07,
+              "max_rel": 0.0049532754346728325,
+              "mean_abs": 2.2032537572158617e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[outgoing]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 9.5367431640625e-07,
+              "max_rel": 0.00591853866353631,
+              "mean_abs": 8.028713693875034e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[incoming]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.3113021850585938e-06,
+              "max_rel": 0.06835233420133591,
+              "mean_abs": 7.830366399730337e-08
+            }
+          }
+        },
+        "pairwise_operations.PairwiseBlock": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.9073486328125e-06,
+              "max_rel": 0.0037568563129752874,
+              "mean_abs": 2.0485619245391717e-07
+            }
+          }
+        },
+        "outer_product.OuterProduct[presoftmax_differential]": {
+          "checksum_matches": false,
+          "outputs": {
+            "pair_update": {
+              "max_abs": 6.705522537231445e-08,
+              "max_rel": 0.013286523520946503,
+              "mean_abs": 2.4230459860774545e-09
+            },
+            "seq_weights": {
+              "max_abs": 8.940696716308594e-08,
+              "max_rel": 4.894716880698979e-07,
+              "mean_abs": 3.973643103449831e-08
+            }
+          }
+        },
+        "positional_encoding.RelativePositionEncoding": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 0.0,
+              "max_rel": 0.0,
+              "mean_abs": 0.0
+            }
+          }
+        },
+        "regression.LMHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.6689300537109375e-06,
+              "max_rel": 0.0035859947092831135,
+              "mean_abs": 3.704908522195183e-07
+            }
+          }
+        },
+        "regression.LogisticRegressionContactHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.1920928955078125e-07,
+              "max_rel": 2.2844240277208883e-07,
+              "mean_abs": 2.533197474008375e-08
+            }
+          }
+        },
+        "model.MSAPairformer.forward": {
+          "checksum_matches": false,
+          "outputs": {
+            "logits": {
+              "max_abs": 3.6954879760742188e-06,
+              "max_rel": 0.004553833976387978,
+              "mean_abs": 1.0584084293441265e-06
+            },
+            "predicted_cb_contacts": {
+              "max_abs": 3.2782554626464844e-07,
+              "max_rel": 8.64142009504576e-07,
+              "mean_abs": 7.122755363297983e-08
+            },
+            "predicted_confind_contacts": {
+              "max_abs": 4.172325134277344e-07,
+              "max_rel": 7.911314696684713e-07,
+              "mean_abs": 1.2665987014770508e-07
+            },
+            "final_pairwise_repr": {
+              "max_abs": 1.2874603271484375e-05,
+              "max_rel": 0.023975307121872902,
+              "mean_abs": 2.316597374374396e-06
+            }
+          }
+        },
+        "model.MSAPairformer.predict_cb_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_cb_contacts": {
+              "max_abs": 3.2782554626464844e-07,
+              "max_rel": 8.64142009504576e-07,
+              "mean_abs": 7.122755363297983e-08
+            }
+          }
+        },
+        "model.MSAPairformer.predict_confind_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_confind_contacts": {
+              "max_abs": 4.172325134277344e-07,
+              "max_rel": 7.911314696684713e-07,
+              "mean_abs": 1.2665987014770508e-07
+            }
+          }
+        }
+      }
+    },
+    {
+      "device": "cuda",
+      "requested_cuequivariance": false,
+      "effective_cuequivariance": false,
+      "shape": "fixture",
+      "cases": {
+        "core.Transition": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 7.003545761108398e-07,
+              "max_rel": 0.00821639597415924,
+              "mean_abs": 8.775040782893484e-08
+            }
+          }
+        },
+        "core.SwiGLU": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.9073486328125e-06,
+              "max_rel": 0.0003329454630147666,
+              "mean_abs": 5.6886012345103154e-08
+            }
+          }
+        },
+        "pairwise_operations.MSAPairWeightedAveraging": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 2.0116567611694336e-07,
+              "max_rel": 0.007365799974650145,
+              "mean_abs": 2.2755116901862493e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[outgoing]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.0728836059570312e-06,
+              "max_rel": 0.005092319566756487,
+              "mean_abs": 9.744754692064816e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[incoming]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.1920928955078125e-06,
+              "max_rel": 0.06064624339342117,
+              "mean_abs": 9.531959221931174e-08
+            }
+          }
+        },
+        "pairwise_operations.PairwiseBlock": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 2.1383166313171387e-06,
+              "max_rel": 0.004278728738427162,
+              "mean_abs": 2.2167522217841906e-07
+            }
+          }
+        },
+        "outer_product.OuterProduct[presoftmax_differential]": {
+          "checksum_matches": false,
+          "outputs": {
+            "pair_update": {
+              "max_abs": 5.587935447692871e-08,
+              "max_rel": 0.006418815813958645,
+              "mean_abs": 2.4874418080855776e-09
+            },
+            "seq_weights": {
+              "max_abs": 1.4901161193847656e-07,
+              "max_rel": 5.7105035011773e-07,
+              "mean_abs": 5.21540641784668e-08
+            }
+          }
+        },
+        "positional_encoding.RelativePositionEncoding": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 0.0,
+              "max_rel": 0.0,
+              "mean_abs": 0.0
+            }
+          }
+        },
+        "regression.LMHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.430511474609375e-06,
+              "max_rel": 0.0005537997931241989,
+              "mean_abs": 2.995068939526391e-07
+            }
+          }
+        },
+        "regression.LogisticRegressionContactHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 5.960464477539063e-08,
+              "max_rel": 1.7541590580094635e-07,
+              "mean_abs": 1.9371508841459217e-08
+            }
+          }
+        },
+        "model.MSAPairformer.forward": {
+          "checksum_matches": false,
+          "outputs": {
+            "logits": {
+              "max_abs": 4.0531158447265625e-06,
+              "max_rel": 0.003708298085257411,
+              "mean_abs": 1.0250921604892937e-06
+            },
+            "predicted_cb_contacts": {
+              "max_abs": 2.682209014892578e-07,
+              "max_rel": 6.90191939156648e-07,
+              "mean_abs": 1.0073185308101529e-07
+            },
+            "predicted_confind_contacts": {
+              "max_abs": 2.384185791015625e-07,
+              "max_rel": 4.6959462451923173e-07,
+              "mean_abs": 7.83801112902438e-08
+            },
+            "final_pairwise_repr": {
+              "max_abs": 1.245737075805664e-05,
+              "max_rel": 0.05081009492278099,
+              "mean_abs": 2.4913692868722137e-06
+            }
+          }
+        },
+        "model.MSAPairformer.predict_cb_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_cb_contacts": {
+              "max_abs": 2.682209014892578e-07,
+              "max_rel": 6.90191939156648e-07,
+              "mean_abs": 1.0073185308101529e-07
+            }
+          }
+        },
+        "model.MSAPairformer.predict_confind_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_confind_contacts": {
+              "max_abs": 2.384185791015625e-07,
+              "max_rel": 4.6959462451923173e-07,
+              "mean_abs": 7.83801112902438e-08
+            }
+          }
+        }
+      }
+    },
+    {
+      "device": "cuda",
+      "requested_cuequivariance": true,
+      "effective_cuequivariance": true,
+      "shape": "fixture",
+      "cases": {
+        "core.Transition": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 7.003545761108398e-07,
+              "max_rel": 0.00821639597415924,
+              "mean_abs": 8.775040782893484e-08
+            }
+          }
+        },
+        "core.SwiGLU": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.9073486328125e-06,
+              "max_rel": 0.0003329454630147666,
+              "mean_abs": 5.6886012345103154e-08
+            }
+          }
+        },
+        "pairwise_operations.MSAPairWeightedAveraging": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 2.0116567611694336e-07,
+              "max_rel": 0.007365799974650145,
+              "mean_abs": 2.2755116901862493e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[outgoing]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.0728836059570312e-06,
+              "max_rel": 0.005092319566756487,
+              "mean_abs": 9.744754692064816e-08
+            }
+          }
+        },
+        "pairwise_operations.TriangleMultiplication[incoming]": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.1920928955078125e-06,
+              "max_rel": 0.06064624339342117,
+              "mean_abs": 9.531959221931174e-08
+            }
+          }
+        },
+        "pairwise_operations.PairwiseBlock": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 2.1383166313171387e-06,
+              "max_rel": 0.004278728738427162,
+              "mean_abs": 2.2167522217841906e-07
+            }
+          }
+        },
+        "outer_product.OuterProduct[presoftmax_differential]": {
+          "checksum_matches": false,
+          "outputs": {
+            "pair_update": {
+              "max_abs": 5.587935447692871e-08,
+              "max_rel": 0.006418815813958645,
+              "mean_abs": 2.4874418080855776e-09
+            },
+            "seq_weights": {
+              "max_abs": 1.4901161193847656e-07,
+              "max_rel": 5.7105035011773e-07,
+              "mean_abs": 5.21540641784668e-08
+            }
+          }
+        },
+        "positional_encoding.RelativePositionEncoding": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 0.0,
+              "max_rel": 0.0,
+              "mean_abs": 0.0
+            }
+          }
+        },
+        "regression.LMHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 1.430511474609375e-06,
+              "max_rel": 0.0005537997931241989,
+              "mean_abs": 2.995068939526391e-07
+            }
+          }
+        },
+        "regression.LogisticRegressionContactHead": {
+          "checksum_matches": true,
+          "outputs": {
+            "out": {
+              "max_abs": 5.960464477539063e-08,
+              "max_rel": 1.7541590580094635e-07,
+              "mean_abs": 1.9371508841459217e-08
+            }
+          }
+        },
+        "model.MSAPairformer.forward": {
+          "checksum_matches": false,
+          "outputs": {
+            "logits": {
+              "max_abs": 4.0531158447265625e-06,
+              "max_rel": 0.003708298085257411,
+              "mean_abs": 1.0250921604892937e-06
+            },
+            "predicted_cb_contacts": {
+              "max_abs": 2.682209014892578e-07,
+              "max_rel": 6.90191939156648e-07,
+              "mean_abs": 1.0073185308101529e-07
+            },
+            "predicted_confind_contacts": {
+              "max_abs": 2.384185791015625e-07,
+              "max_rel": 4.6959462451923173e-07,
+              "mean_abs": 7.83801112902438e-08
+            },
+            "final_pairwise_repr": {
+              "max_abs": 1.245737075805664e-05,
+              "max_rel": 0.05081009492278099,
+              "mean_abs": 2.4913692868722137e-06
+            }
+          }
+        },
+        "model.MSAPairformer.predict_cb_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_cb_contacts": {
+              "max_abs": 2.682209014892578e-07,
+              "max_rel": 6.90191939156648e-07,
+              "mean_abs": 1.0073185308101529e-07
+            }
+          }
+        },
+        "model.MSAPairformer.predict_confind_contacts": {
+          "checksum_matches": false,
+          "outputs": {
+            "predicted_confind_contacts": {
+              "max_abs": 2.384185791015625e-07,
+              "max_rel": 4.6959462451923173e-07,
+              "mean_abs": 7.83801112902438e-08
+            }
+          }
+        }
+      }
+    }
+  ]
+}

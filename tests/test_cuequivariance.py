@@ -61,10 +61,23 @@ def _pair_inputs(device):
 
 
 def _build(factory, use_cuequivariance, device, seed=0):
-    """Same seed either side, so the comparison is of kernels and not weights."""
+    """Same seed either side, so the comparison is of kernels and not weights.
+
+    The flag is handed to the factory as well as set on the module global, and
+    that is not belt-and-braces. `TriangleMultiplication.__init__` declares
+    `use_cuequivariance: bool = CUEQUIVARIANCE_AVAILABLE` -- a default argument,
+    evaluated once when the `def` executes at import time. On a CUDA host it is
+    therefore frozen True, and `triangle_path` cannot move it however much it
+    rewrites the global. Constructing without the argument silently gets the
+    fused path even when vanilla was asked for, which is exactly how this test
+    was failing: the "fallback" module it compared against was fused too.
+
+    Modules that read the global at call time -- `PairwiseBlock`, and
+    `generate_fixtures._triangle`, which passes it explicitly -- are unaffected.
+    """
     with triangle_path(use_cuequivariance) as effective:
         torch.manual_seed(seed)
-        module = factory().to(device).eval()
+        module = factory(effective).to(device).eval()
     return module, effective
 
 
@@ -85,9 +98,10 @@ def _report(name, got, want):
 def test_triangle_multiplication_matches_fallback(device, direction):
     pair, pairwise_mask = _pair_inputs(device)
 
-    def factory():
+    def factory(use_cuequivariance):
         return pairwise_operations.TriangleMultiplication(
             dim_pairwise=DIM_PAIRWISE, dim_hidden=DIM_PAIRWISE, direction=direction,
+            use_cuequivariance=use_cuequivariance,
         )
 
     fused, effective = _build(factory, True, device)
@@ -106,7 +120,10 @@ def test_pairwise_block_matches_fallback(device):
     disagreement in how the two triangle updates compose."""
     pair, pairwise_mask = _pair_inputs(device)
 
-    def factory():
+    # PairwiseBlock reads CUEQUIVARIANCE_AVAILABLE at call time and passes it
+    # down, so it needs no explicit flag -- the argument is accepted and ignored
+    # to keep one factory signature.
+    def factory(_use_cuequivariance):
         return pairwise_operations.PairwiseBlock(dim_pairwise=DIM_PAIRWISE)
 
     fused, _ = _build(factory, True, device)
@@ -134,8 +151,12 @@ def test_full_model_matches_fallback(device):
         "store_msa_repr_cpu": False, "store_pairwise_repr_cpu": False,
     }
 
-    fused, _ = _build(MSAPairformer, True, device)
-    vanilla, _ = _build(MSAPairformer, False, device)
+    # Same as PairwiseBlock: the model builds its blocks from the live global.
+    def factory(_use_cuequivariance):
+        return MSAPairformer()
+
+    fused, _ = _build(factory, True, device)
+    vanilla, _ = _build(factory, False, device)
 
     with torch.no_grad():
         got = fused(**kwargs)["logits"]
