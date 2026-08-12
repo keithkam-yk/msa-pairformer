@@ -26,7 +26,7 @@ other problem below grows from it.
 | The tokenizer lives in the dataloader | 12 of 13 external imports of `dataset.py` want tokens or masks. One wants a `Dataset`. | Split `dataset.py`. §2.2 |
 | `utils.py` is four unrelated modules | 695 lines, 21 functions, 4 concerns, 12 functions with no caller | Split by concern. §2.3 |
 | Duplicated files | 2 duplicate pairs, one of them across the package boundary | Delete the copies. §2.4 |
-| The training code is a hand-written loop | `init_dataloaders` takes 44 parameters. Three tracker classes re-implement metric aggregation, and one of them is not DDP-safe. | Rewrite on Lightning. §5 |
+| The training code is a hand-written loop | `init_dataloaders` takes 33 parameters. Three tracker classes re-implement metric aggregation, and one of them is not DDP-safe. | Rewrite on Lightning. §5 |
 | `_run` and `write_log` discard information | The wrapper drops `returncode` and rewrites `CompletedProcess.stdout` into a list | Use the standard library. §6 |
 
 The count of ten `utils` is correct. Five are in the package
@@ -306,7 +306,7 @@ framework provides.
 
 | Today, in `training_utils.py` | Replacement | Why |
 | --- | --- | --- |
-| `init_dataloaders`, 44 parameters, manual index splitting, returns three loaders | `MSADataModule`: `setup()` plus `train_dataloader()` / `val_dataloader()` / `test_dataloader()` | Most of the 44 are one knob duplicated as `x` and `x_val_test`. A DataModule holds them as fields and splits once in `setup`. |
+| `init_dataloaders`, 33 parameters, manual index splitting, returns three loaders | `MSADataModule`: `setup()` plus `train_dataloader()` / `val_dataloader()` / `test_dataloader()` | Eight of the 33 are a second copy of another parameter carrying a `_val_test` suffix. A DataModule holds them as fields and splits once in `setup`. |
 | `init_trRosetta_contact_dataloaders` | a second `LightningDataModule` | Same shape, different dataset. Two DataModules, one `Trainer`. |
 | `GradAccumStatTracker` | nothing. Delete. | Lightning aggregates logged metrics across `accumulate_grad_batches` on its own. This class exists only because the loop is hand-written. |
 | `GradAccumLossTracker` | `torchmetrics.text.Perplexity`, `torchmetrics.classification.MulticlassAccuracy` | It keeps `total_loss / total_tokens` and `total_correct / total_tokens`. That is precisely a torchmetrics `update` and `compute`. |
@@ -457,14 +457,30 @@ re-exports whatever that module imported, including names from `msa_utils`. The
 figure script may use names it never mentions. Converting to explicit imports
 therefore needs the script run once, not only a lint pass.
 
+**Done in commit `98f302a`.** The directory is `vep/`. The star bound 21 names,
+of which the script used 3 — `prepare_msa_inputs`, `process_msa`, `sample_msa`,
+which is what the trailing comment on the old line claimed. Resolved by
+intersecting the names the star binds against the script's free names, rather
+than by running it: the script needs CUDA, model weights and data files that are
+not in the repository, so "run it once" was not available. The paired check is
+that all 13 of its import statements were then executed for real, with only the
+script's own directory on `sys.path`, from the repository root and from `/`.
+
+That leaves one thing §7.1 does not fix, and it should be said plainly: the
+script's data paths are still `../../data/...`, so it continues to fail from the
+repository root — now at file open rather than at import. Making those
+`__file__`-relative is a behaviour change to archival figure code and belongs to
+whoever next reruns the figure.
+
 ### 7.2 Delete `weights.py` and import from the package
 
 `weights.py` and the first 253 lines of what is now `evaluate/proteingym.py`
 define the same seven functions. The comparison method matters, so state it:
 each function was parsed, its syntax tree normalised by round-tripping through
 `ast.unparse`, and the results compared. **Six of the seven are identical.** The
-seventh, `map_from_alphabet`, differs only in whether an assertion message is
-built with `str.format` or an f-string.
+seventh, `map_from_alphabet`, differs only in whether the message of a
+`raise ValueError` is built with `str.format` or an f-string. (An earlier draft
+of this section called it an assertion. It is a raise.)
 
 So the figure directory can import `calc_weights_fast`, `map_from_alphabet` and
 `map_matrix` from **`msa_pairformer.evaluate.proteingym`** and the file can go.
@@ -644,6 +660,42 @@ uvx ruff check msa_pairformer --output-format=concise | grep -c '^msa_pairformer
 auto-fixable. The second of those two lines appears only when something is
 fixable, so it can come and go on its own and move the total independently of
 the code.
+
+### What the gate actually reported
+
+Every figure above describes the baseline at `ddcbc26`. Recorded here so that a
+reader running these commands on the finished branch is not comparing against
+the wrong numbers.
+
+| | `ddcbc26` | finished branch |
+|---|---|---|
+| `pytest -q` | 41 passed, 33 skipped | 65 passed, 33 skipped |
+| `MSA_PAIRFORMER_TYPECHECK=1 pytest -q` | 44 passed, 30 skipped | 68 passed, 30 skipped |
+| `ruff check msa_pairformer` (pinned) | 64 | 61 |
+| symbols in the snapshot | 248 | 255 |
+
+The test counts move because two files are new: `tests/test_training.py` holds
+17 tests and `tests/test_imports.py` holds 7, the latter created in commit 1 and
+extended in each phase after it. 41 + 17 + 7 = 65, and 74 + 24 = 98 collected.
+No existing test was deleted or rewritten, which is the point — the suite that
+proved the old behaviour is the same suite that proves the new.
+
+The lint count falls from 64 to 61 because `training_utils.py` was deleted and
+it carried three of the 64. The pin held at exactly 64 through commits 2, 3 and
+4 as required; commit 5 is the one commit on this branch permitted to change
+behaviour, and it is the one that moves the number. No new file added an error.
+
+The symbol count rises by 7 net: commit 5 removes 30 and adds 37.
+
+Phases 5 and 6 add a fourth gate the earlier phases did not need. Each new test
+was checked by breaking the thing it tests: `lr=0.0` fails only the
+weights-update test; deleting `weight=target.numel()` fails both token-weighting
+tests and nothing else; removing the `query_only` comparison fails only its own
+test. One of these controls was itself broken on the first attempt — a `sed`
+expression whose character class excluded `.` and `(` never matched the real
+call, so it reported success while changing nothing. Rewritten with an assertion
+that the patch actually landed. A negative control is code, and it can fail
+silently in exactly the way it exists to detect.
 
 Commits 2, 3 (the moves) and 4 must show **no symbol-level change at all**.
 Commits 3 (the `_run` retirement), 5 and 6.2 change source on purpose, so for
