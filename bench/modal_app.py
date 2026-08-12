@@ -142,7 +142,12 @@ def correctness(with_drift: bool = True) -> dict[str, Any]:
 
     env = {**os.environ, "MSA_PAIRFORMER_TYPECHECK": "1"}
     proc = subprocess.run(
-        [sys.executable, "-m", "pytest", "/root/tests", "-q", "-rs"],
+        # -s so the deviations test_cuequivariance prints on success reach the
+        # log. pytest swallows stdout for passing tests, which is usually right
+        # and is wrong here: those numbers are the only measurement of how far
+        # the fused kernels sit from the fallback, and a passing run is exactly
+        # when we want them.
+        [sys.executable, "-m", "pytest", "/root/tests", "-q", "-rs", "-s"],
         capture_output=True, text=True, cwd="/root", env=env, check=False,
     )
     return {
