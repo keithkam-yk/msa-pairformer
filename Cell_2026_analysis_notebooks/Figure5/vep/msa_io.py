@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-from .weights import map_from_alphabet, map_matrix, calc_weights_fast
+from msa_pairformer.evaluate.proteingym import map_from_alphabet, map_matrix, calc_weights_fast
 # constants
 GAP = "-"
 MATCH_GAP = GAP
