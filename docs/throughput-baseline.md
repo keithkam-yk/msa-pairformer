@@ -30,7 +30,7 @@ other words for the same thing.
 ## 1. Summary
 
 The paper reports 18.1 s for each optimizer step. Our estimate at the same MSA
-depth is 8.0 s to 10.4 s. The model compute is thus 1.7 to 2.3 times faster than
+depth is 7.9 s to 10.4 s. The model compute is thus 1.7 to 2.3 times faster than
 the full step in the paper.
 
 | Path | Estimated s/step at depth 320 | Estimated days for 50,000 steps | Ratio to the paper |
@@ -139,17 +139,20 @@ does not change this slope. The slope is the MSA track, and the checkpoints are
 on the pair track. Checkpointing moves the intercept from 57.71 GB to 30.84 GB.
 It thus saves a constant 27 GB.
 
-Three independent measurements agree on the memory at MSA depth 320:
+Two independent runs agree on the memory at MSA depth 320. The third row is an
+earlier fit across a subset of the same points as the second row. It is not
+independent evidence, and the document shows it only for completeness.
 
 | Source | Slope (GB/sequence) | Intercept (GB) | Value at depth 320 |
 | --- | --- | --- | --- |
 | Memory probe, no optimizer state | 0.1979 | 30.84 | 94.2 GB |
-| First depth sweep, 3 points | 0.1972 | 32.20 | 95.3 GB |
 | Six-point depth sweep | 0.1975 | 32.17 | 95.4 GB |
+| First depth sweep, 3 of the same depths | 0.1972 | 32.20 | 95.3 GB |
 
-The probe does not allocate optimizer state. The two sweeps do. The difference
-of approximately 1.4 GB is that state. The agreement between the slopes is 0.5
-per cent. This agreement is the reason to trust the extrapolation in section 7.
+The probe does not allocate optimizer state. The sweeps do. The difference of
+approximately 1.4 GB is that state. The two runs are separate: different code,
+different container, different day. Their slopes agree to 0.2 per cent. This
+agreement is the reason to trust the extrapolation in section 7.
 
 The result is 94 GB to 95 GB at MSA depth 320. That value does not fit in 80 GB.
 It fits in 96 GB. The largest MSA depth that fits on our card is between 192 and
