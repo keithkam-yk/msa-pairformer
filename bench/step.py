@@ -12,11 +12,11 @@ from typing import Any
 
 import torch
 
-from msa_pairformer import pairwise_operations
-from msa_pairformer.core import PreLayerNorm, Transition
-from msa_pairformer.model import MSAPairformer
-from msa_pairformer.outer_product import OuterProduct
-from msa_pairformer.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock
+from msa_pairformer.nn import pairwise_operations
+from msa_pairformer.nn.core import PreLayerNorm, Transition
+from msa_pairformer.nn.model import MSAPairformer
+from msa_pairformer.nn.outer_product import OuterProduct
+from msa_pairformer.nn.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock
 
 # Snapshot before anything can override it: `triangle_path` must never claim
 # cuEquivariance on a host that does not have it.

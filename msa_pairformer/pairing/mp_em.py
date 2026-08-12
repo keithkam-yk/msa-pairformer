@@ -17,12 +17,12 @@ from scipy.optimize import linear_sum_assignment
 from tqdm import tqdm
 
 # MSA Pairformer imports
-from msa_pairformer.model import MSAPairformer
-from msa_pairformer.regression import MRFHead
+from msa_pairformer.nn.heads import MRFHead
+from msa_pairformer.nn.model import MSAPairformer
 from msa_pairformer.tokens import aa2tok_d
 
 # DiffPALM imports
-from .gumbel_sinkhorn_utils import MSA_inverse_permutation
+from .sinkhorn import MSA_inverse_permutation
 
 
 def DCN(x):

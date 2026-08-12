@@ -16,9 +16,9 @@ import pytest
 import torch
 from jaxtyping import TypeCheckError
 
-from msa_pairformer.custom_typing import should_typecheck
 from msa_pairformer.features import prepare_msa_masks
-from msa_pairformer.model import MSAPairformer
+from msa_pairformer.nn.custom_typing import should_typecheck
+from msa_pairformer.nn.model import MSAPairformer
 from msa_pairformer.tokens import aa2tok_d
 
 pytestmark = pytest.mark.skipif(

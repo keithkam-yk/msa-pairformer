@@ -100,7 +100,7 @@ necessary for the result, but section 5 shows that it does not fully explain the
 memory.
 
 The published repository contains no training code. There is no backward pass
-and no optimizer step outside `pairing_optimization/`. The harness in `bench/`
+and no optimizer step outside `pairing/`. The harness in `bench/`
 is therefore a reconstruction. It is the smallest training step that is faithful
 enough for a comparison.
 

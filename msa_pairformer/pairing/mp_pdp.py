@@ -16,16 +16,16 @@ from huggingface_hub import snapshot_download
 from matplotlib.colors import CenteredNorm
 from tqdm import tqdm
 
-from msa_pairformer.model import MSAPairformer
+from msa_pairformer.nn.heads import MRFHead
+from msa_pairformer.nn.model import MSAPairformer
 
 # DiffPALM imports
-from msa_pairformer.pairing_optimization.gumbel_sinkhorn_utils import (
+from msa_pairformer.pairing.sinkhorn import (
     MSA_inverse_permutation,
     gumbel_matching,
     gumbel_sinkhorn,
     sample_uniform,
 )
-from msa_pairformer.regression import MRFHead
 from msa_pairformer.tokens import aa2tok_d
 
 

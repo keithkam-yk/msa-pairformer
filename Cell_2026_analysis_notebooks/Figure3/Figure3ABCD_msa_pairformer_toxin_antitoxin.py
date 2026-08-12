@@ -23,7 +23,7 @@ from tqdm import tqdm
 from glob import glob
 from copy import deepcopy
 
-from msa_pairformer.model import MSAPairformer
+from msa_pairformer.nn.model import MSAPairformer
 from msa_pairformer.features import prepare_msa_masks
 from msa_pairformer.tokens import aa2tok_d
 

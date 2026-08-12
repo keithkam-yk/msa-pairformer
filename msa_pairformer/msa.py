@@ -1,5 +1,7 @@
+import itertools
 import os
 import re
+import string
 import subprocess
 import tempfile
 from pathlib import Path
@@ -251,3 +253,35 @@ class MSA:
             with output_file.open() as f:
                 indices = [int(line[1:].strip()) for line in f if line.startswith(">")]
             return msa_a[indices], indices
+
+
+# Adapted from https://github.com/Bitbol-Lab/DiffPALM/blob/main/diffpalm/msa_parsing.py
+# Original author: Umberto Lupo et al. (2024), Pairing interacting protein sequences using masked language modeling
+# Promoted here from pairing_optimization/msa_parsing.py: reading an alignment
+# off disk is what this module is, and it costs the pairing extra nothing.
+
+deletekeys = dict.fromkeys(string.ascii_lowercase)
+deletekeys["."] = None
+deletekeys["*"] = None
+translation = str.maketrans(deletekeys)
+
+
+def read_sequence(filename: str) -> tuple[str, str]:
+    """Reads the first (reference) sequences from a fasta or MSA file."""
+    record = next(SeqIO.parse(filename, "fasta"))
+    return record.description, str(record.seq)
+
+
+def remove_insertions(sequence: str) -> str:
+    """Removes any insertions into the sequence. Needed to load aligned sequences in an MSA."""
+    return sequence.translate(translation)
+
+
+def read_msa(filename: str, nseq: int) -> list[tuple[str, str]]:
+    """Reads the first nseq sequences from an MSA file, automatically removes insertions."""
+    if nseq == -1:
+        nseq = len([elem.id for elem in SeqIO.parse(filename, "fasta")])
+    return [
+        (record.description, remove_insertions(str(record.seq)))
+        for record in itertools.islice(SeqIO.parse(filename, "fasta"), nseq)
+    ]

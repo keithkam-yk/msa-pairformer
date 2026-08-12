@@ -9,7 +9,7 @@ than described:
 It held by accident before this file existed, and it is fragile in a way that
 is easy to miss: importing a submodule imports its parent package first, so
 anything `msa_pairformer/__init__.py` imports is charged to
-`import msa_pairformer.model` as well. A facade written the obvious way would
+`import msa_pairformer.nn.model` as well. A facade written the obvious way would
 therefore have made every consumer of a deep path -- `bench/`, `tests/`, the
 Cell 2026 figure scripts -- pay for `Bio.SeqIO` and `scipy` to load a model,
 and every consumer that only wanted a tokenizer pay for `huggingface_hub`. The
@@ -45,9 +45,11 @@ import pytest
 import msa_pairformer
 
 # Not unused, and not redundant with the line above: binding the submodule is
-# what sets `model` as an attribute of the package, which is the baseline
+# what sets `nn` as an attribute of the package, which is the baseline
 # `dir()` behaviour the last test asserts `__dir__` did not narrow away.
-import msa_pairformer.model
+# (`nn` rather than `model` since phase 4: importing `msa_pairformer.nn.model`
+# binds the intermediate package, not the leaf, on the top-level package.)
+import msa_pairformer.nn.model
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = REPO_ROOT / "msa_pairformer"
@@ -68,7 +70,7 @@ OPTIONAL_DEPENDENCIES = ("matplotlib", "sklearn", "numba", "pandas", "jax", "esm
 # Base dependencies, so these are always installed and importing them cannot
 # fail. They are excluded for cost on the model path, not for installability:
 # they are what `msa.py` pulls in, and charging them to
-# `import msa_pairformer.model` is the regression this file exists to pin. Kept
+# `import msa_pairformer.nn.model` is the regression this file exists to pin. Kept
 # in a separate group so a failure says which of the two arguments it broke.
 UNWANTED_BASE_DEPENDENCIES = ("Bio", "scipy")
 
@@ -93,7 +95,7 @@ FORBIDDEN = OPTIONAL_DEPENDENCIES + UNWANTED_BASE_DEPENDENCIES
 # model stack either.
 IMPORT_PATHS = {
     "msa_pairformer": FORBIDDEN,
-    "msa_pairformer.model": FORBIDDEN,
+    "msa_pairformer.nn.model": FORBIDDEN,
     "msa_pairformer.msa": (*OPTIONAL_DEPENDENCIES, "huggingface_hub"),
     "msa_pairformer.tokens": (*FORBIDDEN, "huggingface_hub"),
 }
@@ -103,14 +105,14 @@ IMPORT_PATHS = {
 # invariant is about.
 TIER_0_MODULES = (
     "__init__.py",
-    "core.py",
-    "model.py",
-    "regression.py",
-    "pairwise_operations.py",
-    "outer_product.py",
-    "positional_encoding.py",
-    "chunk_layer.py",
-    "custom_typing.py",
+    "nn/core.py",
+    "nn/model.py",
+    "nn/heads.py",
+    "nn/pairwise_operations.py",
+    "nn/outer_product.py",
+    "nn/positional_encoding.py",
+    "nn/chunk_layer.py",
+    "nn/custom_typing.py",
     # Not destined for `nn/`, but tier 0 all the same: the tokenizer and the
     # tensor preparation that used to sit behind `Bio.SeqIO` in `dataset.py`.
     # `features.py` imports torch, which is a base dependency and not the
@@ -122,9 +124,10 @@ TIER_0_MODULES = (
 # Everything else in the package, with the reason it is not tier 0. This exists
 # so the classification can be checked for completeness rather than trusted: a
 # module added to the package and forgotten here fails the test below, which is
-# the only way a new tier-0 file gets covered from birth. Phase 4 creates
-# `nn/__init__.py` -- exactly the kind of file where a convenience import
-# appears -- and a hand-maintained list would not have seen it.
+# the only way a new tier-0 file gets covered from birth. Phase 4 made `nn/` a
+# namespace package, following `data/` and `evaluate/`, so there is no
+# `nn/__init__.py` to hold a convenience import -- but if one is ever added it
+# is a tier-0 file, and this test is what notices.
 NOT_TIER_0 = {
     "msa.py": "reads alignments from disk: Bio.SeqIO, scipy.spatial, an hhfilter subprocess",
     "data/msa_datasets.py": "torch Dataset and collate plumbing over msa.py, so Bio.SeqIO and scipy.spatial transitively",
@@ -133,15 +136,15 @@ NOT_TIER_0 = {
     "evaluate/structure.py": "structure file I/O: Bio.PDB",
     "evaluate/contacts.py": "contact metrics, and it imports evaluate/structure.py",
     "evaluate/confind.py": "CONFIND subprocess wrappers",
-    "plotting.py": "matplotlib",
-    "categorical_jacobian.py": "jacobian extra: jax",
-    "proteingym_utils.py": "proteingym extra: numba, pandas",
+    "evaluate/plots.py": "matplotlib",
+    "evaluate/coevolution.py": "jacobian extra: jax",
+    "evaluate/proteingym.py": "proteingym extra: numba, pandas",
     "training_utils.py": "the hand-written training loop; phase 5 replaces it with training/",
 }
 
 # The pairing extra (fair-esm) in its entirety, excluded as a directory because
-# its six modules share one reason and none of them is reachable from the model.
-NOT_TIER_0_PACKAGES = ("pairing_optimization",)
+# its five modules share one reason and none of them is reachable from the model.
+NOT_TIER_0_PACKAGES = ("pairing",)
 
 
 def probe(module: str, forbidden: tuple[str, ...]) -> str:
@@ -284,4 +287,4 @@ def test_all_is_the_documented_facade_and_every_name_resolves():
     # is the one that regressed: submodules and the module dunders disappeared
     # from `inspect.getmembers` when `__dir__` answered with the facade alone.
     assert set(dir(msa_pairformer)) == set(vars(msa_pairformer)) | set(msa_pairformer.__all__)
-    assert {"__name__", "__spec__", "__all__", "model"} <= set(dir(msa_pairformer))
+    assert {"__name__", "__spec__", "__all__", "nn"} <= set(dir(msa_pairformer))

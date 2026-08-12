@@ -1,7 +1,7 @@
 """Minimal training-throughput harness for MSA Pairformer.
 
 The published repository has no training loop -- no backward pass, no optimizer
-step anywhere outside `pairing_optimization/`. This reconstructs the smallest
+step anywhere outside `pairing/`. This reconstructs the smallest
 one faithful enough to measure against: masked-language-model loss over the full
 MSA, bf16 autocast, gradient accumulation, AdamW.
 

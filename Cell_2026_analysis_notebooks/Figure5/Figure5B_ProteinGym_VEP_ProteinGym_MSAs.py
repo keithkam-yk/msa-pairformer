@@ -23,7 +23,7 @@ import re
 from tqdm import tqdm
 from scipy.stats import spearmanr
 
-from msa_pairformer.model import MSAPairformer
+from msa_pairformer.nn.model import MSAPairformer
 from msa_pairformer.tokens import aa2tok_d
 import sys
 sys.path.append("utils")

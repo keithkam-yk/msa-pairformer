@@ -10,10 +10,10 @@ promises to keep at a stable path. Everything else is an implementation detail.
 **Every export resolves lazily, through PEP 562, and that is load-bearing rather
 than a micro-optimisation.** Importing a submodule imports its parent package
 first, so an eager `from msa_pairformer.msa import MSA` here would be
-charged to `import msa_pairformer.model` -- a path that pays for none of it
+charged to `import msa_pairformer.nn.model` -- a path that pays for none of it
 today. Measured on this tree:
 
-    import msa_pairformer.model     torch, huggingface_hub. No Bio, no scipy.
+    import msa_pairformer.nn.model  torch, huggingface_hub. No Bio, no scipy.
     import msa_pairformer.msa       torch, Bio, scipy. No huggingface_hub.
 
 Those two sets are disjoint in both directions, which is why `MSAPairformer` is
@@ -39,8 +39,8 @@ if TYPE_CHECKING:
     # skips the block. It is what keeps the lazy names resolvable for `ty` and
     # for editor completion without reintroducing the import cost.
     from msa_pairformer.features import prepare_msa_masks
-    from msa_pairformer.model import MSAPairformer
     from msa_pairformer.msa import MSA
+    from msa_pairformer.nn.model import MSAPairformer
     from msa_pairformer.tokens import aa2tok_d, tok2aa_d
 
 # Export -> the module that defines it. The mapping is data rather than a chain
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 # source, and so the phase that moved `MSA` into `msa.py` edited one string.
 _EXPORTS = {
     "MSA": "msa_pairformer.msa",
-    "MSAPairformer": "msa_pairformer.model",
+    "MSAPairformer": "msa_pairformer.nn.model",
     "aa2tok_d": "msa_pairformer.tokens",
     "prepare_msa_masks": "msa_pairformer.features",
     "tok2aa_d": "msa_pairformer.tokens",

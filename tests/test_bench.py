@@ -259,7 +259,7 @@ def test_compile_targets_never_nest():
     graph that did not need splitting. `PairwiseBlock` contains a
     `PreLayerNorm(Transition)`, and both classes are targets."""
     from bench.step import compile_targets
-    from msa_pairformer.pairwise_operations import PairwiseBlock
+    from msa_pairformer.nn.pairwise_operations import PairwiseBlock
 
     block = PairwiseBlock(dim_pairwise=16, tri_mult_dim_hidden=8,
                           use_triangle_updates=False, use_pair_updates=False)

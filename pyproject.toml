@@ -37,15 +37,15 @@ dependencies = [
 # Runtime tensor shape/dtype validation, enabled with MSA_PAIRFORMER_TYPECHECK=1.
 # Off by default because it adds per-call overhead on the model's hot path.
 typecheck = ["beartype>=0.19.0"]
-# Categorical Jacobian analysis (msa_pairformer/categorical_jacobian.py).
+# Categorical Jacobian analysis (msa_pairformer/evaluate/coevolution.py).
 # Not needed for the model itself, only for coevolution analysis.
 jacobian = ["jax>=0.4.20"]
-# ProteinGym zero-shot variant effect evaluation (msa_pairformer/proteingym_utils.py).
+# ProteinGym zero-shot variant effect evaluation (msa_pairformer/evaluate/proteingym.py).
 proteingym = [
     "numba>=0.57",
     "pandas>=1.5",
 ]
-# MSA pairing optimization (msa_pairformer/pairing_optimization/*), which uses
+# MSA pairing optimization (msa_pairformer/pairing/*), which uses
 # the MSA Transformer from fair-esm as a baseline / dataset tokenizer.
 pairing = ["fair-esm>=2.0.0"]
 # Everything above except typecheck: all analysis and pairing extras at once.
@@ -91,16 +91,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["msa_pairformer"]
-# Deprecated top-level alias module keeping `import MSA_Pairformer` working for users of
-# 1.0.2 and earlier. It has to be shipped explicitly: it is a module, not a package, and
-# it cannot be a directory because MSA_Pairformer/ and msa_pairformer/ are the same path
-# on case-insensitive filesystems.
-force-include = {"MSA_Pairformer.py" = "MSA_Pairformer.py"}
 
 [tool.hatch.build.targets.sdist]
 only-include = [
     "msa_pairformer",
-    "MSA_Pairformer.py",
     "README.md",
     "LICENSE",
     "MIT_LICENSE",
@@ -132,7 +126,7 @@ ignore = [
     # `dict(...)` kwargs blocks are used deliberately for module config.
     "C408",
     # jaxtyping shape annotations (Float['b s n d']) are not forward references.
-    # See msa_pairformer/custom_typing.py.
+    # See msa_pairformer/nn/custom_typing.py.
     "F722",
 ]
 
@@ -147,5 +141,5 @@ python = ".venv"
 [tool.ty.rules]
 # Counterpart to ruff's F722: jaxtyping shape annotations such as
 # Float['b s n d'] subscript a runtime object, which is not a type expression.
-# See msa_pairformer/custom_typing.py.
+# See msa_pairformer/nn/custom_typing.py.
 invalid-type-form = "ignore"
