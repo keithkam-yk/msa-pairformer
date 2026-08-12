@@ -226,9 +226,8 @@ msa_pairformer/
         msa_datasets.py     MSADataset, CollateAFBatch, trRosetta* — the rest
                             of dataset.py, including the hhfilter subprocess
         download.py         was data_downloader.py
-        weighting.py        calc_weights_fast and its numba kernels from
-                            proteingym_utils.py, plus
-                            fit_seq_weight_mixture_model from utils.py
+        weighting.py        fit_seq_weight_mixture_model from utils.py.
+                            NOT calc_weights_fast -- see the correction below
 
     training/               Lightning. See section 5.       [training extra]
         datamodule.py       MSADataModule — replaces init_dataloaders
@@ -274,6 +273,22 @@ go away.
 
 **Every remaining rename is a `*_utils` file.** Those are the files you asked
 about, and after this the package has none.
+
+**Correction, found in phase 4: sequence weighting does not consolidate.** This
+section first sent `calc_weights_fast` and its numba kernels to
+`data/weighting.py` alongside `fit_seq_weight_mixture_model`. That cannot work.
+`fit_seq_weight_mixture_model` needs only `sklearn`, which is a base
+dependency, so it imports anywhere. `calc_weights_fast` dispatches to
+`@numba.jit` kernels and cannot be separated from them, and `numba` arrives only
+with the `proteingym` extra. Putting them in one module makes the first function
+unimportable without the second's extra — a behaviour regression, produced by a
+commit whose whole claim is that nothing changed but the file names.
+
+So `calc_weights_fast` stays in `evaluate/proteingym.py`, which is where its
+dependency already points. That is the right home on its own terms: the code
+comes from the ProteinGym repository and is used for ProteinGym evaluation.
+Section 2.3 counted three homes for sequence weighting and this refactor closes
+one of them, not two. Section 7.2 is corrected to match.
 
 **File count is not the target.** The layout has 26 files where there were 20.
 The measure of success is that a reader can predict which file a thing is in,
@@ -444,16 +459,22 @@ therefore needs the script run once, not only a lint pass.
 
 ### 7.2 Delete `weights.py` and import from the package
 
-`weights.py` and the first 253 lines of `proteingym_utils.py` define the same
-seven functions. The comparison method matters, so state it: each function was
-parsed, its syntax tree normalised by round-tripping through `ast.unparse`, and
-the results compared. **Six of the seven are identical.** The seventh,
-`map_from_alphabet`, differs only in whether an assertion message is built with
-`str.format` or an f-string.
+`weights.py` and the first 253 lines of what is now `evaluate/proteingym.py`
+define the same seven functions. The comparison method matters, so state it:
+each function was parsed, its syntax tree normalised by round-tripping through
+`ast.unparse`, and the results compared. **Six of the seven are identical.** The
+seventh, `map_from_alphabet`, differs only in whether an assertion message is
+built with `str.format` or an f-string.
 
 So the figure directory can import `calc_weights_fast`, `map_from_alphabet` and
-`map_matrix` from `msa_pairformer.data.weighting` and the file can go. The
-numbers do not change. Sequence weighting drops from three homes to one.
+`map_matrix` from **`msa_pairformer.evaluate.proteingym`** and the file can go.
+The numbers do not change. Sequence weighting drops from three homes to two.
+
+The import target is `evaluate/proteingym`, not `data/weighting` as this section
+first said; the correction is in section 4. It costs the figure directory
+nothing — `weights.py` already imports `numba`, so the directory has always
+needed the `proteingym` extra, and importing from a module that also needs it
+adds no requirement that was not already there.
 
 ### 7.3 What stays frozen
 
