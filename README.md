@@ -65,6 +65,12 @@ are for installing users and are not synced by default. Add them as needed:
 uv sync --extra analysis
 ```
 
+### Training throughput
+
+[docs/throughput-baseline.md](docs/throughput-baseline.md) records the first
+throughput baseline: what the harness in `bench/` measures, what it excludes, the
+memory ceiling on an 80 GB H100, and the extrapolation to the paper's MSA depth.
+
 ### Upgrading from 1.0.2 and earlier
 
 The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8). Import
