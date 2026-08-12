@@ -55,17 +55,34 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = REPO_ROOT / "msa_pairformer"
 
 # Behind an extra in pyproject.toml -- jacobian -> jax, proteingym ->
-# numba/pandas, pairing -> esm -- or, for matplotlib and sklearn, declared as a
-# base dependency today but reached only by the analysis code that later phases
-# move under `evaluate/`. Importing one of these can fail outright on a machine
-# that installed the model and nothing else.
+# numba/pandas, pairing -> esm, training -> lightning/torchmetrics -- or, for
+# matplotlib and sklearn, declared as a base dependency today but reached only
+# by the analysis code that later phases move under `evaluate/`. Importing one
+# of these can fail outright on a machine that installed the model and nothing
+# else.
+#
+# `lightning` and `torchmetrics` arrived with `training/` in phase 5 and are the
+# sharpest case the list has: a training framework reached from `nn/` would mean
+# every inference install pulls one in, which is the regression this file exists
+# to catch. They are on the list whether or not the training extra is installed
+# -- the static half of the check does not care, and the runtime half is a true
+# negative rather than a vacuous pass on a machine that has them.
 #
 # `beartype` is deliberately absent. The typecheck extra is the one the suite
 # switches on itself, via MSA_PAIRFORMER_TYPECHECK=1; the child process below
 # inherits that environment and `custom_typing.py` imports beartype when it is
 # set. On the list, this test would pass or fail depending on how pytest was
 # invoked.
-OPTIONAL_DEPENDENCIES = ("matplotlib", "sklearn", "numba", "pandas", "jax", "esm")
+OPTIONAL_DEPENDENCIES = (
+    "matplotlib",
+    "sklearn",
+    "numba",
+    "pandas",
+    "jax",
+    "esm",
+    "lightning",
+    "torchmetrics",
+)
 
 # Base dependencies, so these are always installed and importing them cannot
 # fail. They are excluded for cost on the model path, not for installability:
@@ -139,8 +156,15 @@ NOT_TIER_0 = {
     "evaluate/plots.py": "matplotlib",
     "evaluate/coevolution.py": "jacobian extra: jax",
     "evaluate/proteingym.py": "proteingym extra: numba, pandas",
-    "training_utils.py": "the hand-written training loop; phase 5 replaces it with training/",
+    "training/datamodule.py": "training extra: lightning. Builds MSADataset, so Bio.SeqIO and scipy too",
+    "training/module.py": "training extra: lightning, torchmetrics",
 }
+
+# The two `training/` entries are listed file by file rather than folded into
+# NOT_TIER_0_PACKAGES below, even though they share one reason. A directory
+# exclusion would swallow a third file added later without a word, and
+# `training/` is the part of the tree most likely to grow one -- a training
+# script, a callback, a schedule.
 
 # The pairing extra (fair-esm) in its entirety, excluded as a directory because
 # its five modules share one reason and none of them is reachable from the model.

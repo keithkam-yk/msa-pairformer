@@ -45,10 +45,22 @@ proteingym = [
     "numba>=0.57",
     "pandas>=1.5",
 ]
+# The Lightning training loop (msa_pairformer/training/*). Deliberately an
+# extra and not a base dependency: installing the model to run inference must
+# not install a training framework. `nn/` never imports either of these, and
+# tests/test_imports.py holds that line -- `lightning` and `torchmetrics` are on
+# its forbidden list for every tier-0 import path.
+training = [
+    "lightning>=2.4",
+    "torchmetrics>=1.4",
+]
 # MSA pairing optimization (msa_pairformer/pairing/*), which uses
 # the MSA Transformer from fair-esm as a baseline / dataset tokenizer.
 pairing = ["fair-esm>=2.0.0"]
-# Everything above except typecheck: all analysis and pairing extras at once.
+# Everything above except typecheck and training: all analysis and pairing
+# extras at once. `training` is out because this extra is for reading results,
+# not for producing them -- an analysis install should not pull in a training
+# framework any more than an inference install should.
 analysis = [
     "msa-pairformer[jacobian]",
     "msa-pairformer[proteingym]",
