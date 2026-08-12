@@ -69,7 +69,8 @@ uv sync --extra analysis
 
 [docs/throughput-baseline.md](docs/throughput-baseline.md) records the first
 throughput baseline: what the harness in `bench/` measures, what it excludes, the
-memory ceiling on an 80 GB H100, and the extrapolation to the paper's MSA depth.
+memory ceiling on an 80 GB H100, and the extrapolation to both of the paper's
+training phases.
 
 ### Upgrading from 1.0.2 and earlier
 

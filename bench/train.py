@@ -6,9 +6,9 @@ one faithful enough to measure against: masked-language-model loss over the full
 MSA, bf16 autocast, gradient accumulation, AdamW.
 
 Defaults reproduce the configuration reported in the paper (see
-`bench.config`). The reported run was 50,000 optimizer steps on a single H100 in
-10.5 days -- 18.1 s per optimizer step -- so this times a handful of steps and
-extrapolates to that horizon for comparison.
+`bench.config`). The reported run was 10.5 days on a single H100 across two
+phases -- 1,176,000 alignments, 771 ms each -- so this times a handful of steps
+and extrapolates to that horizon for comparison.
 
 This module must never import `modal`. Staying device-agnostic is what lets the
 identical code run on a laptop CPU, on a rented H100, and later on several GPUs
@@ -33,9 +33,9 @@ import torch
 from torch.nn import CrossEntropyLoss
 
 from bench.config import (
-    PAPER_DAYS,
-    PAPER_SECONDS_PER_STEP,
-    PAPER_STEPS,
+    PAPER_SECONDS_PER_EXAMPLE,
+    REPORTED_DAYS,
+    TOTAL_EXAMPLES,
     BenchConfig,
 )
 from bench.data import synthetic_batch, to_device
@@ -122,9 +122,13 @@ def run(
         log(f"  step {i+1}/{cfg.steps}  {step_times[-1]:.3f}s  loss={losses[-1]:.4f}")
 
     median = sorted(step_times)[len(step_times) // 2]
-    per_micro = median / cfg.accum
-    tokens_per_s = cfg.tokens_per_micro_batch / per_micro
-    projected_days = median * PAPER_STEPS / 86_400
+    per_example = median / cfg.accum
+    tokens_per_s = cfg.tokens_per_micro_batch / per_example
+    phase = cfg.paper_phase
+    # Per alignment, not per optimizer step: the two phases use effective
+    # batches of 12 and 32, so their steps are not the same amount of work and
+    # cannot be added together. Forward+backward passes can.
+    phase_days = per_example * phase.examples / 86_400
     peak_gb = (
         torch.cuda.max_memory_allocated() / 1024**3 if device.type == "cuda" else None
     )
@@ -141,28 +145,35 @@ def run(
         "measurements": {
             "step_times_s": step_times,
             "median_step_s": median,
-            "per_micro_batch_s": per_micro,
+            "per_example_s": per_example,
             "tokens_per_s": tokens_per_s,
             "peak_gpu_gb": peak_gb,
             "losses": losses,
         },
         "projection": {
-            "steps": PAPER_STEPS,
-            "projected_days": projected_days,
-            "paper_days": PAPER_DAYS,
-            "paper_s_per_step": PAPER_SECONDS_PER_STEP,
-            "speedup_vs_paper": PAPER_SECONDS_PER_STEP / median,
+            "phase": phase.key,
+            "phase_steps": phase.steps,
+            "phase_examples": phase.examples,
+            "projected_phase_days": phase_days,
+            "paper_days": REPORTED_DAYS,
+            "paper_total_examples": TOTAL_EXAMPLES,
+            "paper_s_per_example": PAPER_SECONDS_PER_EXAMPLE,
+            "speedup_vs_paper": PAPER_SECONDS_PER_EXAMPLE / per_example,
         },
     }
 
     log(f"\nmedian optimizer step   {median:.3f} s")
-    log(f"per micro-batch         {per_micro*1000:.1f} ms "
+    log(f"per alignment           {per_example*1000:.1f} ms "
         f"({tokens_per_s/1e3:.1f}k tokens/s)")
     if peak_gb is not None:
         log(f"peak GPU memory         {peak_gb:.1f} GB")
-    log(f"projected {PAPER_STEPS:,} steps  {projected_days:.2f} days "
-        f"(paper: {PAPER_DAYS} days, {PAPER_SECONDS_PER_STEP:.1f} s/step, "
-        f"ratio {PAPER_SECONDS_PER_STEP / median:.1f}x)")
+    log(f"{phase.key}: {phase.examples:,} alignments "
+        f"({phase.steps:,} steps x {phase.effective_batch})  "
+        f"{phase_days:.2f} days")
+    log(f"paper: {REPORTED_DAYS} days for both phases, "
+        f"{TOTAL_EXAMPLES:,} alignments, "
+        f"{PAPER_SECONDS_PER_EXAMPLE*1000:.0f} ms each "
+        f"(ratio {PAPER_SECONDS_PER_EXAMPLE / per_example:.2f}x)")
     return result
 
 

@@ -12,15 +12,17 @@ gradients actually flow, not that any number is right.
 import pytest
 import torch
 
-from bench.config import BenchConfig
+from bench.config import FINETUNE, PRETRAIN, TOTAL_EXAMPLES, BenchConfig
 from bench.data import synthetic_batch
 from bench.sweep import (
     DEFAULT_DEPTHS,
     MIN_POINTS_TO_QUOTE,
     curvature_bracket,
+    example_seconds,
     fit_line,
     replace_depth,
     resolve_depths,
+    whole_run_estimate,
 )
 from bench.sweep import run as sweep_run
 from bench.train import run
@@ -125,7 +127,7 @@ def test_sweep_fits_across_depths():
     assert [p["depth"] for p in report["points"]] == [4, 8]
     assert all(not p["oom"] for p in report["points"])
     assert report["fit"] is not None
-    assert report["paper_estimate"]["depth"] == 320
+    assert report["paper_estimate"]["depth"] == PRETRAIN.depth
     assert report["paper_estimate"]["is_measurement"] is False
     assert report["memory_ceiling"]["largest_depth_measured"] == 8
 
@@ -178,7 +180,7 @@ def test_sweep_refuses_to_quote_too_few_points():
 
     assert estimate["quotable"] is False
     assert estimate["estimated_step_s_low"] <= estimate["estimated_step_s_high"]
-    assert estimate["extrapolation_reach"] == pytest.approx(320 / 8)
+    assert estimate["extrapolation_reach"] == pytest.approx(PRETRAIN.depth / 8)
 
 
 def test_resolve_depths_defaults_to_the_module_ladder():
@@ -192,3 +194,48 @@ def test_resolve_depths_defaults_to_the_module_ladder():
     # Enough points to make the quoting gate satisfiable at all, or the default
     # ladder cannot produce a usable estimate however well it fits.
     assert len(DEFAULT_DEPTHS) > MIN_POINTS_TO_QUOTE
+
+
+def test_examples_ignore_how_the_batch_was_split():
+    """The paper never states its micro-batch size, and does not need to: the
+    work is steps x effective_batch either way. Counting optimizer steps
+    instead would add 50,000 batches of 12 to 18,000 batches of 32 as though
+    they were the same thing."""
+    assert PRETRAIN.examples == 50_000 * 12
+    assert FINETUNE.examples == 18_000 * 32
+    assert TOTAL_EXAMPLES == 1_176_000
+
+    # 10.5 days over that count. Quoted widely, so pinned here.
+    from bench.config import PAPER_SECONDS_PER_EXAMPLE
+    assert PAPER_SECONDS_PER_EXAMPLE == pytest.approx(0.7714, abs=5e-5)
+
+
+def test_example_seconds_rescales_the_two_tracks_separately():
+    """The pair track is O(crop^3) and the MSA track is linear in crop, so a
+    single scale factor on the total would be wrong for both."""
+    fit = {"slope": 0.01, "intercept": 6.0}
+
+    same = example_seconds(fit, depth=320, accum=12, crop_from=312, crop_to=312)
+    assert same == pytest.approx((6.0 + 3.2) / 12)
+
+    bigger = example_seconds(fit, depth=320, accum=12, crop_from=312, crop_to=320)
+    ratio = 320 / 312
+    assert bigger == pytest.approx((6.0 * ratio**3 + 3.2 * ratio) / 12)
+    assert bigger > same
+
+
+def test_whole_run_covers_both_phases():
+    """The reported 10.5 days is the whole run, so an estimate of one phase is
+    not comparable to it."""
+    fit = fit_line([32.0, 64.0, 96.0], [6.4, 6.7, 7.0])
+    cfg = BenchConfig(device="cpu", cuequivariance=False)
+    whole = whole_run_estimate(fit, cfg)
+
+    assert set(whole["phases"]) == {"pretrain", "finetune"}
+    assert whole["phases"]["finetune"]["crop_rescaled"] is True
+    assert whole["phases"]["pretrain"]["crop_rescaled"] is False
+    assert whole["total_examples"] == TOTAL_EXAMPLES
+    assert whole["estimated_days"] == pytest.approx(
+        sum(p["days"] for p in whole["phases"].values())
+    )
+    assert whole["is_measurement"] is False

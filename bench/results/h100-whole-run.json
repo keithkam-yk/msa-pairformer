@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "kind": "whole-run-analysis",
+  "derived_utc": "2026-08-12T14:53:16+00:00",
+  "note": "Derived from the measured points in h100-sweep.json, not a new GPU run. That file's own paper_estimate fields predate the two-phase reading and target depth 320 with crop 312 and effective batch 12, which is one value from each phase. The measurements themselves are unchanged.",
+  "measured_from": {
+    "file": "h100-sweep.json",
+    "git": {
+      "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+      "branch": "main",
+      "dirty": false
+    },
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "crop": 312,
+    "accum": 12
+  },
+  "paper": {
+    "days": 10.5,
+    "phases": {
+      "pretrain": {
+        "steps": 50000,
+        "effective_batch": 12,
+        "depth_cap": 256,
+        "crop": 312,
+        "min_sequences": 8,
+        "alignments": 600000
+      },
+      "finetune": {
+        "steps": 18000,
+        "effective_batch": 32,
+        "depth_cap": 320,
+        "crop": 320,
+        "min_sequences": 128,
+        "alignments": 576000
+      }
+    },
+    "total_alignments": 1176000,
+    "s_per_alignment": 0.7714285714285715
+  },
+  "variants": {
+    "vanilla": {
+      "fit": {
+        "slope": 0.012525400091071243,
+        "intercept": 5.979065507466679,
+        "r_squared": 0.9970902717363156,
+        "adjusted_r_squared": 0.9951504528938593,
+        "n_points": 6,
+        "residual_dof": 4
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.7654639942317432,
+            "s_per_optimizer_step": 9.185567930780918,
+            "days": 5.315722182164883,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.8801489991555758,
+            "s_per_optimizer_step": 28.164767972978424,
+            "days": 5.867659994370505,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 11.183382176535389,
+        "s_per_example": 0.8216362415413756,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 0.9388930677904186,
+        "is_measurement": false
+      },
+      "curvature_at_phase_depth": {
+        "pretrain": {
+          "at": 256.0,
+          "linear": 9.185567930780916,
+          "quadratic": 9.367056846614188,
+          "low": 9.185567930780916,
+          "high": 9.367056846614188,
+          "spread_fraction": 0.01975805058553879
+        },
+        "finetune": {
+          "at": 320.0,
+          "linear": 9.987193536609476,
+          "quadratic": 10.399033768692671,
+          "low": 9.987193536609476,
+          "high": 10.399033768692671,
+          "spread_fraction": 0.041236833007544736
+        }
+      },
+      "memory_fit_gb": {
+        "slope": 0.19747424168246133,
+        "intercept": 32.173086039225254,
+        "r_squared": 0.9999974249405786,
+        "adjusted_r_squared": 0.9999957082342977,
+        "n_points": 6,
+        "residual_dof": 4
+      }
+    },
+    "cuequivariance": {
+      "fit": {
+        "slope": 0.013313333156249893,
+        "intercept": 3.9662014086666773,
+        "r_squared": 0.997928946641914,
+        "adjusted_r_squared": 0.99654824440319,
+        "n_points": 6,
+        "residual_dof": 4
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.6145345580555541,
+            "s_per_optimizer_step": 7.3744146966666495,
+            "days": 4.267601097608015,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.7207239820673887,
+            "s_per_optimizer_step": 23.06316742615644,
+            "days": 4.804826547115925,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 9.072427644723941,
+        "s_per_example": 0.6665457045103305,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 1.1573528509876032,
+        "is_measurement": false
+      },
+      "curvature_at_phase_depth": {
+        "pretrain": {
+          "at": 256.0,
+          "linear": 7.3744146966666495,
+          "quadratic": 7.254112994428539,
+          "low": 7.254112994428539,
+          "high": 7.3744146966666495,
+          "spread_fraction": 0.016583930017427008
+        },
+        "finetune": {
+          "at": 320.0,
+          "linear": 8.226468018666644,
+          "quadratic": 7.95347569435708,
+          "low": 7.95347569435708,
+          "high": 8.226468018666644,
+          "spread_fraction": 0.03432365104268177
+        }
+      },
+      "memory_fit_gb": {
+        "slope": 0.1975014737674168,
+        "intercept": 32.14707117080688,
+        "r_squared": 0.9999977653428014,
+        "adjusted_r_squared": 0.9999962755713356,
+        "n_points": 6,
+        "residual_dof": 4
+      }
+    }
+  }
+}

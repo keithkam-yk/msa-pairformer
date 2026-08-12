@@ -1,14 +1,20 @@
-"""Measure throughput across MSA depths, and extrapolate to the paper's shape.
+"""Measure throughput across MSA depths, and extrapolate to the paper's shapes.
 
-The paper reports 10.5 days for 50,000 steps on "a single H100" -- 18.1 s per
-optimizer step at depth 320, crop 312, effective batch 12. That configuration
-needs ~94 GB (bench/results/h100-memory-depth.json) and does not fit on the
-80 GB H100 available here. The paper's own text puts their card at 96 GB, so
-the number is reproducible, just not on this hardware.
+The paper reports 10.5 days on "a single H100", and that covers both training
+phases: 50,000 pre-training steps at effective batch 12, depth cap 256, crop
+312, then 18,000 query-biased fine-tuning steps at effective batch 32, depth
+320, crop 320. Optimizer steps are therefore not comparable across the phases;
+alignments are. steps x effective_batch gives 600,000 + 576,000 = 1,176,000
+alignments, or 771 ms each, and that is the number to beat.
+
+Neither phase's cap fits on the 80 GB H100 available here -- pre-training's
+depth 256 needs ~83 GB and fine-tuning's shape ~99 GB
+(bench/results/h100-memory-depth.json). The paper's own text puts their card at
+96 GB, so the pre-training number is reproducible, just not on this hardware.
 
 Renting a bigger card does not fix the comparison, it moves the problem: an
 H200 has ~4.8 TB/s of bandwidth against an H100 SXM's ~3.35, and this workload
-is bandwidth-bound. A step time measured there would beat 18.1 s largely
+is bandwidth-bound. A time measured there would beat the paper's largely
 because of the memory system, which is not the question being asked.
 
 So this measures what does fit and extrapolates along the one axis that has to
@@ -20,9 +26,11 @@ change. Cost is close to affine in depth:
 which is the same structure the memory sweep found (0.198 GB per sequence over
 a fixed 30.8 GB). `r_squared` is reported so the assumption is checked against
 the data rather than asserted; below ~0.99 the extrapolation should not be
-quoted. Every other knob -- crop, accumulation, effective batch, precision,
-checkpointing -- is held at the paper's value, so depth is the only difference
-between what was measured and what is being compared against.
+quoted. Every other knob is held at the paper's value for the phase being
+measured, so depth is the only difference between what was measured and what it
+is compared against. The one exception is fine-tuning's crop of 320, which the
+sweep does not visit: `example_seconds` rescales the two fitted terms by their
+own exponents in crop, and that part is arithmetic rather than measurement.
 
 An extrapolation is weaker evidence than a measurement, and this one is stated
 as an estimate everywhere it appears. It is the honest option: the alternative
@@ -38,10 +46,14 @@ from typing import Any
 import torch
 
 from bench.config import (
-    PAPER_DEPTH,
-    PAPER_SECONDS_PER_STEP,
-    PAPER_STEPS,
+    FINETUNE,
+    PAPER_SECONDS_PER_EXAMPLE,
+    PHASES,
+    PRETRAIN,
+    REPORTED_DAYS,
+    TOTAL_EXAMPLES,
     BenchConfig,
+    Phase,
 )
 from bench.train import run as train_run
 
@@ -157,6 +169,65 @@ def curvature_bracket(xs: list[float], ys: list[float], at: float) -> dict[str, 
     }
 
 
+def example_seconds(
+    fit: dict[str, Any], depth: int, accum: int, crop_from: int, crop_to: int
+) -> float:
+    """One alignment's forward+backward at `depth` and `crop_to`, from a fit
+    taken at `crop_from`.
+
+    The fit's two terms are the two tracks, which is why they can be rescaled
+    separately. The intercept is the pair track: constant in MSA depth and
+    O(crop^3). The slope times depth is the MSA track: O(depth * crop * d), so
+    linear in crop.
+
+    The crop rescale is arithmetic, not measurement. Only the depth axis was
+    swept. It matters only for fine-tuning, whose crop is 320 against the
+    sweep's 312, and it moves that estimate by about 6 per cent.
+    """
+    ratio = crop_to / crop_from
+    pair = fit["intercept"] / accum
+    msa = fit["slope"] * depth / accum
+    return pair * ratio**3 + msa * ratio
+
+
+def whole_run_estimate(
+    fit: dict[str, Any], cfg: BenchConfig
+) -> dict[str, Any]:
+    """Both phases, in the unit that is the same in both: forward+backward.
+
+    The paper's 10.5 days on one H100 cover pre-training and query-biased
+    fine-tuning together. Their optimizer steps are not comparable -- effective
+    batch 12 against 32 -- but steps x effective_batch counts alignments
+    exactly, however the accumulation was split: 50,000 x 12 plus 18,000 x 32
+    is 1,176,000 of them.
+    """
+    phases: dict[str, Any] = {}
+    for spec in (PRETRAIN, FINETUNE):
+        seconds = example_seconds(fit, spec.depth, cfg.accum, cfg.crop,
+                                  spec.crop)
+        phases[spec.key] = {
+            "depth": spec.depth,
+            "crop": spec.crop,
+            "examples": spec.examples,
+            "s_per_example": seconds,
+            "s_per_optimizer_step": seconds * spec.effective_batch,
+            "days": seconds * spec.examples / 86_400,
+            "crop_rescaled": spec.crop != cfg.crop,
+        }
+
+    days = sum(p["days"] for p in phases.values())
+    return {
+        "phases": phases,
+        "total_examples": TOTAL_EXAMPLES,
+        "estimated_days": days,
+        "s_per_example": days * 86_400 / TOTAL_EXAMPLES,
+        "paper_days": REPORTED_DAYS,
+        "paper_s_per_example": PAPER_SECONDS_PER_EXAMPLE,
+        "ratio_vs_paper": REPORTED_DAYS / days,
+        "is_measurement": False,
+    }
+
+
 def _release() -> None:
     """Drop the previous depth's model, optimizer and activations.
 
@@ -215,12 +286,15 @@ def run(
     largest = max(p["depth"] for p in measured)
     smallest_oom = min((p["depth"] for p in points if p["oom"]), default=None)
 
+    phase: Phase = cfg.paper_phase
     estimate: dict[str, Any] | None = None
+    whole_run: dict[str, Any] | None = None
     if fit is not None:
         depths_measured = [float(p["depth"]) for p in measured]
         times = [float(p["median_step_s"]) for p in measured]
-        bracket = curvature_bracket(depths_measured, times, float(PAPER_DEPTH))
+        bracket = curvature_bracket(depths_measured, times, float(phase.depth))
         seconds = bracket["linear"]
+        whole_run = whole_run_estimate(fit, cfg)
         # Both conditions, because either alone is satisfiable while the
         # estimate is still worthless: r^2 is near 1 on any three points, and a
         # large n does not rescue a relationship that is not a line.
@@ -228,27 +302,38 @@ def run(
             len(measured) >= MIN_POINTS_TO_QUOTE and fit["r_squared"] >= 0.99
         )
         estimate = {
-            "depth": PAPER_DEPTH,
+            "phase": phase.key,
+            "depth": phase.depth,
             "estimated_step_s": seconds,
             "estimated_step_s_low": bracket["low"],
             "estimated_step_s_high": bracket["high"],
-            "estimated_days": seconds * PAPER_STEPS / 86_400,
-            "paper_s_per_step": PAPER_SECONDS_PER_STEP,
-            "ratio_vs_paper": PAPER_SECONDS_PER_STEP / seconds,
-            "ratio_vs_paper_low": PAPER_SECONDS_PER_STEP / bracket["high"],
-            "ratio_vs_paper_high": PAPER_SECONDS_PER_STEP / bracket["low"],
+            "estimated_example_s": seconds / cfg.accum,
+            "estimated_days": seconds * phase.steps / 86_400,
+            "paper_s_per_example": PAPER_SECONDS_PER_EXAMPLE,
+            "ratio_vs_paper": PAPER_SECONDS_PER_EXAMPLE
+            / (seconds / cfg.accum),
+            "ratio_vs_paper_low": PAPER_SECONDS_PER_EXAMPLE
+            / (bracket["high"] / cfg.accum),
+            "ratio_vs_paper_high": PAPER_SECONDS_PER_EXAMPLE
+            / (bracket["low"] / cfg.accum),
             "curvature": bracket,
             "extrapolated_from": [p["depth"] for p in measured],
-            "extrapolation_reach": PAPER_DEPTH / largest,
+            "extrapolation_reach": phase.depth / largest,
             "is_measurement": False,
             "quotable": quotable,
             "min_points_to_quote": MIN_POINTS_TO_QUOTE,
         }
 
     return {
-        "schema": 1,
+        "schema": 2,
         "kind": "depth-sweep",
         "config": cfg.to_dict(),
+        "paper_phase": {
+            "key": phase.key, "steps": phase.steps,
+            "effective_batch": phase.effective_batch,
+            "depth": phase.depth, "crop": phase.crop,
+            "examples": phase.examples,
+        },
         "git": git,
         "points": points,
         "fit": fit,
@@ -257,6 +342,7 @@ def run(
             "smallest_depth_that_oomed": smallest_oom,
         },
         "paper_estimate": estimate,
+        "whole_run": whole_run,
     }
 
 
@@ -299,17 +385,36 @@ def format_table(report: dict[str, Any]) -> str:
         verdict = "" if estimate["quotable"] else f"  [DO NOT QUOTE: {'; '.join(reasons)}]"
 
         curve = estimate["curvature"]
+        phase = PHASES[estimate["phase"]]
         lines.append(
-            f"\nESTIMATE at the paper's depth {estimate['depth']} "
+            f"\nESTIMATE for {phase.key} at its depth cap {estimate['depth']} "
             f"(not measured){verdict}\n"
             f"  {estimate['estimated_step_s']:.2f} s/step linear, "
             f"range {curve['low']:.2f}-{curve['high']:.2f} s "
             f"({curve['spread_fraction']*100:.0f}% model choice, not measurement)\n"
-            f"  {estimate['estimated_days']:.2f} days for {PAPER_STEPS:,} steps\n"
-            f"  paper: {estimate['paper_s_per_step']:.1f} s/step, "
-            f"{estimate['ratio_vs_paper_low']:.2f}-"
-            f"{estimate['ratio_vs_paper_high']:.2f}x\n"
+            f"  {estimate['estimated_example_s']*1000:.0f} ms per alignment\n"
+            f"  {estimate['estimated_days']:.2f} days for {phase.steps:,} steps "
+            f"x {phase.effective_batch} = {phase.examples:,} alignments\n"
             f"  extrapolating {estimate['extrapolation_reach']:.2f}x beyond the "
             f"largest measured depth"
+        )
+
+    whole = report.get("whole_run")
+    if whole is not None:
+        lines.append("\nWHOLE RUN, both phases (not measured)")
+        for key, part in whole["phases"].items():
+            note = "  [crop rescaled]" if part["crop_rescaled"] else ""
+            lines.append(
+                f"  {key:<9} depth {part['depth']:>3} crop {part['crop']:>3}  "
+                f"{part['s_per_example']*1000:>4.0f} ms x {part['examples']:,}"
+                f"  = {part['days']:>5.2f} days{note}"
+            )
+        lines.append(
+            f"  {'total':<9} {whole['total_examples']:,} alignments"
+            f"  {whole['s_per_example']*1000:.0f} ms each"
+            f"  = {whole['estimated_days']:.2f} days\n"
+            f"  paper:    {whole['paper_days']} days, "
+            f"{whole['paper_s_per_example']*1000:.0f} ms each"
+            f"  ({whole['ratio_vs_paper']:.2f}x)"
         )
     return "\n".join(lines)

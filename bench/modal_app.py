@@ -45,11 +45,10 @@ from typing import Any, cast
 import modal
 
 from bench.config import (
-    PAPER_ACCUM,
-    PAPER_CROP,
-    PAPER_DAYS,
-    PAPER_DEPTH,
-    PAPER_SECONDS_PER_STEP,
+    PAPER_SECONDS_PER_EXAMPLE,
+    PHASES,
+    PRETRAIN,
+    REPORTED_DAYS,
     Amp,
     BenchConfig,
 )
@@ -259,6 +258,7 @@ def sweep(
     # Empty resolves to bench.sweep.DEFAULT_DEPTHS rather than repeating it
     # here; the two copies diverged once already.
     depths: str = "",
+    phase: str = PRETRAIN.key,
     variants: str = "vanilla,cuequivariance",
     steps: int = 5,
     warmup: int = 2,
@@ -287,7 +287,13 @@ def sweep(
         print("WARNING: working tree is dirty; this result is not reproducible "
               "from the recorded commit alone.\n")
 
+    if phase not in PHASES:
+        raise SystemExit(f"unknown phase {phase!r}, expected one of {sorted(PHASES)}")
     ladder = resolve_depths(depths)
+    spec = PHASES[phase]
+    print(f"phase: {spec.key}  depth cap {spec.depth}  crop {spec.crop}  "
+          f"effective batch {spec.effective_batch}  "
+          f"{spec.examples:,} alignments")
     print(f"depths: {ladder}")
     requested = [v.strip() for v in variants.split(",") if v.strip()]
     unknown = set(requested) - {"vanilla", "cuequivariance"}
@@ -297,8 +303,8 @@ def sweep(
     reports: dict[str, Any] = {}
     for name in requested:
         print(f"\n########## {name} ##########")
-        cfg = BenchConfig(
-            device="cuda", crop=PAPER_CROP, micro_batch=1, accum=PAPER_ACCUM,
+        cfg = BenchConfig.for_phase(
+            phase, device="cuda", micro_batch=1,
             steps=steps, warmup=warmup, amp="bf16",
             cuequivariance=(name == "cuequivariance"),
         )
@@ -310,8 +316,9 @@ def sweep(
     if {"vanilla", "cuequivariance"} <= reports.keys():
         _compare_variants(reports)
 
-    _write(out or _results_path(gpu, "sweep"),
-           {"gpu_requested": gpu, "git": git, "variants": reports})
+    _write(out or _results_path(gpu, f"sweep-{phase}"),
+           {"gpu_requested": gpu, "phase": phase, "git": git,
+            "variants": reports})
 
 
 def _compare_variants(reports: dict[str, Any]) -> None:
@@ -325,13 +332,15 @@ def _compare_variants(reports: dict[str, Any]) -> None:
             v, c = plain[depth]["median_step_s"], fused[depth]["median_step_s"]
             print(f"{depth:>7}{v:>12.3f}{c:>10.3f}{v/c:>9.2f}x")
 
-    estimates = {k: r["paper_estimate"] for k, r in reports.items()}
-    if all(estimates.values()):
-        print(f"\nestimated at depth {PAPER_DEPTH} (not measured):")
-        for name, est in estimates.items():
-            print(f"  {name:<16}{est['estimated_step_s']:>8.2f} s/step"
-                  f"{est['estimated_days']:>8.2f} days"
-                  f"{est['ratio_vs_paper']:>8.2f}x vs paper")
+    runs = {k: r["whole_run"] for k, r in reports.items()}
+    if all(runs.values()):
+        print(f"\nwhole run, both phases (not measured). paper: "
+              f"{REPORTED_DAYS} days, "
+              f"{PAPER_SECONDS_PER_EXAMPLE*1000:.0f} ms per alignment")
+        for name, run in runs.items():
+            print(f"  {name:<16}{run['s_per_example']*1000:>6.0f} ms"
+                  f"{run['estimated_days']:>8.2f} days"
+                  f"{run['ratio_vs_paper']:>8.2f}x vs paper")
 
 
 @app.local_entrypoint()
@@ -413,15 +422,18 @@ def main(
         )
         print()
 
-    print(f"{'variant':<18}{'s/step':>9}{'tokens/s':>12}{'peak GB':>10}"
-          f"{'proj. days':>12}{'vs paper':>10}")
+    print(f"{'variant':<18}{'s/step':>9}{'ms/align':>10}{'tokens/s':>12}"
+          f"{'peak GB':>10}{'phase days':>12}{'vs paper':>10}")
     for name, res in results.items():
         m, p = res["measurements"], res["projection"]
         peak = f"{m['peak_gpu_gb']:.1f}" if m["peak_gpu_gb"] is not None else "-"
-        print(f"{name:<18}{m['median_step_s']:>9.3f}{m['tokens_per_s']/1e3:>11.1f}k"
-              f"{peak:>10}{p['projected_days']:>12.2f}{p['speedup_vs_paper']:>9.1f}x")
-    print(f"{'paper (1xH100)':<18}{PAPER_SECONDS_PER_STEP:>9.1f}{'-':>12}{'-':>10}"
-          f"{PAPER_DAYS:>12.1f}{1.0:>9.1f}x")
+        print(f"{name:<18}{m['median_step_s']:>9.3f}"
+              f"{m['per_example_s']*1000:>10.0f}{m['tokens_per_s']/1e3:>11.1f}k"
+              f"{peak:>10}{p['projected_phase_days']:>12.2f}"
+              f"{p['speedup_vs_paper']:>9.1f}x")
+    print(f"{'paper (1xH100)':<18}{'-':>9}"
+          f"{PAPER_SECONDS_PER_EXAMPLE*1000:>10.0f}{'-':>12}{'-':>10}"
+          f"{REPORTED_DAYS:>12.1f}{1.0:>9.1f}x  (both phases)")
 
     if {"vanilla", "cuequivariance"} <= results.keys():
         fused = results["cuequivariance"]["measurements"]["median_step_s"]
