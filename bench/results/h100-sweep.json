@@ -1,7 +1,7 @@
 {
   "gpu_requested": "H100",
   "git": {
-    "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+    "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
     "branch": "main",
     "dirty": false
   },
@@ -24,23 +24,98 @@
         "float32_precision": "highest"
       },
       "git": {
-        "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+        "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
         "branch": "main",
         "dirty": false
       },
       "points": [
         {
-          "depth": 64,
+          "depth": 32,
           "oom": false,
-          "median_step_s": 6.796519074999999,
-          "tokens_per_s": 35255.69447474846,
-          "peak_gpu_gb": 44.810391902923584,
+          "median_step_s": 6.427030488999996,
+          "tokens_per_s": 18641.268343919328,
+          "peak_gpu_gb": 38.4784517288208,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:05:17+00:00",
+            "timestamp": "2026-08-12T14:12:25+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.289243167999999,
+                6.478198671999998,
+                6.427030488999996,
+                6.293491654,
+                6.433953550000005
+              ],
+              "median_step_s": 6.427030488999996,
+              "per_micro_batch_s": 0.535585874083333,
+              "tokens_per_s": 18641.268343919328,
+              "peak_gpu_gb": 38.4784517288208,
+              "losses": [
+                3.182483673095703,
+                3.075547695159912,
+                3.032862663269043,
+                3.0062341690063477,
+                2.991821765899658
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 3.7193463478009234,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 2.823076696314706
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 6.732376720999994,
+          "tokens_per_s": 35591.59119135101,
+          "peak_gpu_gb": 44.801881313323975,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:13:16+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -77,45 +152,120 @@
             },
             "measurements": {
               "step_times_s": [
-                6.708097494,
-                6.950711222999999,
-                6.796519074999999,
-                6.734969266,
-                6.8888851849999995
+                6.732376720999994,
+                6.728519274000007,
+                6.871518875000007,
+                6.728121611999995,
+                6.733881179999997
               ],
-              "median_step_s": 6.796519074999999,
-              "per_micro_batch_s": 0.5663765895833333,
-              "tokens_per_s": 35255.69447474846,
-              "peak_gpu_gb": 44.810391902923584,
+              "median_step_s": 6.732376720999994,
+              "per_micro_batch_s": 0.5610313934166662,
+              "tokens_per_s": 35591.59119135101,
+              "peak_gpu_gb": 44.801881313323975,
               "losses": [
-                3.201462745666504,
-                3.087031841278076,
-                3.0392513275146484,
-                3.0201103687286377,
-                2.9956696033477783
+                3.2403452396392822,
+                3.089480400085449,
+                3.0545578002929688,
+                3.0247104167938232,
+                3.0112698078155518
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 3.9331707609953694,
+              "projected_days": 3.8960513431712926,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 2.6696018652754243
+              "speedup_vs_paper": 2.6950363522297036
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 7.1978999780000095,
+          "tokens_per_s": 49934.564400527925,
+          "peak_gpu_gb": 51.14894342422485,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:14:09+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                7.197243713000006,
+                7.1978999780000095,
+                7.351542775999974,
+                7.196768805999994,
+                7.200597568000006
+              ],
+              "median_step_s": 7.1978999780000095,
+              "per_micro_batch_s": 0.5998249981666675,
+              "tokens_per_s": 49934.564400527925,
+              "peak_gpu_gb": 51.14894342422485,
+              "losses": [
+                3.214622735977173,
+                3.088498592376709,
+                3.05263352394104,
+                3.0274598598480225,
+                3.01326322555542
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 4.165451376157413,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 2.5207352221420343
             }
           }
         },
         {
           "depth": 128,
           "oom": false,
-          "median_step_s": 7.523753485,
-          "tokens_per_s": 63695.86682437669,
-          "peak_gpu_gb": 57.472150802612305,
+          "median_step_s": 7.546942703000013,
+          "tokens_per_s": 63500.15083717261,
+          "peak_gpu_gb": 57.472015380859375,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:06:11+00:00",
+            "timestamp": "2026-08-12T14:15:06+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -152,45 +302,120 @@
             },
             "measurements": {
               "step_times_s": [
-                7.521626841,
-                7.526668959999995,
-                7.674473509000009,
-                7.522462739000005,
-                7.523753485
+                7.5467482109999935,
+                7.549326570000005,
+                7.6955179490000205,
+                7.546942703000013,
+                7.544259068000002
               ],
-              "median_step_s": 7.523753485,
-              "per_micro_batch_s": 0.6269794570833334,
-              "tokens_per_s": 63695.86682437669,
-              "peak_gpu_gb": 57.472150802612305,
+              "median_step_s": 7.546942703000013,
+              "per_micro_batch_s": 0.6289118919166677,
+              "tokens_per_s": 63500.15083717261,
+              "peak_gpu_gb": 57.472015380859375,
               "losses": [
-                3.2040855884552,
-                3.0872690677642822,
-                3.0502073764801025,
-                3.0269863605499268,
-                3.0086536407470703
+                3.234198808670044,
+                3.0932602882385254,
+                3.0561437606811523,
+                3.029383659362793,
+                3.016634464263916
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 4.354024007523148,
+              "projected_days": 4.367443693865749,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 2.411562265586377
+              "speedup_vs_paper": 2.404152345397761
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 7.962186044999953,
+          "tokens_per_s": 75235.6195414677,
+          "peak_gpu_gb": 63.77679634094238,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:16:04+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                7.956702835000016,
+                7.969220648000004,
+                8.109577881000007,
+                7.962186044999953,
+                7.961798150999982
+              ],
+              "median_step_s": 7.962186044999953,
+              "per_micro_batch_s": 0.6635155037499961,
+              "tokens_per_s": 75235.6195414677,
+              "peak_gpu_gb": 63.77679634094238,
+              "losses": [
+                3.2101852893829346,
+                3.094816207885742,
+                3.0486536026000977,
+                3.0230770111083984,
+                3.0110983848571777
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 4.607746553819418,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 2.27877116880407
             }
           }
         },
         {
           "depth": 192,
           "oom": false,
-          "median_step_s": 8.400014878000007,
-          "tokens_per_s": 85576.99128399084,
-          "peak_gpu_gb": 70.05264568328857,
+          "median_step_s": 8.425025969999979,
+          "tokens_per_s": 85322.94174043974,
+          "peak_gpu_gb": 70.06311845779419,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:07:12+00:00",
+            "timestamp": "2026-08-12T14:17:06+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -227,49 +452,45 @@
             },
             "measurements": {
               "step_times_s": [
-                8.399470323999992,
-                8.400014878000007,
-                8.554349898999988,
-                8.39684691299999,
-                8.41099466999998
+                8.424486191000028,
+                8.426176257000009,
+                8.567584719000024,
+                8.423934207999991,
+                8.425025969999979
               ],
-              "median_step_s": 8.400014878000007,
-              "per_micro_batch_s": 0.700001239833334,
-              "tokens_per_s": 85576.99128399084,
-              "peak_gpu_gb": 70.05264568328857,
+              "median_step_s": 8.425025969999979,
+              "per_micro_batch_s": 0.7020854974999983,
+              "tokens_per_s": 85322.94174043974,
+              "peak_gpu_gb": 70.06311845779419,
               "losses": [
-                3.2187986373901367,
-                3.0898051261901855,
-                3.0551795959472656,
-                3.0279488563537598,
-                3.013338088989258
+                3.2255938053131104,
+                3.0976884365081787,
+                3.056516408920288,
+                3.032339572906494,
+                3.01910138130188
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 4.861119721064819,
+              "projected_days": 4.875593732638876,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 2.1599961742353453
+              "speedup_vs_paper": 2.153583866044753
             }
           }
         },
         {
           "depth": 224,
           "oom": true
-        },
-        {
-          "depth": 256,
-          "oom": true
         }
       ],
       "fit": {
-        "slope": 0.012527310960937565,
-        "intercept": 5.969933342999994,
-        "r_squared": 0.9971290589049011,
-        "adjusted_r_squared": null,
-        "n_points": 3,
-        "residual_dof": 1
+        "slope": 0.012525400091071243,
+        "intercept": 5.979065507466679,
+        "r_squared": 0.9970902717363156,
+        "adjusted_r_squared": 0.9951504528938593,
+        "n_points": 6,
+        "residual_dof": 4
       },
       "memory_ceiling": {
         "largest_depth_measured": 192,
@@ -277,30 +498,33 @@
       },
       "paper_estimate": {
         "depth": 320,
-        "estimated_step_s": 9.978672850500015,
-        "estimated_step_s_low": 9.978672850500015,
-        "estimated_step_s_high": 10.599618613000011,
-        "estimated_days": 5.774694936631953,
+        "estimated_step_s": 9.987193536609476,
+        "estimated_step_s_low": 9.987193536609476,
+        "estimated_step_s_high": 10.399033768692693,
+        "estimated_days": 5.779625889241595,
         "paper_s_per_step": 18.144,
-        "ratio_vs_paper": 1.8182778683931733,
-        "ratio_vs_paper_low": 1.711759702160142,
-        "ratio_vs_paper_high": 1.8182778683931733,
+        "ratio_vs_paper": 1.8167265842491775,
+        "ratio_vs_paper_low": 1.7447774864068895,
+        "ratio_vs_paper_high": 1.8167265842491775,
         "curvature": {
           "at": 320.0,
-          "linear": 9.978672850500015,
-          "quadratic": 10.599618613000011,
-          "low": 9.978672850500015,
-          "high": 10.599618613000011,
-          "spread_fraction": 0.06222728932023077
+          "linear": 9.987193536609476,
+          "quadratic": 10.399033768692693,
+          "low": 9.987193536609476,
+          "high": 10.399033768692693,
+          "spread_fraction": 0.041236833007546866
         },
         "extrapolated_from": [
+          32,
           64,
+          96,
           128,
+          160,
           192
         ],
         "extrapolation_reach": 1.6666666666666667,
         "is_measurement": false,
-        "quotable": false,
+        "quotable": true,
         "min_points_to_quote": 5
       }
     },
@@ -322,23 +546,98 @@
         "float32_precision": "highest"
       },
       "git": {
-        "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+        "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
         "branch": "main",
         "dirty": false
       },
       "points": [
         {
-          "depth": 64,
+          "depth": 32,
           "oom": false,
-          "median_step_s": 4.813668970000009,
-          "tokens_per_s": 49778.246384067315,
-          "peak_gpu_gb": 44.796058177948,
+          "median_step_s": 4.357118112000023,
+          "tokens_per_s": 27497.07419453112,
+          "peak_gpu_gb": 38.44667339324951,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:07:54+00:00",
+            "timestamp": "2026-08-12T14:17:57+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                4.358503600999995,
+                4.354303178999999,
+                4.357118112000023,
+                4.52410957699999,
+                4.349268326000015
+              ],
+              "median_step_s": 4.357118112000023,
+              "per_micro_batch_s": 0.36309317600000196,
+              "tokens_per_s": 27497.07419453112,
+              "peak_gpu_gb": 38.44667339324951,
+              "losses": [
+                3.197786808013916,
+                3.0839500427246094,
+                3.0344977378845215,
+                3.0110063552856445,
+                2.9967522621154785
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 2.5214803888889024,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 4.164220370806396
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 4.823206595999977,
+          "tokens_per_s": 49679.81263724436,
+          "peak_gpu_gb": 44.78879499435425,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:18:35+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -375,45 +674,120 @@
             },
             "measurements": {
               "step_times_s": [
-                4.810083507999991,
-                4.807094207000006,
-                4.819350866999997,
-                5.034692944,
-                4.813668970000009
+                5.0612321450000195,
+                4.822496609000041,
+                4.823206595999977,
+                4.823161553999967,
+                4.977409665999971
               ],
-              "median_step_s": 4.813668970000009,
-              "per_micro_batch_s": 0.4011390808333341,
-              "tokens_per_s": 49778.246384067315,
-              "peak_gpu_gb": 44.796058177948,
+              "median_step_s": 4.823206595999977,
+              "per_micro_batch_s": 0.4019338829999981,
+              "tokens_per_s": 49679.81263724436,
+              "peak_gpu_gb": 44.78879499435425,
               "losses": [
-                3.2290494441986084,
-                3.088998556137085,
-                3.0551257133483887,
-                3.0248212814331055,
-                3.010669469833374
+                3.229973077774048,
+                3.0966310501098633,
+                3.0513720512390137,
+                3.027733087539673,
+                3.0127177238464355
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 2.785688061342598,
+              "projected_days": 2.7912075208333205,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 3.7692662526397123
+              "speedup_vs_paper": 3.7618127357528777
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 5.309030887999995,
+          "tokens_per_s": 67700.49140463775,
+          "peak_gpu_gb": 51.132490158081055,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:19:16+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                5.4812666509999985,
+                5.298180427000034,
+                5.305039387000022,
+                5.309030887999995,
+                5.4645650310000065
+              ],
+              "median_step_s": 5.309030887999995,
+              "per_micro_batch_s": 0.44241924066666627,
+              "tokens_per_s": 67700.49140463775,
+              "peak_gpu_gb": 51.132490158081055,
+              "losses": [
+                3.213878870010376,
+                3.0896284580230713,
+                3.0510101318359375,
+                3.0284571647644043,
+                3.0109012126922607
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 3.0723558379629603,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 3.417572883407194
             }
           }
         },
         {
           "depth": 128,
           "oom": false,
-          "median_step_s": 5.6271511319999945,
-          "tokens_per_s": 85164.23119946878,
-          "peak_gpu_gb": 57.43122482299805,
+          "median_step_s": 5.667892268999992,
+          "tokens_per_s": 84552.06578662666,
+          "peak_gpu_gb": 57.43341398239136,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:08:35+00:00",
+            "timestamp": "2026-08-12T14:19:58+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -450,45 +824,120 @@
             },
             "measurements": {
               "step_times_s": [
-                5.793842655999981,
-                5.615842557000008,
-                5.6271511319999945,
-                5.620454268999993,
-                5.803336210999987
+                5.8068259990000115,
+                5.650982843999998,
+                5.667892268999992,
+                5.642352786999993,
+                5.874871084999995
               ],
-              "median_step_s": 5.6271511319999945,
-              "per_micro_batch_s": 0.46892926099999954,
-              "tokens_per_s": 85164.23119946878,
-              "peak_gpu_gb": 57.43122482299805,
+              "median_step_s": 5.667892268999992,
+              "per_micro_batch_s": 0.47232435574999937,
+              "tokens_per_s": 84552.06578662666,
+              "peak_gpu_gb": 57.43341398239136,
               "losses": [
-                3.217690944671631,
-                3.089409828186035,
-                3.0498311519622803,
-                3.027040481567383,
-                3.011019706726074
+                3.2360928058624268,
+                3.1069626808166504,
+                3.0567450523376465,
+                3.0398199558258057,
+                3.020310163497925
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 3.2564532013888856,
+              "projected_days": 3.280030248263884,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 3.2243669264221952
+              "speedup_vs_paper": 3.201189990719639
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 6.062660119000043,
+          "tokens_per_s": 98808.11199074835,
+          "peak_gpu_gb": 63.75487279891968,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T14:20:44+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
+              "branch": "main",
+              "dirty": false
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.217298192000044,
+                6.057270604000109,
+                6.050495306000016,
+                6.062660119000043,
+                6.194339924000019
+              ],
+              "median_step_s": 6.062660119000043,
+              "per_micro_batch_s": 0.5052216765833369,
+              "tokens_per_s": 98808.11199074835,
+              "peak_gpu_gb": 63.75487279891968,
+              "losses": [
+                3.211721658706665,
+                3.0951361656188965,
+                3.050020217895508,
+                3.0238399505615234,
+                3.0092313289642334
+              ]
+            },
+            "projection": {
+              "steps": 50000,
+              "projected_days": 3.5084838651620616,
+              "paper_days": 10.5,
+              "paper_s_per_step": 18.144,
+              "speedup_vs_paper": 2.992745699719782
             }
           }
         },
         {
           "depth": 192,
           "oom": false,
-          "median_step_s": 6.528483730000005,
-          "tokens_per_s": 110109.48785806341,
-          "peak_gpu_gb": 70.04775333404541,
+          "median_step_s": 6.5238603489999605,
+          "tokens_per_s": 110187.52112163036,
+          "peak_gpu_gb": 70.04717206954956,
           "result": {
             "schema": 2,
-            "timestamp": "2026-08-12T14:09:22+00:00",
+            "timestamp": "2026-08-12T14:21:32+00:00",
             "command": "/pkg/modal/_container_entrypoint.py",
             "git": {
-              "commit": "27be2d43de420efe799a2dc6bf04bc92786a29e3",
+              "commit": "617a94d52b9d60f52a7c2f69acb94d4147ce417b",
               "branch": "main",
               "dirty": false
             },
@@ -525,49 +974,45 @@
             },
             "measurements": {
               "step_times_s": [
-                6.673853925000003,
-                6.527368009999975,
-                6.528483730000005,
-                6.495030754000027,
-                6.6859651749999784
+                6.664098083999988,
+                6.5238603489999605,
+                6.504363738000052,
+                6.5090130300000055,
+                6.62531517900004
               ],
-              "median_step_s": 6.528483730000005,
-              "per_micro_batch_s": 0.5440403108333337,
-              "tokens_per_s": 110109.48785806341,
-              "peak_gpu_gb": 70.04775333404541,
+              "median_step_s": 6.5238603489999605,
+              "per_micro_batch_s": 0.5436550290833301,
+              "tokens_per_s": 110187.52112163036,
+              "peak_gpu_gb": 70.04717206954956,
               "losses": [
-                3.2299818992614746,
-                3.092158317565918,
-                3.057159185409546,
-                3.031116008758545,
-                3.0174896717071533
+                3.2066283226013184,
+                3.088672399520874,
+                3.0438430309295654,
+                3.0260586738586426,
+                3.0072038173675537
               ]
             },
             "projection": {
               "steps": 50000,
-              "projected_days": 3.778057714120373,
+              "projected_days": 3.775382146412014,
               "paper_days": 10.5,
               "paper_s_per_step": 18.144,
-              "speedup_vs_paper": 2.779205823340542
+              "speedup_vs_paper": 2.781175412925766
             }
           }
         },
         {
           "depth": 224,
           "oom": true
-        },
-        {
-          "depth": 256,
-          "oom": true
         }
       ],
       "fit": {
-        "slope": 0.013396990312499968,
-        "intercept": 3.9416198506666733,
-        "r_squared": 0.9991259175778885,
-        "adjusted_r_squared": null,
-        "n_points": 3,
-        "residual_dof": 1
+        "slope": 0.013313333156249893,
+        "intercept": 3.9662014086666773,
+        "r_squared": 0.997928946641914,
+        "adjusted_r_squared": 0.99654824440319,
+        "n_points": 6,
+        "residual_dof": 4
       },
       "memory_ceiling": {
         "largest_depth_measured": 192,
@@ -575,30 +1020,33 @@
       },
       "paper_estimate": {
         "depth": 320,
-        "estimated_step_s": 8.228656750666662,
-        "estimated_step_s_low": 8.228656750666662,
-        "estimated_step_s_high": 8.594700234000086,
-        "estimated_days": 4.761954138117281,
+        "estimated_step_s": 8.226468018666644,
+        "estimated_step_s_low": 7.9534756943570795,
+        "estimated_step_s_high": 8.226468018666644,
+        "estimated_days": 4.760687510802456,
         "paper_s_per_step": 18.144,
-        "ratio_vs_paper": 2.2049771365818636,
-        "ratio_vs_paper_low": 2.1110683916843884,
-        "ratio_vs_paper_high": 2.2049771365818636,
+        "ratio_vs_paper": 2.205563792241035,
+        "ratio_vs_paper_low": 2.205563792241035,
+        "ratio_vs_paper_high": 2.2812667941982907,
         "curvature": {
           "at": 320.0,
-          "linear": 8.228656750666662,
-          "quadratic": 8.594700234000086,
-          "low": 8.228656750666662,
-          "high": 8.594700234000086,
-          "spread_fraction": 0.04448398984485147
+          "linear": 8.226468018666644,
+          "quadratic": 7.9534756943570795,
+          "low": 7.9534756943570795,
+          "high": 8.226468018666644,
+          "spread_fraction": 0.03432365104268189
         },
         "extrapolated_from": [
+          32,
           64,
+          96,
           128,
+          160,
           192
         ],
         "extrapolation_reach": 1.6666666666666667,
         "is_measurement": false,
-        "quotable": false,
+        "quotable": true,
         "min_points_to_quote": 5
       }
     }
