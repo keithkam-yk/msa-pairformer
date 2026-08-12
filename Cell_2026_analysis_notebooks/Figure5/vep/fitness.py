@@ -13,7 +13,7 @@ from torch.nn.functional import one_hot
 from msa_pairformer.features import prepare_msa_masks
 from msa_pairformer.tokens import aa2tok_d
 
-import msa_utils
+from . import msa_io
 
 def sample_msa(filename: str, nseq: int, sampling_strategy: str, random_seed: int, weight_filename=None, processed_msa=None, num_cpus=1):
     """Reads the first nseq sequences from an MSA file, automatically removes insertions."""
@@ -35,7 +35,7 @@ def sample_msa(filename: str, nseq: int, sampling_strategy: str, random_seed: in
         if processed_msa is None:
             if weight_filename is None:
                 print("Need weight filename if using sequence-reweighting sample strategy")
-            MSA = msa_utils.MSA_processing(
+            MSA = msa_io.MSA_processing(
                 MSA_location=filename,
                 use_weights=True,
                 weights_location=weight_filename,
@@ -80,7 +80,7 @@ def process_msa(filename: str, weight_filename: str, filter_msa: bool, path_to_h
         os.system(path_to_hhfilter+os.sep+'bin/hhfilter -cov '+str(hhfilter_min_cov)+' -id '+str(hhfilter_max_seq_id)+' -qid '+str(hhfilter_min_seq_id)+' -i '+preprocessed_filename+'_UC.a2m -o '+output_filename+' -maxseq 10000000')
         filename = output_filename
 
-    MSA = msa_utils.MSA_processing(
+    MSA = msa_io.MSA_processing(
         MSA_location=filename,
         use_weights=True,
         weights_location=weight_filename,
