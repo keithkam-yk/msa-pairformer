@@ -4,7 +4,7 @@ from einops import rearrange
 from torch.nn import GELU, LayerNorm, Linear, Module, Parameter, Sequential, Sigmoid
 
 from .core import RMSNorm, SwiGLU
-from .custom_typing import Bool, Float
+from .custom_typing import Bool, Float, typecheck
 
 
 ##########################
@@ -24,10 +24,11 @@ class LMHead(Module):
         self.bias = Parameter(torch.zeros(dim_output))
         self.weight = Linear(dim_msa, dim_output, bias=False).weight
 
+    @typecheck
     def forward(
         self,
         msa_repr: Float["b s n d"]
-    ) -> Float["b s n *"]:
+    ) -> Float["b s n v"]:
         x = self.init_ln(msa_repr)
         x = self.dense(x)
         x = self.dense_activation(x)
@@ -49,10 +50,11 @@ class LogisticRegressionContactHead(Module):
         self.weight = Linear(dim_pairwise, 1, bias=False).weight
         self.sigmoid = Sigmoid()
 
+    @typecheck
     def forward(
         self,
         pair_repr: Float["b n n d"]
-    ) -> Float["b s n *"]:
+    ) -> Float["b n n"]:
         x = self.init_ln(pair_repr)
         x = F.linear(x, self.weight) + self.bias
         x = self.sigmoid(x)
@@ -94,6 +96,7 @@ class MRFHead(Module):
         torch.nn.init.normal_(self.b_dense[-1].weight, mean=0.0, std=1e-3)
         torch.nn.init.zeros_(self.b_dense[-1].bias)
 
+    @typecheck
     def forward(
         self,
         pairwise_repr: Float["b n n dp"],

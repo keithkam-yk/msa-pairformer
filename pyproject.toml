@@ -33,6 +33,11 @@ dependencies = [
     "cuequivariance>=0.7.0; sys_platform == 'linux'"
 ]
 
+[project.optional-dependencies]
+# Runtime tensor shape/dtype validation, enabled with MSA_PAIRFORMER_TYPECHECK=1.
+# Off by default because it adds per-call overhead on the model's hot path.
+typecheck = ["beartype>=0.19.0"]
+
 [tool.setuptools]
 package-dir = {"" = "."}
 include-package-data = true

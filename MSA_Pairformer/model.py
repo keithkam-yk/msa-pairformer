@@ -11,7 +11,7 @@ from huggingface_hub import snapshot_download
 from torch.nn import Module, ModuleList, Sequential
 
 from msa_pairformer.core import LinearNoBias, PreLayerNorm, Transition, exists
-from msa_pairformer.custom_typing import Bool, Float
+from msa_pairformer.custom_typing import Bool, Float, typecheck
 from msa_pairformer.outer_product import OuterProduct
 from msa_pairformer.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock, cuex_is_available
 from msa_pairformer.positional_encoding import RelativePositionEncoding
@@ -142,6 +142,7 @@ class CoreModule(Module):
                 if isinstance(module, OuterProduct):
                     module.opm.seq_attn = True
 
+    @typecheck
     def forward(
         self,
         msa: Float['b s n dm'],
@@ -448,6 +449,7 @@ class MSAPairformer(Module):
         self.core_stack.turn_on_query_biasing()
 
     ###### Make predictions / embeddings ######
+    @typecheck
     def forward(
         self,
         msa: Float['b s n d'],
@@ -537,6 +539,7 @@ class MSAPairformer(Module):
         return results
 
     ###### Contact prediction ######
+    @typecheck
     def predict_contacts(
         self,
         msa: Float['b s n d'],
@@ -577,6 +580,7 @@ class MSAPairformer(Module):
             res['seq_weights_list_d'] = results['seq_weights_list_d']
         return res
 
+    @typecheck
     def predict_cb_contacts(
         self,
         msa: Float['b s n d'],
@@ -616,6 +620,7 @@ class MSAPairformer(Module):
 
         return res
 
+    @typecheck
     def predict_confind_contacts(
         self,
         msa: Float['b s n d'],
@@ -658,6 +663,7 @@ class MSAPairformer(Module):
 
         return res
 
+    @typecheck
     def get_pairwise_repr_at_layer(
         self,
         msa: Float['b s n d'],

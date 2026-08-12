@@ -317,7 +317,7 @@ class PairMultiplication(Module):
     def forward(
         self,
         x: Float["b n n d"],
-        pairwise_mask: Bool["b n"] | None = None,
+        pairwise_mask: Bool["b n n"] | None = None,
     ) -> Float["b n n d"]:
 
         # Get mask
@@ -459,7 +459,7 @@ class PairwiseBlock(Module):
     def forward(
         self,
         pairwise_repr: Float["b n n d"],
-        pairwise_mask: Bool["b n"] | None = None,
+        pairwise_mask: Bool["b n n"] | None = None,
         use_checkpointing_triangles: bool = False
     ) -> Float["b n n d"]:
         if self.use_triangle_updates:

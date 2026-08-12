@@ -8,7 +8,7 @@ from torch.nn import LayerNorm, Linear, Module
 
 from .chunk_layer import chunk_layer
 from .core import LinearNoBias, SwiGLU, exists, to_pairwise_mask
-from .custom_typing import Bool, Float
+from .custom_typing import Bool, Float, typecheck
 
 
 class OuterProductMean(Module):
@@ -81,6 +81,7 @@ class OuterProductMean(Module):
         outer = outer.reshape(a.shape[:-3] + outer.shape[1:])
         return outer
 
+    @typecheck
     def forward(
         self,
         msa: Float['b s n d'],
@@ -89,7 +90,7 @@ class OuterProductMean(Module):
         full_mask: Bool['b s n'] | None = None,
         pairwise_mask: Bool['b n n'] | None = None,
         seq_weights: Float["b s"] | None = None
-    ) -> Float['b n n dp']:
+    ) -> tuple[Float['b n n dp'], Float['b s'] | None]:
         # Default to full mask if not provided
         if not exists(full_mask):
             full_mask = msa.new_ones(msa.shape[:-1])
@@ -228,6 +229,7 @@ class PresoftmaxDifferentialOuterProductMean(Module):
         outer = outer.reshape(a.shape[:-3] + outer.shape[1:])
         return outer
 
+    @typecheck
     def forward(
         self,
         msa: Float['b s n d'],
@@ -236,7 +238,7 @@ class PresoftmaxDifferentialOuterProductMean(Module):
         seq_weights: Float["b s"] | None = None,
         full_mask: Bool['b s n'] | None = None,
         pairwise_mask: Bool['b n n'] | None = None
-    ) -> Float['b n n dp']:
+    ) -> tuple[Float['b n n dp'], Float['b s'] | None]:
         # Default to full mask if not provided
         if not exists(full_mask):
             full_mask = msa.new_ones(msa.shape[:-1]).to(bool).to(msa.device) # [b, s, n]
@@ -351,6 +353,7 @@ class OuterProduct(Module):
         else:
             raise NotImplementedError(f"OuterProduct flavor not implemented: {outer_product_flavor}")
 
+    @typecheck
     def forward(
         self,
         msa: Float['b s n d'],
@@ -359,7 +362,7 @@ class OuterProduct(Module):
         seq_weights: Float["b s"] | None = None,
         full_mask: Bool['b s n'] | None = None,
         pairwise_mask: Bool['b n n'] | None = None
-    ) -> Float['b n n dp']:
+    ) -> tuple[Float['b n n dp'], Float['b s'] | None]:
         return self.opm(
             msa = msa,
             mask = mask,
