@@ -7,8 +7,13 @@ back.
 
     modal run bench/modal_app.py::check       # correctness + golden drift
     modal run bench/modal_app.py::check --gpu L4      # same, cheaper card
-    modal run bench/modal_app.py::main        # verify, then both baselines
+    modal run bench/modal_app.py::sweep       # THE baseline: depths + estimate
+    modal run bench/modal_app.py::main        # one fixed shape, both variants
     modal run bench/modal_app.py::main --variants cuequivariance --steps 10
+
+`sweep` is the baseline to quote. `main` measures a single shape, which is only
+useful when that shape fits -- the paper's does not fit on an 80 GB H100, so a
+bare `main` at default settings OOMs by design rather than by accident.
 
 The entrypoint is never optional. Modal only infers one when a file defines a
 single local entrypoint, and this file has two; the bare form fails with a
@@ -39,7 +44,15 @@ from typing import Any, cast
 
 import modal
 
-from bench.config import PAPER_DAYS, PAPER_SECONDS_PER_STEP, Amp, BenchConfig
+from bench.config import (
+    PAPER_ACCUM,
+    PAPER_CROP,
+    PAPER_DAYS,
+    PAPER_DEPTH,
+    PAPER_SECONDS_PER_STEP,
+    Amp,
+    BenchConfig,
+)
 
 REPO = Path(__file__).parent.parent
 
@@ -170,6 +183,25 @@ def correctness(with_drift: bool = True) -> dict[str, Any]:
     }
 
 
+@app.function(gpu=DEFAULT_GPU, timeout=7200)
+def depth_sweep(
+    cfg: dict[str, Any], git: dict[str, Any], depths: list[int]
+) -> dict[str, Any]:
+    """Every depth in one container, on purpose.
+
+    One call per depth would pay a cold start and a fresh 111M-parameter build
+    each time, and -- worse for the fit -- would spread the points across
+    different physical GPUs. The extrapolation assumes the points differ only
+    in depth, so they have to come off one card in one process.
+    """
+    from bench.sweep import format_table
+    from bench.sweep import run as sweep_run
+
+    report = sweep_run(BenchConfig.from_dict(cfg), git=git, depths=tuple(depths))
+    print("\n" + format_table(report))
+    return report
+
+
 @app.function(gpu=DEFAULT_GPU, timeout=3600)
 def benchmark(cfg: dict[str, Any], git: dict[str, Any]) -> dict[str, Any]:
     """Measure one configuration.
@@ -220,6 +252,83 @@ def check(
         )
     if res["returncode"] != 0:
         raise SystemExit("\ntests failed in the container")
+
+
+@app.local_entrypoint()
+def sweep(
+    depths: str = "64,128,192,224,256",
+    variants: str = "vanilla,cuequivariance",
+    steps: int = 5,
+    warmup: int = 2,
+    gpu: str = DEFAULT_GPU,
+    out: str = "",
+) -> None:
+    """The comparable baseline, for a card the paper's shape does not fit on.
+
+    Depth 320 needs ~94 GB (bench/results/h100-memory-depth.json) and this card
+    has 79. The paper's own text puts their H100 at 96 GB, so their number
+    stands; it just cannot be reproduced here directly. A bigger card would
+    trade the memory problem for a bandwidth one -- an H200 moves ~4.8 TB/s
+    against this card's ~3.35, and the workload is bandwidth-bound, so the
+    result would flatter us for reasons unrelated to the code.
+
+    Instead: measure the depths that fit, check the cost really is affine in
+    depth, and extrapolate the one axis that has to move. Everything else is
+    held at the paper's values, so depth is the only difference between what
+    was measured and what it is compared against.
+    """
+    from bench.provenance import git_info
+    from bench.sweep import format_table
+
+    git = git_info()
+    if git["dirty"]:
+        print("WARNING: working tree is dirty; this result is not reproducible "
+              "from the recorded commit alone.\n")
+
+    ladder = [int(d) for d in depths.split(",") if d.strip()]
+    requested = [v.strip() for v in variants.split(",") if v.strip()]
+    unknown = set(requested) - {"vanilla", "cuequivariance"}
+    if unknown:
+        raise SystemExit(f"unknown variants: {sorted(unknown)}")
+
+    reports: dict[str, Any] = {}
+    for name in requested:
+        print(f"\n########## {name} ##########")
+        cfg = BenchConfig(
+            device="cuda", crop=PAPER_CROP, micro_batch=1, accum=PAPER_ACCUM,
+            steps=steps, warmup=warmup, amp="bf16",
+            cuequivariance=(name == "cuequivariance"),
+        )
+        reports[name] = depth_sweep.with_options(gpu=gpu).remote(
+            cfg.to_dict(), git, ladder
+        )
+        print(format_table(reports[name]))
+
+    if {"vanilla", "cuequivariance"} <= reports.keys():
+        _compare_variants(reports)
+
+    _write(out or _results_path(gpu, "sweep"),
+           {"gpu_requested": gpu, "git": git, "variants": reports})
+
+
+def _compare_variants(reports: dict[str, Any]) -> None:
+    """What the fused kernels buy, per depth and at the paper's shape."""
+    fused = {p["depth"]: p for p in reports["cuequivariance"]["points"] if not p["oom"]}
+    plain = {p["depth"]: p for p in reports["vanilla"]["points"] if not p["oom"]}
+    shared = sorted(set(fused) & set(plain))
+    if shared:
+        print(f"\n{'depth':>7}{'vanilla s':>12}{'cuex s':>10}{'speedup':>10}")
+        for depth in shared:
+            v, c = plain[depth]["median_step_s"], fused[depth]["median_step_s"]
+            print(f"{depth:>7}{v:>12.3f}{c:>10.3f}{v/c:>9.2f}x")
+
+    estimates = {k: r["paper_estimate"] for k, r in reports.items()}
+    if all(estimates.values()):
+        print(f"\nestimated at depth {PAPER_DEPTH} (not measured):")
+        for name, est in estimates.items():
+            print(f"  {name:<16}{est['estimated_step_s']:>8.2f} s/step"
+                  f"{est['estimated_days']:>8.2f} days"
+                  f"{est['ratio_vs_paper']:>8.2f}x vs paper")
 
 
 @app.local_entrypoint()
