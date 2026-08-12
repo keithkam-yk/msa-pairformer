@@ -457,10 +457,11 @@ def _gb(point: dict[str, Any]) -> str:
 
 @app.local_entrypoint()
 def main(
-    depth: int = 320,
-    crop: int = 312,
+    phase: str = "",
+    depth: int = 0,
+    crop: int = 0,
     micro_batch: int = 1,
-    accum: int = 12,
+    accum: int = 0,
     steps: int = 5,
     warmup: int = 2,
     amp: str = "bf16",
@@ -470,7 +471,37 @@ def main(
     gpu: str = DEFAULT_GPU,
     out: str = "",
 ) -> None:
+    """One shape, measured rather than extrapolated.
+
+    `--phase pretrain` or `--phase finetune` takes depth, crop and effective
+    batch from that phase together, and labels the projection with it. Passing
+    them separately is how the old defaults came to hold depth 320 from
+    fine-tuning beside crop 312 and batch 12 from pre-training.
+
+    The compiled variants are why this entrypoint is now useful at the paper's
+    shapes. Eagerly, pre-training needs about 83 GB and fine-tuning about 99
+    GB, so neither fits on an 80 GB card and both had to be extrapolated from a
+    depth sweep. Compilation moves those to roughly 56 GB and 67 GB
+    (bench/results/h100-sweep-pretrain.json), so both phases can be measured
+    directly.
+    """
     from bench.provenance import git_info
+
+    if phase:
+        if phase not in PHASES:
+            raise SystemExit(
+                f"unknown phase {phase!r}, expected one of {sorted(PHASES)}"
+            )
+        spec = PHASES[phase]
+        depth = depth or spec.depth
+        crop = crop or spec.crop
+        accum = accum or spec.effective_batch
+    else:
+        # The historical defaults, kept so an explicit call keeps working.
+        phase = PRETRAIN.key
+        depth = depth or 320
+        crop = crop or 312
+        accum = accum or 12
 
     git = git_info()
     if git["dirty"]:
@@ -514,7 +545,8 @@ def main(
     def config(name: str) -> BenchConfig:
         cuequivariance, compile_mode = VARIANTS[name]
         return BenchConfig(
-            device="cuda", depth=depth, crop=crop, micro_batch=micro_batch,
+            device="cuda", phase=phase,
+            depth=depth, crop=crop, micro_batch=micro_batch,
             accum=accum, steps=steps, warmup=warmup,
             # Modal's CLI hands every flag over as a plain str; BenchConfig's
             # __post_init__ is what actually rejects a bad value.
@@ -555,8 +587,11 @@ def main(
                   f"({plain:.3f}s -> {theirs:.3f}s per optimizer step)")
 
     _write(
-        out or _results_path(gpu, "baseline"),
-        {"gpu_requested": gpu, "git": git, "variants": results},
+        out or _results_path(gpu, f"measured-{phase}"),
+        {"gpu_requested": gpu, "phase": phase, "shape": {
+            "depth": depth, "crop": crop, "micro_batch": micro_batch,
+            "accum": accum,
+        }, "git": git, "variants": results},
     )
 
 
