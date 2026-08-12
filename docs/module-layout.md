@@ -15,7 +15,7 @@ Date: 12 August 2026. Repository commit: `ddcbc26`.
 
 ## Summary
 
-The package has 20 modules, 14,197 lines, and an empty `__init__.py`. Because
+The package has 20 modules, 7,694 lines, and an empty `__init__.py`. Because
 the facade is empty, all 20 modules are public surface. Consumers import deep
 paths, so no module can move without a break. This is the root cause. Every
 other problem below grows from it.
@@ -40,7 +40,9 @@ figure directory, which section 7 covers.
 
 ## 1. What is there now
 
-The package, by size:
+The package, by size. These are the counts at `ddcbc26`, before any phase ran;
+the sections below describe that starting point and are not updated as phases
+land. Read the git history for the current state.
 
 ```
 757  model.py                    734  dataset.py                  695  utils.py
