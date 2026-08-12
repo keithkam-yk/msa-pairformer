@@ -27,8 +27,8 @@ This document adds these names to the names in the baseline document.
 
 ## 1. What we compiled, and why not the model
 
-`torch.compile` is applied to the four modules that `CoreModule` repeats at each
-of its 22 layers:
+The harness applies `torch.compile` to the four modules that `CoreModule`
+repeats at each of its 22 layers:
 
 | Compiled leaf | Track |
 | --- | --- |
@@ -45,11 +45,11 @@ constructs. The compile time is then long, and an unrelated argument invalidates
 the graph. The repeated leaves hold the arithmetic and hold none of that Python.
 One compilation of a leaf serves all 22 layers.
 
-`PreLayerNorm` is compiled in place of the `Transition` inside it. A LayerNorm
+The harness compiles `PreLayerNorm` in place of the `Transition` inside it. A LayerNorm
 in front of a linear layer is the pair that Inductor fuses. A compile boundary
 between them discards that fusion.
 
-A compiled leaf inside another compiled leaf is skipped. `PairwiseBlock`
+The harness skips a compiled leaf inside another compiled leaf. `PairwiseBlock`
 contains a `PreLayerNorm`. Two boundaries would split a graph that needs no
 split.
 
@@ -122,7 +122,7 @@ in total.
 Compilation changes the choice of kernel and the order of the arithmetic. The
 golden fixtures in `tests/fixtures/golden.pt` cannot check the result. They are
 recorded eagerly, one module at a time. The probe therefore compares each
-compiled variant with its own eager variant, at equal weights and on one batch:
+compiled variant with its own eager variant, at equal weights and on one batch.
 
 The probe ran twice. The two runs give the spread of a measurement that has one
 pass in it:
@@ -145,15 +145,192 @@ times).
 
 ## 4. The depth sweep
 
-RESULTS_SWEEP
+All four variants ran in one sweep, at one commit, on one physical H100 80GB
+HBM3. Crop 312, gradient accumulation 12, micro-batch 1, bf16, activation
+checkpointing on. The method is the method of the baseline document: 2 untimed
+warmup steps, then 5 timed steps, then the median.
+
+Data: [bench/results/h100-sweep-pretrain.json](../bench/results/h100-sweep-pretrain.json).
+
+### Time for each optimizer step
+
+| MSA depth | `vanilla` | `cuequivariance` | `vanilla+compile` | `cuequivariance+compile` |
+| --- | --- | --- | --- | --- |
+| 32 | 6.306 | 4.392 | 3.199 | 2.936 |
+| 64 | 6.751 | 4.834 | 3.388 | 3.123 |
+| 96 | 7.224 | 5.302 | 3.593 | 3.330 |
+| 128 | 7.559 | 5.651 | 3.760 | 3.499 |
+| 160 | 7.986 | 6.061 | 3.995 | 3.682 |
+| 192 | 8.455 | 6.520 | 4.177 | 3.916 |
+| 224 | out of memory | out of memory | 4.391 | 4.127 |
+
+Values are seconds. The eager variants agree with the baseline document to
+better than 1 per cent, at every depth. The two sweeps are different days and
+different containers, so that agreement is the run-to-run stability of the
+measurement.
+
+**The graph breaks stay at zero at crop 312.** Both compiled variants report 0
+breaks at every depth. Section 3 could not settle this, because cuEquivariance
+declines small shapes and gives the fallback result silently. Crop 312 is the
+pre-training crop and is large enough. The fused kernels therefore go into the
+Dynamo graph, and the compiled region on that path is the whole
+`PairwiseBlock`. It is not only the elementwise work between the kernels.
+
+### Peak memory
+
+| MSA depth | `vanilla` | `cuequivariance` | `vanilla+compile` | `cuequivariance+compile` |
+| --- | --- | --- | --- | --- |
+| 32 | 38.5 | 38.4 | 27.2 | 28.0 |
+| 64 | 44.8 | 44.8 | 31.1 | 32.1 |
+| 96 | 51.1 | 51.1 | 35.2 | 36.2 |
+| 128 | 57.5 | 57.4 | 39.4 | 40.4 |
+| 160 | 63.8 | 63.8 | 43.5 | 44.5 |
+| 192 | 70.1 | 70.0 | 47.7 | 48.7 |
+| 224 | out of memory | out of memory | 51.9 | 52.9 |
+
+Values are GB. This is the larger result of the run, and section 5 gives the
+consequence.
+
+| Variant | Memory fit (GB) | At depth 256, crop 312 | At depth 320, crop 320 |
+| --- | --- | --- | --- |
+| `vanilla` | 0.1975 × depth + 32.17 | 82.7 | 99.5 |
+| `cuequivariance` | 0.1975 × depth + 32.15 | 82.7 | 99.5 |
+| `vanilla+compile` | 0.1288 × depth + 22.93 | 55.9 | 67.0 |
+| `cuequivariance+compile` | 0.1298 × depth + 23.78 | 57.0 | 68.3 |
+
+Compilation changes both terms. The intercept decreases 9 GB, and the slope
+decreases 35 per cent. The slope is the MSA track. Inductor fuses the
+elementwise chains there and does not write the intermediate tensors, so fewer
+activations stay alive for the backward pass. The choice of triangle path does
+not change the memory, either eagerly or compiled.
+
+### The fits
+
+| Variant | Points | Fit (s/step) | r² | Adjusted r² |
+| --- | --- | --- | --- | --- |
+| `vanilla` | 6 | 0.01320 × depth + 5.902 | 0.9982 | 0.9970 |
+| `cuequivariance` | 6 | 0.01310 × depth + 3.993 | 0.9986 | 0.9977 |
+| `vanilla+compile` | 7 | 0.00620 × depth + 2.992 | 0.9991 | 0.9986 |
+| `cuequivariance+compile` | 7 | 0.00615 × depth + 2.729 | 0.9983 | 0.9974 |
+
+Compilation approximately halves both terms of the time fit.
+
+The compiled variants have seven points and the eager variants have six,
+because depth 224 fits only with compilation. The two sets of fits therefore do
+not have equal reach. The compiled fits reach 1.14 times beyond their largest
+measured depth. The eager fits reach 1.33 times. That difference favours the
+compiled variants.
+
+To remove the advantage, we fit the compiled variants again across the same six
+depths that the eager variants reached. The result moves less than 1 per cent:
+
+| Variant | All points | Depths 32 to 192 only |
+| --- | --- | --- |
+| `vanilla+compile` | 410 ms, 5.57 days | 409 ms, 5.56 days |
+| `cuequivariance+compile` | 386 ms, 5.25 days | 383 ms, 5.22 days |
+
+The numbers in section 5 therefore use all measured points. The ratios between
+variants use the six shared depths.
+
+### The cost of the compilation
+
+`bench` records the warmup time at each point. The compilation is in the first
+warmup step. The excess above two measured steps is the cost:
+
+| Variant | 32 | 64 | 96 | 128 | 160 | 192 | 224 | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `vanilla` | 3 | 1 | 1 | 1 | 0 | 1 | – | 6 |
+| `vanilla+compile` | 29 | 20 | 10 | 0 | 0 | 0 | 0 | 59 |
+
+Values are seconds. Dynamo compiles at the first depth and adds dynamic shapes
+at the second and the third. After depth 128 it compiles nothing more. The
+total for the whole ladder is 59 seconds. A training run has one shape, so it
+pays this once. Against 10.5 days, 30 seconds does not appear in any total.
+
+`cuequivariance+compile` shows 7 seconds, but that figure is not a cold start.
+Modal gave it the same warm container as `vanilla+compile`, and three of the
+four compiled leaves are identical across the triangle paths. It compiled only
+`PairwiseBlock` again.
 
 ## 5. The new estimates
 
-RESULTS_ESTIMATE
+### The whole run
+
+The unit is the alignment, for the reason the baseline document gives: the two
+phases use effective batches of 12 and 32, so their optimizer steps are not the
+same quantity. The paper processes 1,176,000 alignments in 10.5 days, or 771 ms
+for each alignment.
+
+| Variant | Pre-training | Fine-tuning | Whole run | Compared with the paper |
+| --- | --- | --- | --- | --- |
+| `vanilla` | 773 ms → 5.37 d | 892 ms → 5.94 d | **831 ms → 11.32 d** | 0.93 times |
+| `cuequivariance` | 612 ms → 4.25 d | 717 ms → 4.78 d | **664 ms → 9.03 d** | 1.16 times |
+| `vanilla+compile` | 382 ms → 2.65 d | 439 ms → 2.92 d | **410 ms → 5.57 d** | 1.88 times |
+| `cuequivariance+compile` | 359 ms → 2.49 d | 414 ms → 2.76 d | **386 ms → 5.25 d** | 2.00 times |
+| The paper | | | 771 ms → 10.5 d | 1.00 times |
+
+The best variant gives 2.00 times the throughput of the paper's run, at the
+depth caps of both phases.
+
+### What each change gives
+
+The ratios below use the six depths that all four variants reached.
+
+| Change | On the PyTorch path | On the cuEquivariance path |
+| --- | --- | --- |
+| `torch.compile` | 2.04 times | 1.73 times |
+
+| Change | Eagerly | With `torch.compile` |
+| --- | --- | --- |
+| The fused kernels | 1.25 times | 1.07 times |
+
+Both together give 2.17 times.
+
+**The two changes do not add.** The fused kernels give 1.25 times without
+compilation and 1.07 times with it. Inductor reaches most of what the
+hand-written kernels reach. The baseline document reports 1.23 times for the
+fused kernels and says that the value does not depend on the depth
+distribution. That statement is correct, because both paths are read at the same
+depths. The value does depend on `torch.compile`, and the baseline document does
+not say so, because no measurement with `torch.compile` existed.
+
+The order of the two changes therefore decides how each one looks. From the
+eager PyTorch path, the fused kernels give 1.25 times and `torch.compile` gives
+2.04 times. From the compiled PyTorch path, the fused kernels give only 1.07
+times.
+
+### Both phases now fit on an 80 GB card
+
+This is the more useful result. The baseline document had to extrapolate,
+because neither phase's shape fits on the available card:
+
+| Phase | Shape | Eager | Compiled |
+| --- | --- | --- | --- |
+| Pre-training | depth 256, crop 312 | 82.7 GB | 55.9 GB |
+| Fine-tuning | depth 320, crop 320 | 99.5 GB | 67.0 GB |
+
+Both compiled figures are below 80 GB. Section 5 of the baseline document
+records that fine-tuning does not fit even on the 96 GB card that we infer for
+the paper. With `torch.compile`, it fits on a card that is 16 GB smaller.
+
+MEASURED_DIRECT
 
 ## 6. What this does not measure
 
-RESULTS_LIMITS
+- **The depth distribution of the training data.** All estimates use the depth
+  caps. Real alignments are frequently smaller. This limit stays the same as in the
+  baseline document, and it still controls the comparison with the paper.
+- **Convergence.** Every number here is a time and a memory value. The probe
+  shows that the compiled path computes the same loss and the same gradients to
+  the bf16 floor, at one step. It does not show that a run of 68,000 steps
+  reaches the same result. No compiled run has trained anything.
+- **`max-autotune`.** All measurements use the `default` mode. `max-autotune`
+  searches across kernel configurations and needs a much longer compilation. It
+  is not measured.
+- **The data pipeline, more than one GPU, and real data.** These exclusions stay the
+  same as in the baseline document.
+- **The crop axis.** The fine-tuning figures rescale a fit at crop 312 to crop
+  320 by arithmetic, exactly as the baseline document does.
 
 ## 7. How to repeat the measurement
 
