@@ -154,7 +154,9 @@ def correctness(with_drift: bool = True) -> dict[str, Any]:
         # refuse rather than silently trust a suite that checked nothing.
         "cuequivariance_present": CUEQUIVARIANCE_PRESENT,
         "returncode": proc.returncode,
-        "output": proc.stdout[-4000:] + proc.stderr[-2000:],
+        # Generous, because the tail is where the failures are and 4000 chars
+        # truncated the list of failing tests out of a run that had 4 of them.
+        "output": proc.stdout[-20000:] + proc.stderr[-4000:],
         "drift": report,
     }
 

@@ -42,7 +42,7 @@
       "shape": "fixture",
       "cases": {
         "core.Transition": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 6.854534149169922e-07,
@@ -52,7 +52,7 @@
           }
         },
         "core.SwiGLU": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.9073486328125e-06,
@@ -62,7 +62,7 @@
           }
         },
         "pairwise_operations.MSAPairWeightedAveraging": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 2.086162567138672e-07,
@@ -72,7 +72,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[outgoing]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 9.5367431640625e-07,
@@ -82,7 +82,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[incoming]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.3113021850585938e-06,
@@ -92,7 +92,7 @@
           }
         },
         "pairwise_operations.PairwiseBlock": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.9073486328125e-06,
@@ -102,7 +102,7 @@
           }
         },
         "outer_product.OuterProduct[presoftmax_differential]": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "pair_update": {
               "max_abs": 6.705522537231445e-08,
@@ -117,7 +117,7 @@
           }
         },
         "positional_encoding.RelativePositionEncoding": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 0.0,
@@ -127,7 +127,7 @@
           }
         },
         "regression.LMHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.6689300537109375e-06,
@@ -137,7 +137,7 @@
           }
         },
         "regression.LogisticRegressionContactHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.1920928955078125e-07,
@@ -147,7 +147,7 @@
           }
         },
         "model.MSAPairformer.forward": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "logits": {
               "max_abs": 3.6954879760742188e-06,
@@ -172,7 +172,7 @@
           }
         },
         "model.MSAPairformer.predict_cb_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_cb_contacts": {
               "max_abs": 3.2782554626464844e-07,
@@ -182,7 +182,7 @@
           }
         },
         "model.MSAPairformer.predict_confind_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_confind_contacts": {
               "max_abs": 4.172325134277344e-07,
@@ -200,7 +200,7 @@
       "shape": "fixture",
       "cases": {
         "core.Transition": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 7.003545761108398e-07,
@@ -210,7 +210,7 @@
           }
         },
         "core.SwiGLU": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.9073486328125e-06,
@@ -220,7 +220,7 @@
           }
         },
         "pairwise_operations.MSAPairWeightedAveraging": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 2.0116567611694336e-07,
@@ -230,7 +230,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[outgoing]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.0728836059570312e-06,
@@ -240,7 +240,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[incoming]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.1920928955078125e-06,
@@ -250,7 +250,7 @@
           }
         },
         "pairwise_operations.PairwiseBlock": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 2.1383166313171387e-06,
@@ -260,7 +260,7 @@
           }
         },
         "outer_product.OuterProduct[presoftmax_differential]": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "pair_update": {
               "max_abs": 5.587935447692871e-08,
@@ -275,7 +275,7 @@
           }
         },
         "positional_encoding.RelativePositionEncoding": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 0.0,
@@ -285,7 +285,7 @@
           }
         },
         "regression.LMHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.430511474609375e-06,
@@ -295,7 +295,7 @@
           }
         },
         "regression.LogisticRegressionContactHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 5.960464477539063e-08,
@@ -305,7 +305,7 @@
           }
         },
         "model.MSAPairformer.forward": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "logits": {
               "max_abs": 4.0531158447265625e-06,
@@ -330,7 +330,7 @@
           }
         },
         "model.MSAPairformer.predict_cb_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_cb_contacts": {
               "max_abs": 2.682209014892578e-07,
@@ -340,7 +340,7 @@
           }
         },
         "model.MSAPairformer.predict_confind_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_confind_contacts": {
               "max_abs": 2.384185791015625e-07,
@@ -358,7 +358,7 @@
       "shape": "fixture",
       "cases": {
         "core.Transition": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 7.003545761108398e-07,
@@ -368,7 +368,7 @@
           }
         },
         "core.SwiGLU": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.9073486328125e-06,
@@ -378,7 +378,7 @@
           }
         },
         "pairwise_operations.MSAPairWeightedAveraging": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 2.0116567611694336e-07,
@@ -388,7 +388,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[outgoing]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.0728836059570312e-06,
@@ -398,7 +398,7 @@
           }
         },
         "pairwise_operations.TriangleMultiplication[incoming]": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.1920928955078125e-06,
@@ -408,7 +408,7 @@
           }
         },
         "pairwise_operations.PairwiseBlock": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 2.1383166313171387e-06,
@@ -418,7 +418,7 @@
           }
         },
         "outer_product.OuterProduct[presoftmax_differential]": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "pair_update": {
               "max_abs": 5.587935447692871e-08,
@@ -433,7 +433,7 @@
           }
         },
         "positional_encoding.RelativePositionEncoding": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 0.0,
@@ -443,7 +443,7 @@
           }
         },
         "regression.LMHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 1.430511474609375e-06,
@@ -453,7 +453,7 @@
           }
         },
         "regression.LogisticRegressionContactHead": {
-          "checksum_matches": true,
+          "fingerprint_problems": [],
           "outputs": {
             "out": {
               "max_abs": 5.960464477539063e-08,
@@ -463,7 +463,7 @@
           }
         },
         "model.MSAPairformer.forward": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "logits": {
               "max_abs": 4.0531158447265625e-06,
@@ -488,7 +488,7 @@
           }
         },
         "model.MSAPairformer.predict_cb_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_cb_contacts": {
               "max_abs": 2.682209014892578e-07,
@@ -498,7 +498,7 @@
           }
         },
         "model.MSAPairformer.predict_confind_contacts": {
-          "checksum_matches": false,
+          "fingerprint_problems": [],
           "outputs": {
             "predicted_confind_contacts": {
               "max_abs": 2.384185791015625e-07,

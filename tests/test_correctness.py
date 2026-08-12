@@ -50,17 +50,29 @@ PACKAGE = "msa_pairformer"
 # precision and pretending otherwise means either false failures or a test that
 # cannot detect anything.
 #
-# `cpu/vanilla` is measured at exactly 0.0 against these goldens, so its
-# tolerance only has to absorb reduction-order differences between contiguity
-# states. The GPU rows are placeholders until `modal run
-# bench/modal_app.py::check` reports what the deviation actually is -- see
-# bench/drift.py. Do not tighten them by guessing; the drift report is the only
-# thing that says what is achievable.
+# Measured, not guessed: bench/results/h100-drift.json, H100 80GB, torch
+# 2.13.0+cu130, TF32 off. Worst absolute deviation from the goldens per path:
+#
+#     cpu/vanilla    1.287e-05      cuda/vanilla   1.246e-05
+#     cuda/cuex      1.246e-05      (identical to cuda/vanilla -- see below)
+#
+# On the machine that recorded the goldens, cpu/vanilla is exactly 0.0. It is
+# not zero anywhere else, and that is the constraint these numbers are sized
+# for: the same 1-ULP initialisation differences that motivated
+# `param_fingerprint` propagate through the forward pass, reaching ~1.3e-5 on
+# the 22-layer model. A tolerance tight enough to be exact on one machine makes
+# the suite unrunnable on every other, which is where it matters most.
+#
+# All three rows carry the same numbers because the fixtures are recorded at
+# N=10, and cuEquivariance declines shapes that small -- so the cuex row here
+# measures the fallback, not the fused kernels. That is a known limit of this
+# file rather than a claim about the kernels; tests/test_cuequivariance.py
+# covers them at N=312, where they demonstrably engage.
 TOLERANCES: dict[str, tuple[float, float]] = {
     # path: (rtol, atol)
-    "cpu/vanilla": (1e-5, 1e-6),
-    "cuda/vanilla": (1e-4, 1e-5),  # PROVISIONAL - set from the drift report
-    "cuda/cuex": (1e-2, 1e-3),     # PROVISIONAL - set from the drift report
+    "cpu/vanilla": (1e-4, 5e-5),
+    "cuda/vanilla": (1e-4, 5e-5),
+    "cuda/cuex": (1e-4, 5e-5),
 }
 
 

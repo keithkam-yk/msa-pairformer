@@ -95,10 +95,26 @@ def _build(factory, use_cuequivariance, device, seed=0):
 
 
 def _report(name, got, want):
-    """Assert agreement, and put the actual deviation in the failure message --
-    the number is what tells us where to set the tolerance."""
+    """Assert agreement, and report the deviation either way.
+
+    The non-identity check comes first and is the more important of the two.
+    A fused kernel cannot reproduce the fallback bitwise, so if it does, it did
+    not run -- cuEquivariance declined the input and used its own PyTorch
+    reference, which `_vanilla_forward` mirrors op for op. That is precisely how
+    this file passed while testing nothing at N=24. Agreement is only evidence
+    when there were two implementations to agree.
+    """
+    assert not torch.equal(got, want), (
+        f"{name}: the fused and fallback paths are bitwise identical, so the "
+        "fused kernel did not run -- cuEquivariance declined this input and "
+        "fell back. This test cannot pass honestly at this shape or dtype; "
+        "raise N (see the table at the top of this file) rather than trusting "
+        "the green."
+    )
+
     abs_dev = (got - want).abs().max().item()
     rel_dev = ((got - want).abs() / want.abs().clamp_min(1e-6)).max().item()
+    print(f"{name}: max abs {abs_dev:.3e}, max rel {rel_dev:.3e}")
     torch.testing.assert_close(
         got, want, rtol=RTOL, atol=ATOL,
         msg=lambda m: f"{name}: cuEquivariance disagrees with the fallback "
