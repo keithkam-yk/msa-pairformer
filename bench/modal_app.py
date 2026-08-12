@@ -6,6 +6,7 @@ GPU. This file only defines the container, requests the GPU, and moves results
 back.
 
     modal run bench/modal_app.py::check        # correctness + golden drift
+    modal run bench/modal_app.py::check --gpu L4    # same, on a cheaper card
     modal run bench/modal_app.py               # verify, then both baselines
     modal run bench/modal_app.py --variants cuequivariance --steps 10
 
@@ -13,11 +14,16 @@ Run `check` before trusting anything else: it establishes both that the GPU
 paths work and what deviation from the recorded goldens each one produces,
 which is what the tolerances in `tests/test_correctness.py` are set from.
 
-The GPU is pinned to H100 on purpose. The point of the first run is
-comparability against the paper's "10.5 days on a single H100"; measured on any
-other card the number has no reference to sit against. Note Modal's H100 is
-SXM -- the paper does not say which variant it used, and PCIe is meaningfully
-slower, so that stays a caveat on any comparison.
+The GPU defaults to H100 because the point of the benchmark is comparability
+against the paper's "10.5 days on a single H100"; measured on any other card
+the number has no reference to sit against. Note Modal's H100 is SXM -- the
+paper does not say which variant it used, and PCIe is meaningfully slower, so
+that stays a caveat on any comparison.
+
+`--gpu` exists mainly for `check`, where the question is whether the fused
+kernels run at all rather than how fast anything is. Prefer Ampere or newer
+(L4, A10G, L40S): the fused triangle path is Triton-generated and older cards
+are not worth the debugging.
 """
 
 from __future__ import annotations
@@ -32,7 +38,18 @@ import modal
 from bench.config import PAPER_DAYS, PAPER_SECONDS_PER_STEP, Amp, BenchConfig
 
 REPO = Path(__file__).parent.parent
-GPU = "H100"
+
+# The default, overridable per run with --gpu. H100 is the default because the
+# point of the benchmark is comparability against the paper's "10.5 days on a
+# single H100"; measured on another card the number has no reference to sit
+# against.
+#
+# `check` is the exception and is why this is a flag at all: correctness needs
+# *a* CUDA device, not a specific one. The fused kernels either run or they do
+# not, and that answer is card-independent -- so a cheaper GPU verifies the
+# path perfectly well. The drift *magnitudes* are not card-independent, which
+# is why the device name is recorded in the report and in the output filename.
+DEFAULT_GPU = "H100"
 
 # Dependencies of the modules the harness touches (model, dataset, and their
 # imports), rather than the full project: no matplotlib, sklearn or tqdm.
@@ -62,9 +79,13 @@ CUEQUIVARIANCE = "0.11.1"
 # ops compiled against an ABI torch is not using. Model code only ever imports
 # `cuequivariance_torch` (pairwise_operations.py:31), so which ops variant sits
 # underneath is invisible to it, and matching torch's CUDA major costs nothing.
+#
+# uv_pip_install rather than pip_install: same resolver as the local uv.lock, so
+# when the two lists are compared they were at least produced by the same
+# machinery, and the layer builds in a fraction of the time.
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install(
+    .uv_pip_install(
         f"torch=={TORCH}",
         "numpy>=1.26,<2.0",
         "einops>=0.8.0",
@@ -77,7 +98,7 @@ image = (
         "beartype>=0.19.0",
         "pytest>=8.0",
     )
-    .pip_install(
+    .uv_pip_install(
         f"cuequivariance=={CUEQUIVARIANCE}",
         f"cuequivariance-torch=={CUEQUIVARIANCE}",
         f"cuequivariance-ops-cu13=={CUEQUIVARIANCE}",
@@ -90,7 +111,7 @@ image = (
 app = modal.App("msa-pairformer-bench", image=image)
 
 
-@app.function(gpu=GPU, timeout=1800)
+@app.function(gpu=DEFAULT_GPU, timeout=1800)
 def correctness(with_drift: bool = True) -> dict[str, Any]:
     """Everything that answers "is the GPU path correct", in one container.
 
@@ -138,7 +159,7 @@ def correctness(with_drift: bool = True) -> dict[str, Any]:
     }
 
 
-@app.function(gpu=GPU, timeout=3600)
+@app.function(gpu=DEFAULT_GPU, timeout=3600)
 def benchmark(cfg: dict[str, Any], git: dict[str, Any]) -> dict[str, Any]:
     """Measure one configuration.
 
@@ -155,7 +176,8 @@ def benchmark(cfg: dict[str, Any], git: dict[str, Any]) -> dict[str, Any]:
 @app.local_entrypoint()
 def check(
     with_drift: bool = True,
-    out: str = "bench/results/h100-drift.json",
+    gpu: str = DEFAULT_GPU,
+    out: str = "",
 ) -> None:
     """Correctness on a GPU, without benchmarking anything.
 
@@ -169,13 +191,13 @@ def check(
     kernels depend on. `--no-with-drift` skips the drift table when all you
     want is pass or fail.
     """
-    res = correctness.remote(with_drift=with_drift)
+    res = correctness.with_options(gpu=gpu).remote(with_drift=with_drift)
     print(f"{res['gpu']}  torch {res['torch']}  cuda {res['cuda']}")
     print(f"cuequivariance present: {res['cuequivariance_present']}")
     print(res["output"])
 
     if res["drift"] is not None:
-        _write(out, res["drift"])
+        _write(out or _results_path(gpu, "drift"), res["drift"])
         print("Set the tolerances in tests/test_correctness.py from the table "
               "above; they are valid only for this GPU, cuEquivariance version "
               "and precision setting, all recorded in the JSON.")
@@ -200,7 +222,8 @@ def main(
     amp: str = "bf16",
     variants: str = "vanilla,cuequivariance",
     verify_first: bool = True,
-    out: str = "bench/results/h100-baseline.json",
+    gpu: str = DEFAULT_GPU,
+    out: str = "",
 ) -> None:
     from bench.provenance import git_info
 
@@ -213,7 +236,7 @@ def main(
 
     if verify_first:
         print("verifying container ...")
-        res = correctness.remote(with_drift=False)
+        res = correctness.with_options(gpu=gpu).remote(with_drift=False)
         print(f"  {res['gpu']}  torch {res['torch']}  cuda {res['cuda']}")
         print("  " + res["output"].strip().splitlines()[-1])
         if res["returncode"] != 0:
@@ -260,7 +283,9 @@ def main(
     results: dict[str, Any] = {}
     for name in requested:
         print(f"=== {name} ===")
-        results[name] = benchmark.remote(configs[name].to_dict(), git)
+        results[name] = benchmark.with_options(gpu=gpu).remote(
+            configs[name].to_dict(), git
+        )
         print()
 
     print(f"{'variant':<18}{'s/step':>9}{'tokens/s':>12}{'peak GB':>10}"
@@ -279,7 +304,21 @@ def main(
         print(f"\nfused triangle kernels are {plain/fused:.2f}x the vanilla path "
               f"({plain:.3f}s -> {fused:.3f}s per optimizer step)")
 
-    _write(out, {"gpu_requested": GPU, "git": git, "variants": results})
+    _write(
+        out or _results_path(gpu, "baseline"),
+        {"gpu_requested": gpu, "git": git, "variants": results},
+    )
+
+
+def _results_path(gpu: str, kind: str) -> str:
+    """Name results after the card that produced them.
+
+    Neither drift magnitudes nor throughput transfer between GPUs, so a fixed
+    filename would let an L4 run silently overwrite an H100 one and leave two
+    incomparable numbers looking like a before and after.
+    """
+    slug = gpu.lower().replace(":", "x").replace("/", "-")
+    return f"bench/results/{slug}-{kind}.json"
 
 
 def _write(path: str, payload: dict[str, Any]) -> None:
