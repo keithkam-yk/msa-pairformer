@@ -14,7 +14,7 @@ import torch
 
 from bench.config import BenchConfig
 from bench.data import synthetic_batch
-from bench.sweep import fit_line, replace_depth
+from bench.sweep import curvature_bracket, fit_line, replace_depth
 from bench.sweep import run as sweep_run
 from bench.train import run
 
@@ -121,3 +121,54 @@ def test_sweep_fits_across_depths():
     assert report["paper_estimate"]["depth"] == 320
     assert report["paper_estimate"]["is_measurement"] is False
     assert report["memory_ceiling"]["largest_depth_measured"] == 8
+
+
+def test_fit_line_refuses_an_adjusted_r_squared_it_cannot_compute():
+    """Three points against two parameters leaves one residual degree of
+    freedom, so adjusted r^2 is undefined. Reporting None is the point: the
+    first sweep quoted r^2 = 0.9945 off three points and meant almost nothing
+    by it."""
+    three = fit_line([64.0, 128.0, 192.0], [4.949, 5.643, 6.542])
+    assert three["n_points"] == 3
+    assert three["residual_dof"] == 1
+    assert three["adjusted_r_squared"] is None
+    assert three["r_squared"] > 0.99, "high r^2 on three points is the trap"
+
+    five = fit_line([32.0, 64.0, 96.0, 128.0, 160.0], [2.0, 3.0, 4.0, 5.0, 6.0])
+    assert five["adjusted_r_squared"] == pytest.approx(1.0)
+
+
+def test_curvature_bracket_exposes_what_r_squared_hides():
+    """The real sweep's three cuEquivariance points, whose r^2 was 0.9945. The
+    parabola through them is 11% higher at depth 320, and that spread is the
+    part of the estimate that is not evidence."""
+    xs = [64.0, 128.0, 192.0]
+    bracket = curvature_bracket(xs, [4.949, 5.643, 6.542], 320.0)
+
+    assert bracket["linear"] == pytest.approx(8.10, abs=0.02)
+    assert bracket["quadratic"] == pytest.approx(8.96, abs=0.02)
+    # Convex: the middle point sits below the chord, so a straight line
+    # extrapolates low. The first report's numbers were optimistic, not safe.
+    assert bracket["quadratic"] > bracket["linear"]
+    assert bracket["spread_fraction"] == pytest.approx(0.106, abs=0.01)
+
+
+def test_curvature_bracket_is_tight_on_a_genuine_line():
+    """The bracket has to be wide only when the data earns it, or it is just
+    pessimism and nobody will read it."""
+    xs = [32.0, 64.0, 96.0, 128.0, 160.0, 192.0]
+    bracket = curvature_bracket(xs, [0.05 * x + 3.0 for x in xs], 320.0)
+
+    assert bracket["linear"] == pytest.approx(19.0)
+    assert bracket["spread_fraction"] < 1e-6
+
+
+def test_sweep_refuses_to_quote_too_few_points():
+    """A two-point sweep still produces an estimate -- it must not claim the
+    estimate is usable."""
+    report = sweep_run(BenchConfig(**TINY), depths=(4, 8), log=lambda *_: None)
+    estimate = report["paper_estimate"]
+
+    assert estimate["quotable"] is False
+    assert estimate["estimated_step_s_low"] <= estimate["estimated_step_s_high"]
+    assert estimate["extrapolation_reach"] == pytest.approx(320 / 8)
