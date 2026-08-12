@@ -117,7 +117,9 @@ The harness measures one optimizer step. The step contains:
 The harness excludes these items. Each one adds time to a real training run:
 
 - The data pipeline. The batches are synthetic.
-- `torch.compile`. All code runs eagerly.
+- `torch.compile`. All code in this document runs eagerly.
+  [throughput-torch-compile.md](throughput-torch-compile.md) measures it
+  separately, and it changes both the time and the memory.
 - Optimizer-state offload, and all other memory optimizations.
 - Distributed communication. All measurements use one GPU.
 - Checkpoint writes, logging and validation.
@@ -280,7 +282,9 @@ What the comparison supports:
   caps, and the cuEquivariance path accounts for 86 per cent.
 - The fused kernels give 1.23 times across the whole run, from 11.18 days to
   9.07 days. This does not depend on the depth distribution, because both paths
-  are read at the same depths.
+  are read at the same depths. It does depend on `torch.compile`: with
+  compilation on, the same comparison gives only 1.07 times. See
+  [throughput-torch-compile.md](throughput-torch-compile.md).
 
 What the comparison does not support: a claim about how much of the paper's time
 is data loading or other work outside the model. The depth distribution controls
@@ -338,7 +342,16 @@ with was wrong, and it was wrong in a direction that flattered us.
   the print.
 - `pyproject.toml` still pins `cuequivariance_ops_cu12` for Linux installs. That
   is the same mixed-stack fault as in section 8, and it ships to users.
-- No measurement uses `torch.compile`, more than one GPU, or real data.
+- No measurement in this document uses more than one GPU or real data.
+
+`torch.compile` was on this list. It is not any more:
+[throughput-torch-compile.md](throughput-torch-compile.md) measures it. That
+document supersedes two statements here. Compilation moves the memory below 80
+GB for both phases, so the shapes in section 5 no longer need an extrapolation.
+The direct measurement of the pre-training shape agrees with the extrapolation
+in section 7 to 3 per cent on time and to 0.2 per cent on memory, which is the
+best available check on the method of this document. Every number in this
+document stays correct for the eager paths.
 
 ## 10. How to repeat the measurement
 

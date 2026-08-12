@@ -11,6 +11,38 @@ sentence gives one idea. The tenses are simple.
 Read the baseline document first. This document does not repeat the paper's
 numbers, the memory limit, or the method of the extrapolation.
 
+Date of the measurements: 12 August 2026. Repository commit: `3b8d275`.
+
+## Summary
+
+`torch.compile` gives approximately two times the throughput and removes
+approximately one third of the peak memory. The memory result is the more
+useful one, because it changes what we can measure.
+
+| Variant | Whole run | Compared with the paper |
+| --- | --- | --- |
+| `vanilla` (baseline document) | 831 ms → 11.32 days | 0.93 times |
+| `cuequivariance` (baseline document) | 664 ms → 9.03 days | 1.16 times |
+| `vanilla+compile` | 388 ms → 5.28 days | 1.99 times |
+| `cuequivariance+compile` | **370 ms → 5.03 days** | **2.09 times** |
+| The paper | 771 ms → 10.5 days | 1.00 times |
+
+Four results:
+
+1. The compiled variants use 56 GB at the pre-training shape and 66 GB at the
+   fine-tuning shape. Eagerly the same shapes need 83 GB and 99 GB. **Both
+   phases therefore fit on an 80 GB H100 for the first time**, and the two
+   compiled rows above are measurements at those shapes. The two eager rows
+   stay estimates.
+2. The fused cuEquivariance kernels give 1.25 times without compilation and
+   only 1.07 times with it. The two changes largely overlap, and they do not
+   add.
+3. The fused kernels go into the Dynamo graph. There are no graph breaks at the
+   pre-training crop, on either triangle path.
+4. The extrapolation method of the baseline document now has a check against a
+   measurement. It agrees to 3 per cent on time at the same crop, and to 1.2
+   per cent on memory.
+
 ## Technical names
 
 This document adds these names to the names in the baseline document.
@@ -229,8 +261,11 @@ depths that the eager variants reached. The result moves less than 1 per cent:
 | `vanilla+compile` | 410 ms, 5.57 days | 409 ms, 5.56 days |
 | `cuequivariance+compile` | 386 ms, 5.25 days | 383 ms, 5.22 days |
 
-The numbers in section 5 therefore use all measured points. The ratios between
-variants use the six shared depths.
+The difference between the two ladders is thus too small to change any
+conclusion. The ratios between variants in section 5 use the six shared depths.
+The whole-run figures for the compiled variants do not use either fit: section 5
+measures those two shapes directly. The estimates above remain useful as the
+check on the method.
 
 ### The cost of the compilation
 
@@ -261,15 +296,19 @@ phases use effective batches of 12 and 32, so their optimizer steps are not the
 same quantity. The paper processes 1,176,000 alignments in 10.5 days, or 771 ms
 for each alignment.
 
-| Variant | Pre-training | Fine-tuning | Whole run | Compared with the paper |
-| --- | --- | --- | --- | --- |
-| `vanilla` | 773 ms → 5.37 d | 892 ms → 5.94 d | **831 ms → 11.32 d** | 0.93 times |
-| `cuequivariance` | 612 ms → 4.25 d | 717 ms → 4.78 d | **664 ms → 9.03 d** | 1.16 times |
-| `vanilla+compile` | 382 ms → 2.65 d | 439 ms → 2.92 d | **410 ms → 5.57 d** | 1.88 times |
-| `cuequivariance+compile` | 359 ms → 2.49 d | 414 ms → 2.76 d | **386 ms → 5.25 d** | 2.00 times |
-| The paper | | | 771 ms → 10.5 d | 1.00 times |
+| Variant | Pre-training | Fine-tuning | Whole run | Compared with the paper | Source |
+| --- | --- | --- | --- | --- | --- |
+| `vanilla` | 773 ms → 5.37 d | 892 ms → 5.94 d | **831 ms → 11.32 d** | 0.93 times | estimate |
+| `cuequivariance` | 612 ms → 4.25 d | 717 ms → 4.78 d | **664 ms → 9.03 d** | 1.16 times | estimate |
+| `vanilla+compile` | 370 ms → 2.57 d | 407 ms → 2.71 d | **388 ms → 5.28 d** | 1.99 times | measurement |
+| `cuequivariance+compile` | 350 ms → 2.43 d | 390 ms → 2.60 d | **370 ms → 5.03 d** | 2.09 times | measurement |
+| The paper | | | 771 ms → 10.5 d | 1.00 times | reported |
 
-The best variant gives 2.00 times the throughput of the paper's run, at the
+The two compiled rows are measurements at the exact shapes of the two phases.
+The two eager rows stay estimates, because those shapes still do not fit on the
+card. That difference is real, and the last column records it.
+
+The best variant gives 2.09 times the throughput of the paper's run, at the
 depth caps of both phases.
 
 ### What each change gives
@@ -284,7 +323,9 @@ The ratios below use the six depths that all four variants reached.
 | --- | --- | --- |
 | The fused kernels | 1.25 times | 1.07 times |
 
-Both together give 2.17 times.
+Both together give 2.17 times. The direct measurements agree with the compiled
+value: the fused kernels give 1.057 times at the pre-training shape and 1.044
+times at the fine-tuning shape.
 
 **The two changes do not add.** The fused kernels give 1.25 times without
 compilation and 1.07 times with it. Inductor reaches most of what the
@@ -304,16 +345,57 @@ times.
 This is the more useful result. The baseline document had to extrapolate,
 because neither phase's shape fits on the available card:
 
-| Phase | Shape | Eager | Compiled |
+| Phase | Shape | Eager (estimate) | Compiled (measured) |
 | --- | --- | --- | --- |
-| Pre-training | depth 256, crop 312 | 82.7 GB | 55.9 GB |
-| Fine-tuning | depth 320, crop 320 | 99.5 GB | 67.0 GB |
+| Pre-training | depth 256, crop 312 | 82.7 GB | 56.0 GB |
+| Fine-tuning | depth 320, crop 320 | 99.5 GB | 66.4 GB |
 
-Both compiled figures are below 80 GB. Section 5 of the baseline document
-records that fine-tuning does not fit even on the 96 GB card that we infer for
-the paper. With `torch.compile`, it fits on a card that is 16 GB smaller.
+Both compiled figures are below 80 GB, and both come from a run at that exact
+shape. Section 5 of the baseline document records that fine-tuning does not fit
+even on the 96 GB card that we infer for the paper. With `torch.compile`, it
+fits on a card that is 16 GB smaller.
 
-MEASURED_DIRECT
+### The direct measurement, and what it says about the extrapolation
+
+Both shapes therefore ran directly, at 5 timed steps each, with the paper's
+effective batch for the phase: 12 for pre-training and 32 for fine-tuning.
+
+Data:
+[bench/results/h100-measured-pretrain.json](../bench/results/h100-measured-pretrain.json)
+and
+[bench/results/h100-measured-finetune.json](../bench/results/h100-measured-finetune.json).
+
+| Shape | Variant | Estimate | Measurement | Difference |
+| --- | --- | --- | --- | --- |
+| Pre-training | `vanilla+compile` | 382 ms | 370 ms | −3.2 % |
+| Pre-training | `cuequivariance+compile` | 359 ms | 350 ms | −2.6 % |
+| Fine-tuning | `vanilla+compile` | 439 ms | 407 ms | −7.3 % |
+| Fine-tuning | `cuequivariance+compile` | 414 ms | 390 ms | −5.8 % |
+
+| Shape | Variant | Estimate | Measurement | Difference |
+| --- | --- | --- | --- | --- |
+| Pre-training | `vanilla+compile` | 55.9 GB | 56.0 GB | +0.2 % |
+| Pre-training | `cuequivariance+compile` | 57.0 GB | 57.1 GB | +0.2 % |
+| Fine-tuning | `vanilla+compile` | 67.0 GB | 66.4 GB | −0.9 % |
+| Fine-tuning | `cuequivariance+compile` | 68.3 GB | 67.5 GB | −1.2 % |
+
+Three results:
+
+- **The memory fit is very accurate.** It predicts the direct measurement to
+  1.2 per cent or better, across a reach of 1.43 times in MSA depth and a crop
+  change that it never measured.
+- **The time estimates are all high.** The extrapolation is thus conservative.
+  It never claims a throughput that the hardware does not give.
+- **The crop rescale over-corrects.** The pre-training estimates are 3 per cent
+  high, and the fine-tuning estimates are 6 to 7 per cent high. Pre-training
+  uses the crop of the sweep, and fine-tuning does not. The extra 3 to 4 per
+  cent is therefore the cost of the arithmetic rescale from crop 312 to crop
+  320. The pair term uses crop³, and that exponent is a little too large.
+
+This is the first check of the extrapolation method against a measurement. The
+baseline document has no such check, because no shape it extrapolates to fits on
+the card. The agreement to 3 per cent for the same crop supports the numbers in
+that document as well.
 
 ## 6. What this does not measure
 
@@ -346,6 +428,17 @@ Then the four-variant sweep:
 uv run modal run bench/modal_app.py::sweep --variants vanilla,cuequivariance,vanilla+compile,cuequivariance+compile
 ```
 
+Then each phase at its own shape. `--phase` sets the MSA depth, the crop and the
+effective batch together, and labels the projection with the same phase:
+
+```bash
+uv run modal run bench/modal_app.py::main --phase pretrain --variants vanilla+compile,cuequivariance+compile --no-verify-first
+```
+
+```bash
+uv run modal run bench/modal_app.py::main --phase finetune --variants vanilla+compile,cuequivariance+compile --no-verify-first
+```
+
 The local self-check needs no GPU:
 
 ```bash
@@ -358,3 +451,9 @@ uv run pytest
 | --- | --- |
 | [bench/results/h100-compile-probe.json](../bench/results/h100-compile-probe.json) | The probe: graphs, graph breaks, memory and numerical agreement |
 | [bench/results/h100-sweep-pretrain.json](../bench/results/h100-sweep-pretrain.json) | The four-variant depth sweep and the estimates |
+| [bench/results/h100-measured-pretrain.json](../bench/results/h100-measured-pretrain.json) | The compiled variants at depth 256, crop 312, effective batch 12 |
+| [bench/results/h100-measured-finetune.json](../bench/results/h100-measured-finetune.json) | The compiled variants at depth 320, crop 320, effective batch 32 |
+
+The fine-tuning file records a dirty working tree. The difference was in `docs/`
+only. `bench/` was at commit `3b8d275` for both measured runs, and no commit
+after it changes `bench/`.

@@ -72,6 +72,11 @@ throughput baseline: what the harness in `bench/` measures, what it excludes, th
 memory ceiling on an 80 GB H100, and the extrapolation to both of the paper's
 training phases.
 
+[docs/throughput-torch-compile.md](docs/throughput-torch-compile.md) adds
+`torch.compile` on top of that baseline. It roughly doubles the throughput and
+cuts peak memory by about a third, which puts both of the paper's training
+shapes on an 80 GB card and replaces the extrapolation with a measurement.
+
 ### Upgrading from 1.0.2 and earlier
 
 The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8). Import
