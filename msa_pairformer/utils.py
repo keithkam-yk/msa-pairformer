@@ -113,13 +113,56 @@ def get_contacts(structure_file_path, chain_id, max_dist = 8):
     return contacts_a
 
 def compute_precision(predictions_a, targets_a, min_seq_sep = 6):
+    """Top-K precision of a single predicted contact map.
+
+    K is the number of true contacts in the valid region, i.e. precision@K where
+    K = number of contacts -- the same definition of K used by
+    `calculate_precision_batch` below. Unlike `compute_precisions`, which returns the
+    binned {AUC, P@L, P@L2, P@L5} dictionary for a batch, this returns one scalar for
+    one contact map, which is what the singular name and the reduced signature (no
+    maxsep / src_lengths / override_length) imply.
+
+    Only the strictly upper-triangular region with `j - i >= min_seq_sep` is scored, and
+    pairs marked invalid with a negative target are excluded. Returns None when there is
+    no true contact in the valid region (there is no precision to report), matching
+    `calculate_precision_batch`.
+    """
+    if isinstance(predictions_a, np.ndarray):
+        predictions_a = torch.from_numpy(predictions_a)
+    if isinstance(targets_a, np.ndarray):
+        targets_a = torch.from_numpy(targets_a)
     assert predictions_a.shape == targets_a.shape, "Predictions and targets must have the same shape"
+    # This scores a single contact map: accept [L, L] or a batch of one, [1, L, L]
+    if predictions_a.dim() == 3 and predictions_a.shape[0] == 1:
+        predictions_a = predictions_a.squeeze(0)
+        targets_a = targets_a.squeeze(0)
+    if predictions_a.dim() != 2:
+        raise ValueError(
+            f"compute_precision scores a single contact map, got shape {tuple(predictions_a.shape)}. "
+            "Use compute_precisions for a batch."
+        )
+    targets_a = targets_a.to(predictions_a.device)
     # Get valid indices
     seqlen = predictions_a.shape[1]
-    seqlen_range = torch.arange(seqlen)
+    seqlen_range = torch.arange(seqlen, device=predictions_a.device)
     valid_mask = seqlen_range[None, :] - seqlen_range[:, None] >= min_seq_sep
     # Some contact maps have -1 for invalid pairs
     valid_mask = valid_mask & (targets_a >= 0)
+
+    # Number of true contacts in the valid region -- the K of precision@K
+    true_contacts = (targets_a > 0) & valid_mask
+    num_contacts = int(true_contacts.sum().item())
+    if num_contacts == 0:
+        return None
+
+    # Invalid pairs are pushed to the bottom of the ranking so they can never be
+    # selected among the top K
+    if not predictions_a.is_floating_point():
+        predictions_a = predictions_a.float()
+    scored = predictions_a.masked_fill(~valid_mask, float("-inf"))
+    topk_indices = scored.flatten().argsort(descending=True)[:num_contacts]
+    topk_hits = true_contacts.flatten()[topk_indices]
+    return (topk_hits.sum() / num_contacts).item()
 
 def run_confind(
     structure_file_path, 

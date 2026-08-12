@@ -37,6 +37,23 @@ dependencies = [
 # Runtime tensor shape/dtype validation, enabled with MSA_PAIRFORMER_TYPECHECK=1.
 # Off by default because it adds per-call overhead on the model's hot path.
 typecheck = ["beartype>=0.19.0"]
+# Categorical Jacobian analysis (msa_pairformer/categorical_jacobian.py).
+# Not needed for the model itself, only for coevolution analysis.
+jacobian = ["jax>=0.4.20"]
+# ProteinGym zero-shot variant effect evaluation (msa_pairformer/proteingym_utils.py).
+proteingym = [
+    "numba>=0.57",
+    "pandas>=1.5",
+]
+# MSA pairing optimization (msa_pairformer/pairing_optimization/*), which uses
+# the MSA Transformer from fair-esm as a baseline / dataset tokenizer.
+pairing = ["fair-esm>=2.0.0"]
+# Everything above except typecheck: all analysis and pairing extras at once.
+analysis = [
+    "msa-pairformer[jacobian]",
+    "msa-pairformer[proteingym]",
+    "msa-pairformer[pairing]",
+]
 
 [tool.setuptools]
 package-dir = {"" = "."}
@@ -52,9 +69,21 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["msa_pairformer"]
+# Deprecated top-level alias module keeping `import MSA_Pairformer` working for users of
+# 1.0.2 and earlier. It has to be shipped explicitly: it is a module, not a package, and
+# it cannot be a directory because MSA_Pairformer/ and msa_pairformer/ are the same path
+# on case-insensitive filesystems.
+force-include = {"MSA_Pairformer.py" = "MSA_Pairformer.py"}
 
 [tool.hatch.build.targets.sdist]
-only-include = ["msa_pairformer", "README.md", "LICENSE", "MIT_LICENSE", "pyproject.toml"]
+only-include = [
+    "msa_pairformer",
+    "MSA_Pairformer.py",
+    "README.md",
+    "LICENSE",
+    "MIT_LICENSE",
+    "pyproject.toml",
+]
 
 [tool.ruff]
 target-version = "py310"

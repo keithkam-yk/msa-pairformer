@@ -30,6 +30,26 @@ git clone git@github.com:yoakiyama/MSA_Pairformer.git
 pip install -e .
 ```
 
+### Upgrading from 1.0.2 and earlier
+
+The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8). Import
+it under the new name:
+
+```py
+from msa_pairformer.model import MSAPairformer     # new
+from MSA_Pairformer.model import MSAPairformer     # old, deprecated but still works
+```
+
+The old spelling keeps working through a compatibility shim (`MSA_Pairformer.py`) that
+aliases `MSA_Pairformer.*` onto the identical `msa_pairformer.*` modules and raises a
+`DeprecationWarning`. Both spellings resolve to the same module objects, so mixing them
+is safe. The shim will be removed in a future release -- please migrate your imports.
+
+Note that `MSA_Pairformer/` and `msa_pairformer/` are the *same* directory on
+case-insensitive filesystems (macOS, Windows). If you are upgrading in place there,
+`pip uninstall msa-pairformer` before installing the new version so that no files from
+the old package directory are left behind.
+
 ### Installing hhsuite (for filtering MSAs)
 
 We use hhfilter (part of hhsuite) as the default option for subsampling MSAs. To install hhsuite, please follow these directions:

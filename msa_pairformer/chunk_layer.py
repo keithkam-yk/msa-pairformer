@@ -1,6 +1,6 @@
 # Adapted from https://github.com/yoakiyama/openfold/blob/main/openfold/utils/chunk_utils.py
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import partial
 from typing import Any
 
@@ -57,6 +57,153 @@ def _fetch_dims(tree):
         raise ValueError("Not supported")
 
     return shapes
+
+def _flat_idx_to_idx(flat_idx: int, dims: Sequence[int]) -> tuple[int, ...]:
+    """Convert an index into the flattened batch dimensions into a per-dimension index."""
+    idx = []
+    for d in reversed(dims):
+        idx.append(flat_idx % d)
+        flat_idx = flat_idx // d
+
+    return tuple(reversed(idx))
+
+
+@torch.jit.ignore
+def _get_minimal_slice_set(
+    start: Sequence[int],
+    end: Sequence[int],
+    dims: Sequence[int],
+    start_edges: Sequence[bool] | None = None,
+    end_edges: Sequence[bool] | None = None,
+) -> list[tuple[slice, ...]]:
+    """Produce an ordered sequence of tensor slices that, applied to a tensor with shape
+    ``dims``, together yield every leaf in the contiguous range [start, end].
+
+    ``end`` is INCLUSIVE. The sequence of slices is kept short so that the caller performs
+    as few indexing operations as possible.
+    """
+    # start_edges/end_edges indicate whether, starting from a given dimension, the
+    # start/end index sits on the top/bottom edge of the corresponding subtree.
+    def reduce_edge_list(edges: list[bool]) -> None:
+        tally = True
+        for i in range(len(edges)):
+            reversed_idx = -1 * (i + 1)
+            edges[reversed_idx] = edges[reversed_idx] and tally
+            tally = edges[reversed_idx]
+
+    if start_edges is None:
+        start_edges = [s == 0 for s in start]
+        reduce_edge_list(start_edges)
+    if end_edges is None:
+        end_edges = [e == (d - 1) for e, d in zip(end, dims, strict=False)]
+        reduce_edge_list(end_edges)
+
+    # Base cases: either there is nothing left to slice, or the remaining
+    # one-dimensional range can be sliced directly.
+    if len(start) == 0:
+        return [()]
+    elif len(start) == 1:
+        return [(slice(start[0], end[0] + 1),)]
+
+    slices: list[tuple[slice, ...]] = []
+    path_l: list[slice] = []
+
+    # Dimensions in which start and end agree can be selected directly
+    for s, e in zip(start, end, strict=False):
+        if s == e:
+            path_l.append(slice(s, s + 1))
+        else:
+            break
+
+    path = tuple(path_l)
+    divergence_idx = len(path)
+
+    # start == end, and we're done
+    if divergence_idx == len(dims):
+        return [path]
+
+    def upper() -> list[tuple[slice, ...]]:
+        sdi = start[divergence_idx]
+        return [
+            (*path, slice(sdi, sdi + 1), *s)
+            for s in _get_minimal_slice_set(
+                start[divergence_idx + 1:],
+                [d - 1 for d in dims[divergence_idx + 1:]],
+                dims[divergence_idx + 1:],
+                start_edges=start_edges[divergence_idx + 1:],
+                end_edges=[True for _ in end_edges[divergence_idx + 1:]],
+            )
+        ]
+
+    def lower() -> list[tuple[slice, ...]]:
+        edi = end[divergence_idx]
+        return [
+            (*path, slice(edi, edi + 1), *s)
+            for s in _get_minimal_slice_set(
+                [0 for _ in start[divergence_idx + 1:]],
+                end[divergence_idx + 1:],
+                dims[divergence_idx + 1:],
+                start_edges=[True for _ in start_edges[divergence_idx + 1:]],
+                end_edges=end_edges[divergence_idx + 1:],
+            )
+        ]
+
+    # If both start and end are at the edges of the subtree rooted at divergence_idx,
+    # the whole subtree can be selected at once
+    if start_edges[divergence_idx] and end_edges[divergence_idx]:
+        slices.append((*path, slice(start[divergence_idx], end[divergence_idx] + 1)))
+    # If only start is at the edge, grab almost all of the subtree and treat the ragged
+    # bottom edge as a special case
+    elif start_edges[divergence_idx]:
+        slices.append((*path, slice(start[divergence_idx], end[divergence_idx])))
+        slices.extend(lower())
+    # As above, but the top is the ragged one this time
+    elif end_edges[divergence_idx]:
+        slices.extend(upper())
+        slices.append((*path, slice(start[divergence_idx] + 1, end[divergence_idx] + 1)))
+    # Both sides are ragged: handle each separately, and take whatever contiguous
+    # ground lies between them in one chunk
+    else:
+        slices.extend(upper())
+        middle_ground = end[divergence_idx] - start[divergence_idx]
+        if middle_ground > 1:
+            slices.append((*path, slice(start[divergence_idx] + 1, end[divergence_idx])))
+        slices.extend(lower())
+
+    return [tuple(s) for s in slices]
+
+
+@torch.jit.ignore
+def _chunk_slice(
+    t: torch.Tensor,
+    flat_start: int,
+    flat_end: int,
+    no_batch_dims: int,
+) -> torch.Tensor:
+    """Equivalent to
+
+        t.reshape((-1, *t.shape[no_batch_dims:]))[flat_start:flat_end]
+
+    but without the up-front reshape, which materialises the whole (possibly expanded)
+    tensor. Only sub-tensors that scale with the chunk size (flat_end - flat_start) are
+    ever reshaped here.
+    """
+    batch_dims = t.shape[:no_batch_dims]
+    start_idx = list(_flat_idx_to_idx(flat_start, batch_dims))
+    # _get_minimal_slice_set is inclusive
+    end_idx = list(_flat_idx_to_idx(flat_end - 1, batch_dims))
+
+    # Get an ordered list of slices to perform
+    slices = _get_minimal_slice_set(
+        start_idx,
+        end_idx,
+        batch_dims,
+    )
+
+    sliced_tensors = [t[s] for s in slices]
+
+    return torch.cat([s.reshape((-1, *t.shape[no_batch_dims:])) for s in sliced_tensors])
+
 
 def chunk_layer(
     layer: Callable,
@@ -124,8 +271,8 @@ def chunk_layer(
                 partial(
                     _chunk_slice, 
                     flat_start=i, 
-                    flat_end=min(flat_batch_dim, i + chunk_size), 
-                    no_batch_dims=len(orig_batch_dims)
+                    flat_end=min(flat_batch_dim, i + chunk_size),
+                    no_batch_dims=no_batch_dims
                 )
             )
 

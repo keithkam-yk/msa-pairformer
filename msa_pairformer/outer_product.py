@@ -207,17 +207,30 @@ class PresoftmaxDifferentialOuterProductMean(Module):
         self,
         a,
         b,
+        pair_denom,
         chunk_size
     ):
         a_reshape = a.reshape((-1, *a.shape[-3:]))
         b_reshape = b.reshape((-1, *b.shape[-3:]))
+        # pair_denom is [..., n, n]: flatten its leading dims the same way as a and b so
+        # that the three zip in the same order.
+        pair_denom_reshape = pair_denom.reshape((-1, *pair_denom.shape[-2:]))
         out = []
-        for a_prime, b_prime in zip(a_reshape, b_reshape, strict=False):
+        zipped = zip(a_reshape, b_reshape, pair_denom_reshape, strict=False)
+        for a_prime, b_prime, pair_denom_prime in zipped:
+            # Chunking runs over the first (n) dimension of a, and _opm divides the outer
+            # product by pair_denom elementwise over that same dimension, so pair_denom has
+            # to be chunked alongside a. The batch bookkeeping is passed explicitly because
+            # chunk_layer otherwise derives flat_batch_dim from the number of inputs.
+            n = a_prime.shape[0]
             outer = chunk_layer(
                 partial(self._opm, b=b_prime),
-                {"a": a_prime},
+                {"a": a_prime, "pair_denom": pair_denom_prime},
                 chunk_size = chunk_size,
-                no_batch_dims=1
+                no_batch_dims=1,
+                orig_batch_dims={"a": (n,), "pair_denom": (n,)},
+                flat_batch_dim=n,
+                og_batch_dim=(n,),
             )
             out.append(outer)
 
@@ -295,7 +308,7 @@ class PresoftmaxDifferentialOuterProductMean(Module):
         weighted_mask = seq_weights.unsqueeze(-1) * full_mask.float()
         pair_denom = torch.einsum("bsi, bsj -> bij", weighted_mask, full_mask.float())
         if self.chunk_size is not None:
-            outer = self._chunk(a, b, self.chunk_size)
+            outer = self._chunk(a, b, pair_denom, self.chunk_size)
         else:
             outer = self._opm(a, b, pair_denom)
         # Mask invalid pairwise positions
