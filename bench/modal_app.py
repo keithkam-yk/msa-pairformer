@@ -5,10 +5,14 @@ there, so the same code path is exercised locally on CPU and remotely on the
 GPU. This file only defines the container, requests the GPU, and moves results
 back.
 
-    modal run bench/modal_app.py::check        # correctness + golden drift
-    modal run bench/modal_app.py::check --gpu L4    # same, on a cheaper card
-    modal run bench/modal_app.py               # verify, then both baselines
-    modal run bench/modal_app.py --variants cuequivariance --steps 10
+    modal run bench/modal_app.py::check       # correctness + golden drift
+    modal run bench/modal_app.py::check --gpu L4      # same, cheaper card
+    modal run bench/modal_app.py::main        # verify, then both baselines
+    modal run bench/modal_app.py::main --variants cuequivariance --steps 10
+
+The entrypoint is never optional. Modal only infers one when a file defines a
+single local entrypoint, and this file has two; the bare form fails with a
+listing rather than running `main`.
 
 Run `check` before trusting anything else: it establishes both that the GPU
 paths work and what deviation from the recorded goldens each one produces,

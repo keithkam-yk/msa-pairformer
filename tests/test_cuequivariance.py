@@ -20,7 +20,7 @@ true across hardware.
 Requires a CUDA host with cuequivariance_torch installed, so it skips
 everywhere else -- including every machine this was developed on.
 
-    modal run bench/modal_app.py          # runs this as part of `verify`
+    modal run bench/modal_app.py::check   # runs this on a rented GPU
 """
 
 import pytest
