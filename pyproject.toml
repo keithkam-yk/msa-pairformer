@@ -48,6 +48,9 @@ proteingym = [
 # MSA pairing optimization (msa_pairformer/pairing_optimization/*), which uses
 # the MSA Transformer from fair-esm as a baseline / dataset tokenizer.
 pairing = ["fair-esm>=2.0.0"]
+# Throughput harness (bench/). Only modal is extra: bench/train.py itself needs
+# nothing beyond the core dependencies, by design, so it runs anywhere.
+bench = ["modal>=1.0"]
 # Everything above except typecheck: all analysis and pairing extras at once.
 analysis = [
     "msa-pairformer[jacobian]",
@@ -115,7 +118,9 @@ ignore = [
 ]
 
 [tool.ty.src]
-include = ["msa_pairformer"]
+# `tests` is deliberately out of scope for now: it imports the model heavily and
+# would reopen the diagnostics already triaged on msa_pairformer.
+include = ["msa_pairformer", "bench"]
 
 [tool.ty.environment]
 python = ".venv"
