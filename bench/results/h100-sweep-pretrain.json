@@ -1,0 +1,2859 @@
+{
+  "gpu_requested": "H100",
+  "phase": "pretrain",
+  "git": {
+    "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+    "branch": "main",
+    "dirty": true
+  },
+  "variants": {
+    "vanilla": {
+      "schema": 2,
+      "kind": "depth-sweep",
+      "config": {
+        "device": "cuda",
+        "phase": "pretrain",
+        "depth": 256,
+        "crop": 312,
+        "micro_batch": 1,
+        "accum": 12,
+        "steps": 5,
+        "warmup": 2,
+        "amp": "bf16",
+        "lr": 0.0001,
+        "cuequivariance": false,
+        "compile_mode": "off",
+        "checkpoint_triangles": true,
+        "float32_precision": "highest"
+      },
+      "paper_phase": {
+        "key": "pretrain",
+        "steps": 50000,
+        "effective_batch": 12,
+        "depth": 256,
+        "crop": 312,
+        "examples": 600000
+      },
+      "git": {
+        "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+        "branch": "main",
+        "dirty": true
+      },
+      "points": [
+        {
+          "depth": 32,
+          "oom": false,
+          "median_step_s": 6.306073427000001,
+          "tokens_per_s": 18998.827303061782,
+          "peak_gpu_gb": 38.4784517288208,
+          "warmup_s": 15.155437799000001,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:25:38+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.287408676000002,
+                6.460526940999998,
+                6.306073427000001,
+                6.304510131000001,
+                6.515100197999999
+              ],
+              "median_step_s": 6.306073427000001,
+              "per_example_s": 0.5255061189166668,
+              "tokens_per_s": 18998.827303061782,
+              "peak_gpu_gb": 38.4784517288208,
+              "losses": [
+                3.2158210277557373,
+                3.0485005378723145,
+                3.0237228870391846,
+                2.997833490371704,
+                2.976921319961548
+              ],
+              "warmup_times_s": [
+                8.624120065,
+                6.531317734000002
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.649348048032408,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.4679725766445402
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 6.751324605999997,
+          "tokens_per_s": 35491.70184870831,
+          "peak_gpu_gb": 44.801881313323975,
+          "warmup_s": 14.083945674999995,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:26:27+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 64,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.757503729000007,
+                6.749287705,
+                6.960115649000002,
+                6.751324605999997,
+                6.74197728
+              ],
+              "median_step_s": 6.751324605999997,
+              "per_example_s": 0.5626103838333331,
+              "tokens_per_s": 35491.70184870831,
+              "peak_gpu_gb": 44.801881313323975,
+              "losses": [
+                3.212015151977539,
+                3.0842673778533936,
+                3.0526633262634277,
+                3.0181655883789062,
+                3.0094611644744873
+              ],
+              "warmup_times_s": [
+                7.044346619999999,
+                7.0395990549999965
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.907016554398146,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.3711594979325843
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 7.224254367999976,
+          "tokens_per_s": 49752.40096639981,
+          "peak_gpu_gb": 51.14894342422485,
+          "warmup_s": 15.093946735999992,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:27:19+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                7.204743711999981,
+                7.208507807999979,
+                7.3926169509999795,
+                7.224254367999976,
+                7.228857163000015
+              ],
+              "median_step_s": 7.224254367999976,
+              "per_example_s": 0.6020211973333313,
+              "tokens_per_s": 49752.40096639981,
+              "peak_gpu_gb": 51.14894342422485,
+              "losses": [
+                3.2121832370758057,
+                3.0896427631378174,
+                3.04695200920105,
+                3.022641897201538,
+                3.0082366466522217
+              ],
+              "warmup_times_s": [
+                7.591337218999996,
+                7.502609516999996
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 4.180702759259245,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.28139768972527
+            }
+          }
+        },
+        {
+          "depth": 128,
+          "oom": false,
+          "median_step_s": 7.559370689000019,
+          "tokens_per_s": 63395.75339219071,
+          "peak_gpu_gb": 57.472015380859375,
+          "warmup_s": 15.721542259000017,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:28:15+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 128,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                7.559370689000019,
+                7.56919284899999,
+                7.72596274899999,
+                7.552537575000002,
+                7.558691867000022
+              ],
+              "median_step_s": 7.559370689000019,
+              "per_example_s": 0.6299475574166683,
+              "tokens_per_s": 63395.75339219071,
+              "peak_gpu_gb": 57.472015380859375,
+              "losses": [
+                3.2160985469818115,
+                3.092660903930664,
+                3.0519235134124756,
+                3.0285537242889404,
+                3.0127110481262207
+              ],
+              "warmup_times_s": [
+                7.905201626000007,
+                7.81634063300001
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 4.37463581539353,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.2245917336231893
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 7.9861845899999935,
+          "tokens_per_s": 75009.53593660932,
+          "peak_gpu_gb": 63.77679634094238,
+          "warmup_s": 16.420085547000014,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:29:12+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                7.985830808999992,
+                7.988236986999993,
+                8.239785090000026,
+                7.9861845899999935,
+                7.984706038000013
+              ],
+              "median_step_s": 7.9861845899999935,
+              "per_example_s": 0.6655153824999994,
+              "tokens_per_s": 75009.53593660932,
+              "peak_gpu_gb": 63.77679634094238,
+              "losses": [
+                3.2088732719421387,
+                3.0892536640167236,
+                3.052140951156616,
+                3.0275847911834717,
+                3.0131800174713135
+              ],
+              "warmup_times_s": [
+                8.100221798000007,
+                8.319863749000007
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 4.62163460069444,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.1591446144050204
+            }
+          }
+        },
+        {
+          "depth": 192,
+          "oom": false,
+          "median_step_s": 8.455091474000028,
+          "tokens_per_s": 85019.54144559,
+          "peak_gpu_gb": 70.06311845779419,
+          "warmup_s": 17.906173261999925,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:30:14+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 192,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                8.45581624700003,
+                8.455091474000028,
+                8.755519338999989,
+                8.443329683000002,
+                8.432815909999988
+              ],
+              "median_step_s": 8.455091474000028,
+              "per_example_s": 0.704590956166669,
+              "tokens_per_s": 85019.54144559,
+              "peak_gpu_gb": 70.06311845779419,
+              "losses": [
+                3.218561887741089,
+                3.097677707672119,
+                3.0562872886657715,
+                3.0322506427764893,
+                3.0176403522491455
+              ],
+              "warmup_times_s": [
+                9.074532936999958,
+                8.831640324999967
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 4.892992751157424,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.0948601662807778
+            }
+          }
+        },
+        {
+          "depth": 224,
+          "oom": true
+        }
+      ],
+      "fit": {
+        "slope": 0.013200702239285864,
+        "intercept": 5.90190454153332,
+        "r_squared": 0.9982261381164947,
+        "adjusted_r_squared": 0.9970435635274912,
+        "n_points": 6,
+        "residual_dof": 4
+      },
+      "memory_ceiling": {
+        "largest_depth_measured": 192,
+        "smallest_depth_that_oomed": 224
+      },
+      "paper_estimate": {
+        "phase": "pretrain",
+        "depth": 256,
+        "estimated_step_s": 9.2812843147905,
+        "estimated_step_s_low": 9.260798506528662,
+        "estimated_step_s_high": 9.2812843147905,
+        "estimated_example_s": 0.7734403595658751,
+        "estimated_days": 5.371113608096355,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 0.997398909802906,
+        "ratio_vs_paper_low": 0.997398909802906,
+        "ratio_vs_paper_high": 0.9996052554881496,
+        "curvature": {
+          "at": 256.0,
+          "linear": 9.2812843147905,
+          "quadratic": 9.260798506528662,
+          "low": 9.260798506528662,
+          "high": 9.2812843147905,
+          "spread_fraction": 0.002212099555712891
+        },
+        "extrapolated_from": [
+          32,
+          64,
+          96,
+          128,
+          160,
+          192
+        ],
+        "extrapolation_reach": 1.3333333333333333,
+        "is_measurement": false,
+        "quotable": true,
+        "min_points_to_quote": 5
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.773440359565875,
+            "s_per_optimizer_step": 9.2812843147905,
+            "days": 5.371113608096354,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.8916813084261099,
+            "s_per_optimizer_step": 28.533801869635518,
+            "days": 5.9445420561740665,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 11.31565566427042,
+        "s_per_example": 0.8313542937015002,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 0.9279179493906057,
+        "is_measurement": false
+      }
+    },
+    "cuequivariance": {
+      "schema": 2,
+      "kind": "depth-sweep",
+      "config": {
+        "device": "cuda",
+        "phase": "pretrain",
+        "depth": 256,
+        "crop": 312,
+        "micro_batch": 1,
+        "accum": 12,
+        "steps": 5,
+        "warmup": 2,
+        "amp": "bf16",
+        "lr": 0.0001,
+        "cuequivariance": true,
+        "compile_mode": "off",
+        "checkpoint_triangles": true,
+        "float32_precision": "highest"
+      },
+      "paper_phase": {
+        "key": "pretrain",
+        "steps": 50000,
+        "effective_batch": 12,
+        "depth": 256,
+        "crop": 312,
+        "examples": 600000
+      },
+      "git": {
+        "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+        "branch": "main",
+        "dirty": true
+      },
+      "points": [
+        {
+          "depth": 32,
+          "oom": false,
+          "median_step_s": 4.392217195000001,
+          "tokens_per_s": 27277.339594313933,
+          "peak_gpu_gb": 38.44667339324951,
+          "warmup_s": 12.521875964000003,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:31:02+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                4.395586711000021,
+                4.392217195000001,
+                4.3794154349999985,
+                4.6504387159999965,
+                4.3808852669999965
+              ],
+              "median_step_s": 4.392217195000001,
+              "per_example_s": 0.36601809958333337,
+              "tokens_per_s": 27277.339594313933,
+              "peak_gpu_gb": 38.44667339324951,
+              "losses": [
+                3.200460195541382,
+                3.055269479751587,
+                3.021760940551758,
+                3.0009896755218506,
+                2.9789633750915527
+              ],
+              "warmup_times_s": [
+                7.899368616000004,
+                4.622507347999999
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.541792358217593,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.1076241101375808
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 4.834008221000033,
+          "tokens_per_s": 49568.802750283605,
+          "peak_gpu_gb": 44.78879499435425,
+          "warmup_s": 9.865769984999986,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:31:37+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 64,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                5.0450565239999605,
+                4.828831185000013,
+                4.831064203999972,
+                4.834008221000033,
+                5.025875842000005
+              ],
+              "median_step_s": 4.834008221000033,
+              "per_example_s": 0.40283401841666944,
+              "tokens_per_s": 49568.802750283605,
+              "peak_gpu_gb": 44.78879499435425,
+              "losses": [
+                3.237977981567383,
+                3.102081060409546,
+                3.0576181411743164,
+                3.0233230590820312,
+                3.009681463241577
+              ],
+              "warmup_times_s": [
+                5.031131738999989,
+                4.834638245999997
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.797458461226871,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.9150035403183054
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 5.301979322000022,
+          "tokens_per_s": 67790.53220909534,
+          "peak_gpu_gb": 51.132490158081055,
+          "warmup_s": 10.818023171999982,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:32:16+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                5.497849331999987,
+                5.295693547999974,
+                5.301979322000022,
+                5.293798571000025,
+                5.581793468000001
+              ],
+              "median_step_s": 5.301979322000022,
+              "per_example_s": 0.44183161016666855,
+              "tokens_per_s": 67790.53220909534,
+              "peak_gpu_gb": 51.132490158081055,
+              "losses": [
+                3.213057518005371,
+                3.0865671634674072,
+                3.050513505935669,
+                3.0275375843048096,
+                3.0110647678375244
+              ],
+              "warmup_times_s": [
+                5.532798401999969,
+                5.2852247700000135
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.0682750706018647,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.7459786798359034
+            }
+          }
+        },
+        {
+          "depth": 128,
+          "oom": false,
+          "median_step_s": 5.651268453,
+          "tokens_per_s": 84800.7848124075,
+          "peak_gpu_gb": 57.43341398239136,
+          "warmup_s": 11.52523246100003,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:32:57+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 128,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                5.872706515999994,
+                5.648280790999991,
+                5.651268453,
+                5.641595135999978,
+                5.799730833000012
+              ],
+              "median_step_s": 5.651268453,
+              "per_example_s": 0.47093903775,
+              "tokens_per_s": 84800.7848124075,
+              "peak_gpu_gb": 57.43341398239136,
+              "losses": [
+                3.2090742588043213,
+                3.0896689891815186,
+                3.048253059387207,
+                3.023142099380493,
+                3.006798505783081
+              ],
+              "warmup_times_s": [
+                5.875858719000007,
+                5.649373742000023
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.270409984375,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.6380646104731873
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 6.06101812899999,
+          "tokens_per_s": 98834.88008950005,
+          "peak_gpu_gb": 63.75487279891968,
+          "warmup_s": 12.680573941999967,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:33:41+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.242890848999991,
+                6.060050324000031,
+                6.053142638000054,
+                6.06101812899999,
+                6.31836349699995
+              ],
+              "median_step_s": 6.06101812899999,
+              "per_example_s": 0.5050848440833325,
+              "tokens_per_s": 98834.88008950005,
+              "peak_gpu_gb": 63.75487279891968,
+              "losses": [
+                3.209934711456299,
+                3.087407112121582,
+                3.0550734996795654,
+                3.02824330329895,
+                3.0123202800750732
+              ],
+              "warmup_times_s": [
+                6.630686738999998,
+                6.049887202999969
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.5075336394675873,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.527324726657796
+            }
+          }
+        },
+        {
+          "depth": 192,
+          "oom": false,
+          "median_step_s": 6.519717807000006,
+          "tokens_per_s": 110257.53280735503,
+          "peak_gpu_gb": 70.04717206954956,
+          "warmup_s": 13.169166447999942,
+          "compile": null,
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:34:29+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 192,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "off",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                6.734682908999957,
+                6.519717807000006,
+                6.5123264709999376,
+                6.511885763999999,
+                6.651839364000011
+              ],
+              "median_step_s": 6.519717807000006,
+              "per_example_s": 0.5433098172500005,
+              "tokens_per_s": 110257.53280735503,
+              "peak_gpu_gb": 70.04717206954956,
+              "losses": [
+                3.225647449493408,
+                3.1007394790649414,
+                3.055633544921875,
+                3.0330512523651123,
+                3.0175516605377197
+              ],
+              "warmup_times_s": [
+                6.6505595549999725,
+                6.518606892999969
+              ]
+            },
+            "compile": null,
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 3.772984842013892,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 1.4198686402046066
+            }
+          }
+        },
+        {
+          "depth": 224,
+          "oom": true
+        }
+      ],
+      "fit": {
+        "slope": 0.013096269566964176,
+        "intercept": 3.993252663000021,
+        "r_squared": 0.998601405609579,
+        "adjusted_r_squared": 0.9976690093492984,
+        "n_points": 6,
+        "residual_dof": 4
+      },
+      "memory_ceiling": {
+        "largest_depth_measured": 192,
+        "smallest_depth_that_oomed": 224
+      },
+      "paper_estimate": {
+        "phase": "pretrain",
+        "depth": 256,
+        "estimated_step_s": 7.345897672142851,
+        "estimated_step_s_low": 7.299982154999976,
+        "estimated_step_s_high": 7.345897672142851,
+        "estimated_example_s": 0.6121581393452376,
+        "estimated_days": 4.251098189897483,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 1.2601785745325367,
+        "ratio_vs_paper_low": 1.2601785745325367,
+        "ratio_vs_paper_high": 1.2681048611608403,
+        "curvature": {
+          "at": 256.0,
+          "linear": 7.345897672142851,
+          "quadratic": 7.299982154999976,
+          "low": 7.299982154999976,
+          "high": 7.345897672142851,
+          "spread_fraction": 0.006289812244462175
+        },
+        "extrapolated_from": [
+          32,
+          64,
+          96,
+          128,
+          160,
+          192
+        ],
+        "extrapolation_reach": 1.3333333333333333,
+        "is_measurement": false,
+        "quotable": true,
+        "min_points_to_quote": 5
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.6121581393452376,
+            "s_per_optimizer_step": 7.345897672142851,
+            "days": 4.251098189897483,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.7172193611059321,
+            "s_per_optimizer_step": 22.951019555389827,
+            "days": 4.781462407372881,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 9.032560597270365,
+        "s_per_example": 0.6636166969423125,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 1.1624610637179777,
+        "is_measurement": false
+      }
+    },
+    "vanilla+compile": {
+      "schema": 2,
+      "kind": "depth-sweep",
+      "config": {
+        "device": "cuda",
+        "phase": "pretrain",
+        "depth": 256,
+        "crop": 312,
+        "micro_batch": 1,
+        "accum": 12,
+        "steps": 5,
+        "warmup": 2,
+        "amp": "bf16",
+        "lr": 0.0001,
+        "cuequivariance": false,
+        "compile_mode": "default",
+        "checkpoint_triangles": true,
+        "float32_precision": "highest"
+      },
+      "paper_phase": {
+        "key": "pretrain",
+        "steps": 50000,
+        "effective_batch": 12,
+        "depth": 256,
+        "crop": 312,
+        "examples": 600000
+      },
+      "git": {
+        "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+        "branch": "main",
+        "dirty": true
+      },
+      "points": [
+        {
+          "depth": 32,
+          "oom": false,
+          "median_step_s": 3.198875216000033,
+          "tokens_per_s": 37453.16460009072,
+          "peak_gpu_gb": 27.222020149230957,
+          "warmup_s": 35.22267242199996,
+          "compile": {
+            "unique_graphs": 4,
+            "process_graphs": 4,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:35:31+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.1927213410000377,
+                3.195325591000028,
+                3.200165477999917,
+                3.198875216000033,
+                3.199818965000077
+              ],
+              "median_step_s": 3.198875216000033,
+              "per_example_s": 0.2665729346666694,
+              "tokens_per_s": 37453.16460009072,
+              "peak_gpu_gb": 27.222020149230957,
+              "losses": [
+                3.1754257678985596,
+                3.0719799995422363,
+                3.036853551864624,
+                3.0092952251434326,
+                2.9932591915130615
+              ],
+              "warmup_times_s": [
+                32.02399244000003,
+                3.1986799819999305
+              ]
+            },
+            "compile": {
+              "unique_graphs": 4,
+              "process_graphs": 4,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 1.8512009351852043,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.8938743252130537
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 3.3877444489999107,
+          "tokens_per_s": 70730.2465127606,
+          "peak_gpu_gb": 31.117486476898193,
+          "warmup_s": 26.782942519000017,
+          "compile": {
+            "unique_graphs": 3,
+            "process_graphs": 7,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:36:16+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 64,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.3877444489999107,
+                3.3880161170000065,
+                3.3855164810000815,
+                3.387778594999986,
+                3.3859395989999257
+              ],
+              "median_step_s": 3.3877444489999107,
+              "per_example_s": 0.2823120374166592,
+              "tokens_per_s": 70730.2465127606,
+              "peak_gpu_gb": 31.117486476898193,
+              "losses": [
+                3.2047863006591797,
+                3.082362413406372,
+                3.0475826263427734,
+                3.0171754360198975,
+                3.000161647796631
+              ],
+              "warmup_times_s": [
+                23.39063859700002,
+                3.3923039219999964
+              ]
+            },
+            "compile": {
+              "unique_graphs": 3,
+              "process_graphs": 7,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 1.960500259837911,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.7325387131475165
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 3.5933246570000392,
+          "tokens_per_s": 100025.47342885307,
+          "peak_gpu_gb": 35.18104076385498,
+          "warmup_s": 16.855772508999962,
+          "compile": {
+            "unique_graphs": 1,
+            "process_graphs": 8,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:36:52+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.5910652300000265,
+                3.590693052000006,
+                3.5961826079999355,
+                3.5936260490000222,
+                3.5933246570000392
+              ],
+              "median_step_s": 3.5933246570000392,
+              "per_example_s": 0.2994437214166699,
+              "tokens_per_s": 100025.47342885307,
+              "peak_gpu_gb": 35.18104076385498,
+              "losses": [
+                3.2187042236328125,
+                3.0873053073883057,
+                3.0548348426818848,
+                3.0228488445281982,
+                3.012596607208252
+              ],
+              "warmup_times_s": [
+                13.261106865999977,
+                3.594665642999985
+              ]
+            },
+            "compile": {
+              "unique_graphs": 1,
+              "process_graphs": 8,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.0794702876157634,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.576205531306312
+            }
+          }
+        },
+        {
+          "depth": 128,
+          "oom": false,
+          "median_step_s": 3.7599580800000467,
+          "tokens_per_s": 127456.74015599504,
+          "peak_gpu_gb": 39.36477851867676,
+          "warmup_s": 7.757822033000025,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 8,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:37:20+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 128,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.7622269890000553,
+                3.7571432849999837,
+                3.7599580800000467,
+                3.76048645700007,
+                3.755227497999954
+              ],
+              "median_step_s": 3.7599580800000467,
+              "per_example_s": 0.3133298400000039,
+              "tokens_per_s": 127456.74015599504,
+              "peak_gpu_gb": 39.36477851867676,
+              "losses": [
+                3.2247443199157715,
+                3.0887064933776855,
+                3.0529227256774902,
+                3.030905246734619,
+                3.0132529735565186
+              ],
+              "warmup_times_s": [
+                3.992977235000012,
+                3.764844798000013
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 8,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.175901666666694,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.4620335280819785
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 3.9953403810000054,
+          "tokens_per_s": 149934.65959715415,
+          "peak_gpu_gb": 43.50083112716675,
+          "warmup_s": 8.104324524999925,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 8,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:37:50+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.9813356130000557,
+                3.9953403810000054,
+                3.997496938999916,
+                4.013882149999972,
+                3.97964286499996
+              ],
+              "median_step_s": 3.9953403810000054,
+              "per_example_s": 0.33294503175000045,
+              "tokens_per_s": 149934.65959715415,
+              "peak_gpu_gb": 43.50083112716675,
+              "losses": [
+                3.20682430267334,
+                3.0901262760162354,
+                3.0497231483459473,
+                3.0299360752105713,
+                3.012799024581909
+              ],
+              "warmup_times_s": [
+                4.14154435699993,
+                3.9627801679999948
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 8,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.31211827604167,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.3169847808626156
+            }
+          }
+        },
+        {
+          "depth": 192,
+          "oom": false,
+          "median_step_s": 4.176918693999937,
+          "tokens_per_s": 172100.0700905697,
+          "peak_gpu_gb": 47.700552463531494,
+          "warmup_s": 8.471026488999996,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 8,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:38:20+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 192,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                4.178316561999964,
+                4.176896633999945,
+                4.173048319000031,
+                4.176918693999937,
+                4.177136873999984
+              ],
+              "median_step_s": 4.176918693999937,
+              "per_example_s": 0.3480765578333281,
+              "tokens_per_s": 172100.0700905697,
+              "peak_gpu_gb": 47.700552463531494,
+              "losses": [
+                3.2151379585266113,
+                3.0998528003692627,
+                3.051501750946045,
+                3.0244696140289307,
+                3.0161728858947754
+              ],
+              "warmup_times_s": [
+                4.276882915999977,
+                4.194143573000019
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 8,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.4171983182870003,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.2162612048064436
+            }
+          }
+        },
+        {
+          "depth": 224,
+          "oom": false,
+          "median_step_s": 4.390892099999974,
+          "tokens_per_s": 190998.99995265313,
+          "peak_gpu_gb": 51.869534969329834,
+          "warmup_s": 8.929540246999977,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 8,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:38:52+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 224,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": false,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                4.392056440000033,
+                4.39251944099999,
+                4.390892099999974,
+                4.390545715999906,
+                4.387748367000086
+              ],
+              "median_step_s": 4.390892099999974,
+              "per_example_s": 0.3659076749999978,
+              "tokens_per_s": 190998.99995265313,
+              "peak_gpu_gb": 51.869534969329834,
+              "losses": [
+                3.227663278579712,
+                3.0987589359283447,
+                3.049971342086792,
+                3.033792734146118,
+                3.013749837875366
+              ],
+              "warmup_times_s": [
+                4.535089470999992,
+                4.394450775999985
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 8,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.541025520833318,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.10826015450093
+            }
+          }
+        }
+      ],
+      "fit": {
+        "slope": 0.006201355877231965,
+        "intercept": 2.9923769587143005,
+        "r_squared": 0.9990701047636978,
+        "adjusted_r_squared": 0.9986051571455468,
+        "n_points": 7,
+        "residual_dof": 5
+      },
+      "memory_ceiling": {
+        "largest_depth_measured": 224,
+        "smallest_depth_that_oomed": null
+      },
+      "paper_estimate": {
+        "phase": "pretrain",
+        "depth": 256,
+        "estimated_step_s": 4.5799240632856835,
+        "estimated_step_s_low": 4.5799240632856835,
+        "estimated_step_s_high": 4.6003539412856425,
+        "estimated_example_s": 0.38166033860714027,
+        "estimated_days": 2.650419018105141,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 2.0212437431771937,
+        "ratio_vs_paper_low": 2.012267528823185,
+        "ratio_vs_paper_high": 2.0212437431771937,
+        "curvature": {
+          "at": 256.0,
+          "linear": 4.5799240632856835,
+          "quadratic": 4.6003539412856425,
+          "low": 4.5799240632856835,
+          "high": 4.6003539412856425,
+          "spread_fraction": 0.004460746011867802
+        },
+        "extrapolated_from": [
+          32,
+          64,
+          96,
+          128,
+          160,
+          192,
+          224
+        ],
+        "extrapolation_reach": 1.1428571428571428,
+        "is_measurement": false,
+        "quotable": true,
+        "min_points_to_quote": 5
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.3816603386071403,
+            "s_per_optimizer_step": 4.579924063285684,
+            "days": 2.6504190181051412,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.43865243100913265,
+            "s_per_optimizer_step": 14.036877792292245,
+            "days": 2.9243495400608843,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 5.574768558166026,
+        "s_per_example": 0.4095748328448509,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 1.883486263231395,
+        "is_measurement": false
+      }
+    },
+    "cuequivariance+compile": {
+      "schema": 2,
+      "kind": "depth-sweep",
+      "config": {
+        "device": "cuda",
+        "phase": "pretrain",
+        "depth": 256,
+        "crop": 312,
+        "micro_batch": 1,
+        "accum": 12,
+        "steps": 5,
+        "warmup": 2,
+        "amp": "bf16",
+        "lr": 0.0001,
+        "cuequivariance": true,
+        "compile_mode": "default",
+        "checkpoint_triangles": true,
+        "float32_precision": "highest"
+      },
+      "paper_phase": {
+        "key": "pretrain",
+        "steps": 50000,
+        "effective_batch": 12,
+        "depth": 256,
+        "crop": 312,
+        "examples": 600000
+      },
+      "git": {
+        "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+        "branch": "main",
+        "dirty": true
+      },
+      "points": [
+        {
+          "depth": 32,
+          "oom": false,
+          "median_step_s": 2.9356702569999698,
+          "tokens_per_s": 40811.12301843961,
+          "peak_gpu_gb": 28.008009910583496,
+          "warmup_s": 11.632388005000053,
+          "compile": {
+            "unique_graphs": 1,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:39:21+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 32,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                2.9344317329999967,
+                2.9356702569999698,
+                2.9406915880000497,
+                2.940871930999947,
+                2.9344583939999893
+              ],
+              "median_step_s": 2.9356702569999698,
+              "per_example_s": 0.24463918808333082,
+              "tokens_per_s": 40811.12301843961,
+              "peak_gpu_gb": 28.008009910583496,
+              "losses": [
+                3.2275378704071045,
+                3.053609609603882,
+                3.0313925743103027,
+                2.9957642555236816,
+                2.9795114994049072
+              ],
+              "warmup_times_s": [
+                8.693188073000101,
+                2.9391999319999513
+              ]
+            },
+            "compile": {
+              "unique_graphs": 1,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 1.6988832505786862,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 3.153331963993445
+            }
+          }
+        },
+        {
+          "depth": 64,
+          "oom": false,
+          "median_step_s": 3.123441329000002,
+          "tokens_per_s": 76715.38369402163,
+          "peak_gpu_gb": 32.06091022491455,
+          "warmup_s": 6.691045201999941,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:39:44+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 64,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.123441329000002,
+                3.128729163999992,
+                3.120815246999996,
+                3.1237524250000206,
+                3.1192924110000604
+              ],
+              "median_step_s": 3.123441329000002,
+              "per_example_s": 0.26028677741666684,
+              "tokens_per_s": 76715.38369402163,
+              "peak_gpu_gb": 32.06091022491455,
+              "losses": [
+                3.198267698287964,
+                3.0849735736846924,
+                3.0463061332702637,
+                3.0239882469177246,
+                3.0073373317718506
+              ],
+              "warmup_times_s": [
+                3.565639967999914,
+                3.125405234000027
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 1.8075470653935197,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.9637639648274154
+            }
+          }
+        },
+        {
+          "depth": 96,
+          "oom": false,
+          "median_step_s": 3.3299780099999907,
+          "tokens_per_s": 107935.8479006896,
+          "peak_gpu_gb": 36.18268966674805,
+          "warmup_s": 7.03352884100002,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:40:09+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 96,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.328913221999983,
+                3.32749073399998,
+                3.3299780099999907,
+                3.3317263580000827,
+                3.331291307000015
+              ],
+              "median_step_s": 3.3299780099999907,
+              "per_example_s": 0.2774981674999992,
+              "tokens_per_s": 107935.8479006896,
+              "peak_gpu_gb": 36.18268966674805,
+              "losses": [
+                3.1977498531341553,
+                3.0781755447387695,
+                3.0474064350128174,
+                3.0234649181365967,
+                3.005462408065796
+              ],
+              "warmup_times_s": [
+                3.700501397000039,
+                3.333027443999981
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 1.9270706076388833,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.7799411375521017
+            }
+          }
+        },
+        {
+          "depth": 128,
+          "oom": false,
+          "median_step_s": 3.499333718999992,
+          "tokens_per_s": 136949.49909977452,
+          "peak_gpu_gb": 40.403141021728516,
+          "warmup_s": 7.313873745999899,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:40:35+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 128,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.501199296999971,
+                3.5076800909999974,
+                3.499333718999992,
+                3.498449629999982,
+                3.4985287250000283
+              ],
+              "median_step_s": 3.499333718999992,
+              "per_example_s": 0.2916111432499993,
+              "tokens_per_s": 136949.49909977452,
+              "peak_gpu_gb": 40.403141021728516,
+              "losses": [
+                3.2231483459472656,
+                3.0954089164733887,
+                3.057034730911255,
+                3.0298962593078613,
+                3.0124459266662598
+              ],
+              "warmup_times_s": [
+                3.8071148839999296,
+                3.5067588619999697
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.0250773836805505,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.6454015536958506
+            }
+          }
+        },
+        {
+          "depth": 160,
+          "oom": false,
+          "median_step_s": 3.68226998199998,
+          "tokens_per_s": 162682.25929339346,
+          "peak_gpu_gb": 44.524755001068115,
+          "warmup_s": 7.554564101000096,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:41:03+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 160,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.68226998199998,
+                3.6877395829999386,
+                3.6831851670000333,
+                3.6813920339999413,
+                3.682228704999943
+              ],
+              "median_step_s": 3.68226998199998,
+              "per_example_s": 0.30685583183333165,
+              "tokens_per_s": 162682.25929339346,
+              "peak_gpu_gb": 44.524755001068115,
+              "losses": [
+                3.224417209625244,
+                3.09679913520813,
+                3.0548624992370605,
+                3.0251033306121826,
+                3.0123231410980225
+              ],
+              "warmup_times_s": [
+                3.871799939000084,
+                3.682764162000012
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.130943276620359,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.513977221223457
+            }
+          }
+        },
+        {
+          "depth": 192,
+          "oom": false,
+          "median_step_s": 3.915910380000014,
+          "tokens_per_s": 183571.10613956326,
+          "peak_gpu_gb": 48.73978281021118,
+          "warmup_s": 7.985746866999989,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:41:32+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 192,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                3.9132992179999064,
+                3.9185598499999514,
+                3.915910380000014,
+                3.914800461000027,
+                3.9178037290000702
+              ],
+              "median_step_s": 3.915910380000014,
+              "per_example_s": 0.32632586500000116,
+              "tokens_per_s": 183571.10613956326,
+              "peak_gpu_gb": 48.73978281021118,
+              "losses": [
+                3.215792417526245,
+                3.0905110836029053,
+                3.0472843647003174,
+                3.027373790740967,
+                3.011431932449341
+              ],
+              "warmup_times_s": [
+                4.0604449359999535,
+                3.9253019310000354
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.266151840277786,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.363982307772535
+            }
+          }
+        },
+        {
+          "depth": 224,
+          "oom": false,
+          "median_step_s": 4.12664943499999,
+          "tokens_per_s": 203229.28157816778,
+          "peak_gpu_gb": 52.87450075149536,
+          "warmup_s": 8.466619485000024,
+          "compile": {
+            "unique_graphs": 0,
+            "process_graphs": 9,
+            "graph_breaks": 0,
+            "graph_break_reasons": {}
+          },
+          "result": {
+            "schema": 2,
+            "timestamp": "2026-08-12T15:42:02+00:00",
+            "command": "/pkg/modal/_container_entrypoint.py",
+            "git": {
+              "commit": "19a0cb207a19f9cc4f678461258746d474963fce",
+              "branch": "main",
+              "dirty": true
+            },
+            "environment": {
+              "python": "3.11.12",
+              "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+              "torch": "2.13.0+cu130",
+              "cuda": "13.0",
+              "cuequivariance_available": true,
+              "gpu": "NVIDIA H100 80GB HBM3",
+              "gpu_count": 1
+            },
+            "precision": {
+              "float32_matmul_precision": "highest",
+              "allow_tf32_matmul": false,
+              "allow_tf32_cudnn": false
+            },
+            "config": {
+              "device": "cuda",
+              "phase": "pretrain",
+              "depth": 224,
+              "crop": 312,
+              "micro_batch": 1,
+              "accum": 12,
+              "steps": 5,
+              "warmup": 2,
+              "amp": "bf16",
+              "lr": 0.0001,
+              "cuequivariance": true,
+              "compile_mode": "default",
+              "checkpoint_triangles": true,
+              "float32_precision": "highest"
+            },
+            "model": {
+              "params": 111365468
+            },
+            "measurements": {
+              "step_times_s": [
+                4.12257195799998,
+                4.124516588999995,
+                4.12664943499999,
+                4.131235097999934,
+                4.145349069000076
+              ],
+              "median_step_s": 4.12664943499999,
+              "per_example_s": 0.34388745291666584,
+              "tokens_per_s": 203229.28157816778,
+              "peak_gpu_gb": 52.87450075149536,
+              "losses": [
+                3.2272868156433105,
+                3.0923354625701904,
+                3.053617000579834,
+                3.0348944664001465,
+                3.0173232555389404
+              ],
+              "warmup_times_s": [
+                4.2606877990000385,
+                4.205931685999985
+              ]
+            },
+            "compile": {
+              "unique_graphs": 0,
+              "process_graphs": 9,
+              "graph_breaks": 0,
+              "graph_break_reasons": {}
+            },
+            "projection": {
+              "phase": "pretrain",
+              "phase_steps": 50000,
+              "phase_examples": 600000,
+              "projected_phase_days": 2.3881073119212903,
+              "paper_days": 10.5,
+              "paper_total_examples": 1176000,
+              "paper_s_per_example": 0.7714285714285715,
+              "speedup_vs_paper": 2.2432588478751843
+            }
+          }
+        }
+      ],
+      "fit": {
+        "slope": 0.006149740633928654,
+        "intercept": 2.7290122148571236,
+        "r_squared": 0.9982709598766153,
+        "adjusted_r_squared": 0.9974064398149229,
+        "n_points": 7,
+        "residual_dof": 5
+      },
+      "memory_ceiling": {
+        "largest_depth_measured": 224,
+        "smallest_depth_that_oomed": null
+      },
+      "paper_estimate": {
+        "phase": "pretrain",
+        "depth": 256,
+        "estimated_step_s": 4.303345817142859,
+        "estimated_step_s_low": 4.303345817142859,
+        "estimated_step_s_high": 4.342991475428566,
+        "estimated_example_s": 0.3586121514285716,
+        "estimated_days": 2.490362162698414,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 2.1511501167919143,
+        "ratio_vs_paper_low": 2.131513015744375,
+        "ratio_vs_paper_high": 2.1511501167919143,
+        "curvature": {
+          "at": 256.0,
+          "linear": 4.303345817142859,
+          "quadratic": 4.342991475428566,
+          "low": 4.303345817142859,
+          "high": 4.342991475428566,
+          "spread_fraction": 0.009212752116684202
+        },
+        "extrapolated_from": [
+          32,
+          64,
+          96,
+          128,
+          160,
+          192,
+          224
+        ],
+        "extrapolation_reach": 1.1428571428571428,
+        "is_measurement": false,
+        "quotable": true,
+        "min_points_to_quote": 5
+      },
+      "whole_run": {
+        "phases": {
+          "pretrain": {
+            "depth": 256,
+            "crop": 312,
+            "examples": 600000,
+            "s_per_example": 0.3586121514285716,
+            "s_per_optimizer_step": 4.303345817142859,
+            "days": 2.490362162698414,
+            "crop_rescaled": false
+          },
+          "finetune": {
+            "depth": 320,
+            "crop": 320,
+            "examples": 576000,
+            "s_per_example": 0.41356177644695913,
+            "s_per_optimizer_step": 13.233976846302692,
+            "days": 2.757078509646394,
+            "crop_rescaled": true
+          }
+        },
+        "total_examples": 1176000,
+        "estimated_days": 5.247440672344808,
+        "s_per_example": 0.3855262534783941,
+        "paper_days": 10.5,
+        "paper_s_per_example": 0.7714285714285715,
+        "ratio_vs_paper": 2.0009754574906125,
+        "is_measurement": false
+      }
+    }
+  }
+}
