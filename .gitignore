@@ -1,4 +1,7 @@
-data/
+# Anchored to the repository root: the ignored directory is the top-level one
+# holding downloaded structures. Unanchored, this pattern also swallowed
+# msa_pairformer/data/, which is package source.
+/data/
 model_checkpoints/
 __pycache__/
 *.pyc

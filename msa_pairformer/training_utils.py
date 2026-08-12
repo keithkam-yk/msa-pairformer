@@ -6,7 +6,13 @@ import numpy as np
 import torch
 
 # sys.path.append("../funcs/")
-from .dataset import CollateAFBatch, CollatetrRosettaContactMSABatch, MSADataset, aa2tok_d, trRosettaContactMSADataset
+from .data.msa_datasets import (
+    CollateAFBatch,
+    CollatetrRosettaContactMSABatch,
+    MSADataset,
+    trRosettaContactMSADataset,
+)
+from .tokens import aa2tok_d
 
 
 def init_dataloaders(

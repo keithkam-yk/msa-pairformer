@@ -28,8 +28,9 @@ import torch
 
 from bench.step import CUEQUIVARIANCE_PRESENT, triangle_path
 from msa_pairformer import pairwise_operations
-from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
+from msa_pairformer.features import prepare_msa_masks
 from msa_pairformer.model import MSAPairformer
+from msa_pairformer.tokens import aa2tok_d
 
 pytestmark = pytest.mark.skipif(
     not (torch.cuda.is_available() and CUEQUIVARIANCE_PRESENT),

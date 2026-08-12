@@ -24,7 +24,7 @@ from tqdm import tqdm
 from scipy.stats import spearmanr
 
 from msa_pairformer.model import MSAPairformer
-from msa_pairformer.dataset import aa2tok_d
+from msa_pairformer.tokens import aa2tok_d
 import sys
 sys.path.append("utils")
 from compute_fitness_utils import * # prepare_msa_inputs, sample_msa, process_msa

@@ -1,17 +1,18 @@
+import logging
 import multiprocessing as mp
-import os
+import shlex
+import subprocess
 
 from tqdm import tqdm
 
-from msa_pairformer import utils as mp_utils
+logger = logging.getLogger(__name__)
 
 
 def download_AF_pdb(prot_id, out_dir):
     url = f"https://alphafold.ebi.ac.uk/files/AF-{prot_id}-F1-model_v4.pdb"
     cmd = f"wget -P {out_dir} {url}"
-    res = mp_utils._run(cmd)
-    log_file_prefix = os.path.join(out_dir, "download.log")
-    mp_utils.write_log(log_file_prefix, res)
+    res = subprocess.run(shlex.split(cmd), capture_output=True, text=True, check=True)
+    logger.debug("%s", res.stdout)
 
 def download_rcsb_pdb(pdb_id, out_dir, log=False, cif=False):
     if not cif:
@@ -20,10 +21,9 @@ def download_rcsb_pdb(pdb_id, out_dir, log=False, cif=False):
     else:
         url = f"https://files.rcsb.org/download/{pdb_id}.cif"
         cmd = f"wget {url} -O {out_dir}/{pdb_id}.cif"
-    res = mp_utils._run(cmd)
+    res = subprocess.run(shlex.split(cmd), capture_output=True, text=True, check=True)
     if log:
-        log_file_prefix = os.path.join(out_dir, "download.log")
-        mp_utils.write_log(log_file_prefix, res)
+        logger.debug("%s", res.stdout)
 
 def download_rcsb_pdb_mp(param_d: dict):
     pdb_id = param_d["pdb_id"]

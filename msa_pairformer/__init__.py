@@ -1,7 +1,7 @@
 """The public surface of the package.
 
 Until now this file was empty, which published all 20 modules: a consumer had to
-write `from msa_pairformer.dataset import aa2tok_d`, so every internal file name
+write `from msa_pairformer.tokens import aa2tok_d`, so every internal file name
 became API and nothing could move. The names below are the ones a consumer
 actually needs -- load the model, read an alignment off disk, tokenise it, build
 the masks the forward pass wants -- and they are the only ones the package
@@ -9,12 +9,12 @@ promises to keep at a stable path. Everything else is an implementation detail.
 
 **Every export resolves lazily, through PEP 562, and that is load-bearing rather
 than a micro-optimisation.** Importing a submodule imports its parent package
-first, so an eager `from msa_pairformer.dataset import MSA` here would be
+first, so an eager `from msa_pairformer.msa import MSA` here would be
 charged to `import msa_pairformer.model` -- a path that pays for none of it
 today. Measured on this tree:
 
     import msa_pairformer.model     torch, huggingface_hub. No Bio, no scipy.
-    import msa_pairformer.dataset   torch, Bio, scipy. No huggingface_hub.
+    import msa_pairformer.msa       torch, Bio, scipy. No huggingface_hub.
 
 Those two sets are disjoint in both directions, which is why `MSAPairformer` is
 deferred alongside the rest: eager, it would add the model stack to every
@@ -23,9 +23,9 @@ consumer that only wanted a tokenizer, exactly as an eager `MSA` would add
 to be free to import. `bench/`, `tests/` and the figure scripts all reach for
 deep paths, and none of them should start paying for a neighbour.
 
-This is not scaffolding for the module split either. After `dataset.py` becomes
-`tokens.py`, `features.py` and `msa.py`, `MSA` still sits behind `Bio`, so the
-laziness stays earned.
+This is not scaffolding for the module split either. Now that `dataset.py` has
+become `tokens.py`, `features.py` and `msa.py`, `MSA` still sits behind `Bio`,
+so the laziness stays earned.
 
 `tests/test_imports.py` holds the line, at runtime and by source inspection.
 """
@@ -38,18 +38,20 @@ if TYPE_CHECKING:
     # Never executed: a type checker reads these bindings, and the interpreter
     # skips the block. It is what keeps the lazy names resolvable for `ty` and
     # for editor completion without reintroducing the import cost.
-    from msa_pairformer.dataset import MSA, aa2tok_d, prepare_msa_masks, tok2aa_d
+    from msa_pairformer.features import prepare_msa_masks
     from msa_pairformer.model import MSAPairformer
+    from msa_pairformer.msa import MSA
+    from msa_pairformer.tokens import aa2tok_d, tok2aa_d
 
 # Export -> the module that defines it. The mapping is data rather than a chain
 # of imports inside `__getattr__` so that `__dir__` can answer from the same
-# source, and so a later phase moving `MSA` into `msa.py` edits one string.
+# source, and so the phase that moved `MSA` into `msa.py` edited one string.
 _EXPORTS = {
-    "MSA": "msa_pairformer.dataset",
+    "MSA": "msa_pairformer.msa",
     "MSAPairformer": "msa_pairformer.model",
-    "aa2tok_d": "msa_pairformer.dataset",
-    "prepare_msa_masks": "msa_pairformer.dataset",
-    "tok2aa_d": "msa_pairformer.dataset",
+    "aa2tok_d": "msa_pairformer.tokens",
+    "prepare_msa_masks": "msa_pairformer.features",
+    "tok2aa_d": "msa_pairformer.tokens",
 }
 
 try:

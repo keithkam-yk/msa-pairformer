@@ -30,7 +30,8 @@ Scope
 Only the **forward-pass path** is covered. Three things are deliberately out of
 scope because the upstream reference cannot execute them at all:
 
-* `utils.compute_precision` -- returns None upstream (it never returns a value).
+* `evaluate.contacts.compute_precision` -- returns None upstream (it never
+  returns a value).
 * `chunk_layer(..., low_mem=True)` -- upstream references an undefined
   `_chunk_slice`.
 * The outer product's `chunk_size` path -- upstream's differential `_chunk`
@@ -267,13 +268,20 @@ def build_cases(
             return mod, args, {"out": mod(**args)}
 
     def _full_model_inputs():
-        dataset = importlib.import_module(f"{pkg}.dataset")
+        # This tree split `dataset.py` into `tokens.py` and `features.py`; the
+        # upstream tree still has the one module. Both paths are tried so the
+        # same script keeps driving both, per the `pkg` argument's purpose.
+        try:
+            tokens_mod = importlib.import_module(f"{pkg}.tokens")
+            features_mod = importlib.import_module(f"{pkg}.features")
+        except ModuleNotFoundError:
+            tokens_mod = features_mod = importlib.import_module(f"{pkg}.dataset")
         gen = torch.Generator().manual_seed(99)
         tokens = torch.randint(0, 20, (B, S, N), generator=gen)
         onehot = torch.nn.functional.one_hot(
-            tokens, num_classes=len(dataset.aa2tok_d)
+            tokens, num_classes=len(tokens_mod.aa2tok_d)
         ).float()
-        mask, msa_mask, full_mask, pairwise_mask = dataset.prepare_msa_masks(tokens)
+        mask, msa_mask, full_mask, pairwise_mask = features_mod.prepare_msa_masks(tokens)
         return {
             "msa": onehot.to(device), "mask": mask.to(device),
             "msa_mask": msa_mask.to(device), "full_mask": full_mask.to(device),

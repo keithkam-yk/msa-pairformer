@@ -21,7 +21,7 @@ from huggingface_hub import snapshot_download
 from pathlib import Path
 from scipy.optimize import linear_sum_assignment
 
-from msa_pairformer.dataset import esmtok_to_pairformertok_d, aa2tok_d
+from msa_pairformer.tokens import esmtok_to_pairformertok_d, aa2tok_d
 from msa_pairformer.model import MSAPairformer
 from msa_pairformer.regression import MRFHead
 

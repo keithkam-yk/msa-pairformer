@@ -16,11 +16,10 @@ from huggingface_hub import snapshot_download
 from scipy.optimize import linear_sum_assignment
 from tqdm import tqdm
 
-from msa_pairformer.dataset import aa2tok_d
-
 # MSA Pairformer imports
 from msa_pairformer.model import MSAPairformer
 from msa_pairformer.regression import MRFHead
+from msa_pairformer.tokens import aa2tok_d
 
 # DiffPALM imports
 from .gumbel_sinkhorn_utils import MSA_inverse_permutation

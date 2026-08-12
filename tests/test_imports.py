@@ -67,7 +67,7 @@ OPTIONAL_DEPENDENCIES = ("matplotlib", "sklearn", "numba", "pandas", "jax", "esm
 
 # Base dependencies, so these are always installed and importing them cannot
 # fail. They are excluded for cost on the model path, not for installability:
-# they are what `dataset.py` pulls in, and charging them to
+# they are what `msa.py` pulls in, and charging them to
 # `import msa_pairformer.model` is the regression this file exists to pin. Kept
 # in a separate group so a failure says which of the two arguments it broke.
 UNWANTED_BASE_DEPENDENCIES = ("Bio", "scipy")
@@ -75,19 +75,27 @@ UNWANTED_BASE_DEPENDENCIES = ("Bio", "scipy")
 FORBIDDEN = OPTIONAL_DEPENDENCIES + UNWANTED_BASE_DEPENDENCIES
 
 # Each import path a consumer writes today, against what must not appear in its
-# graph. The facade is the new path; the two deep ones are what every existing
+# graph. The facade is the new path; the deep ones are what every existing
 # caller in `bench/`, `tests/` and the figure scripts writes.
 #
-# The `dataset.py` entry pins the other direction of the same claim, and it
-# needs its own list: `Bio` and `scipy` are that module's own dependencies and
-# are expected there. `huggingface_hub` is the marker in that direction --
-# `model.py` imports it and `dataset.py` does not, so its presence would mean
-# the facade had resolved `MSAPairformer` eagerly and charged the whole model
-# stack to a caller that wanted a tokenizer.
+# The `msa.py` entry pins the other direction of the same claim, and it needs
+# its own list: `Bio` and `scipy` are that module's own dependencies and are
+# expected there. `huggingface_hub` is the marker in that direction --
+# `model.py` imports it and `msa.py` does not, so its presence would mean the
+# facade had resolved `MSAPairformer` eagerly and charged the whole model stack
+# to a caller that wanted an alignment reader.
+#
+# `tokens.py` is the reason the split in phase 3 happened at all. The tokenizer
+# used to live inside the module that reads alignments off disk, so a caller
+# that wanted a token dictionary paid for `Bio.SeqIO` and `scipy.spatial`. It
+# takes the full forbidden list plus `huggingface_hub`: nothing optional,
+# neither of the two base dependencies that only the reader needs, and not the
+# model stack either.
 IMPORT_PATHS = {
     "msa_pairformer": FORBIDDEN,
     "msa_pairformer.model": FORBIDDEN,
-    "msa_pairformer.dataset": (*OPTIONAL_DEPENDENCIES, "huggingface_hub"),
+    "msa_pairformer.msa": (*OPTIONAL_DEPENDENCIES, "huggingface_hub"),
+    "msa_pairformer.tokens": (*FORBIDDEN, "huggingface_hub"),
 }
 
 # Tier 0 of the target layout (§4): the modules that become `nn/`, plus the
@@ -103,6 +111,12 @@ TIER_0_MODULES = (
     "positional_encoding.py",
     "chunk_layer.py",
     "custom_typing.py",
+    # Not destined for `nn/`, but tier 0 all the same: the tokenizer and the
+    # tensor preparation that used to sit behind `Bio.SeqIO` in `dataset.py`.
+    # `features.py` imports torch, which is a base dependency and not the
+    # question here -- the question is Bio, scipy and the extras.
+    "tokens.py",
+    "features.py",
 )
 
 # Everything else in the package, with the reason it is not tier 0. This exists
@@ -112,12 +126,16 @@ TIER_0_MODULES = (
 # `nn/__init__.py` -- exactly the kind of file where a convenience import
 # appears -- and a hand-maintained list would not have seen it.
 NOT_TIER_0 = {
-    "dataset.py": "reads alignments from disk: Bio.SeqIO, scipy.spatial, an hhfilter subprocess",
-    "utils.py": "structure I/O, contact metrics, CONFIND wrappers: Bio.PDB, sklearn",
+    "msa.py": "reads alignments from disk: Bio.SeqIO, scipy.spatial, an hhfilter subprocess",
+    "data/msa_datasets.py": "torch Dataset and collate plumbing over msa.py, so Bio.SeqIO and scipy.spatial transitively",
+    "data/download.py": "shells out to wget to fetch structures",
+    "data/weighting.py": "sequence weighting: sklearn",
+    "evaluate/structure.py": "structure file I/O: Bio.PDB",
+    "evaluate/contacts.py": "contact metrics, and it imports evaluate/structure.py",
+    "evaluate/confind.py": "CONFIND subprocess wrappers",
     "plotting.py": "matplotlib",
     "categorical_jacobian.py": "jacobian extra: jax",
     "proteingym_utils.py": "proteingym extra: numba, pandas",
-    "data_downloader.py": "shells out to wget to fetch structures",
     "training_utils.py": "the hand-written training loop; phase 5 replaces it with training/",
 }
 
