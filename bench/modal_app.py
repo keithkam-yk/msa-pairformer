@@ -233,6 +233,7 @@ def main(
     amp: str = "bf16",
     variants: str = "vanilla,cuequivariance",
     verify_first: bool = True,
+    checkpoint_triangles: bool = True,
     gpu: str = DEFAULT_GPU,
     out: str = "",
 ) -> None:
@@ -284,6 +285,7 @@ def main(
             # __post_init__ is what actually rejects a bad value.
             amp=cast("Amp", amp),
             cuequivariance=cuequivariance,
+            checkpoint_triangles=checkpoint_triangles,
         )
 
     configs = {"vanilla": config(False), "cuequivariance": config(True)}

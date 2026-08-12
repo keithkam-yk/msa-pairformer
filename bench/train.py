@@ -85,7 +85,8 @@ def run(
     n_params = sum(p.numel() for p in model.parameters())
 
     log(f"device={device} gpu={env['gpu']} amp={cfg.amp} "
-        f"cuequivariance={cfg.cuequivariance}")
+        f"cuequivariance={cfg.cuequivariance} "
+        f"checkpoint_triangles={cfg.checkpoint_triangles}")
     log(f"params={n_params/1e6:.1f}M shape=[{cfg.micro_batch}, {cfg.depth}, "
         f"{cfg.crop}] accum={cfg.accum} effective_batch={cfg.effective_batch}")
 
@@ -97,7 +98,10 @@ def run(
         optimizer.zero_grad(set_to_none=True)
         for _ in range(cfg.accum):
             with torch.autocast("cuda", dtype=torch.bfloat16, enabled=autocast_on):
-                loss = micro_step(model, batch, criterion, cfg.accum)
+                loss = micro_step(
+                    model, batch, criterion, cfg.accum,
+                    checkpoint_triangles=cfg.checkpoint_triangles,
+                )
         optimizer.step()
         return loss
 

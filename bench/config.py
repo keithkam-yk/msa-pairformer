@@ -52,6 +52,13 @@ class BenchConfig:
     amp: Amp = "bf16"
     lr: float = 1e-4
     cuequivariance: bool = True
+    # Defaults on, unlike the model's own `use_checkpointing_triangles=False`,
+    # because at the paper's shape it is not optional: depth 320 with a 312
+    # crop allocates 76.2 GiB and dies on an 80 GB H100 without it, at
+    # micro_batch 1 with nothing left to shrink. Whatever the authors ran for
+    # 10.5 days, it was not the unchecked path, and the flag exists in
+    # PairwiseBlock precisely for this.
+    checkpoint_triangles: bool = True
     # Pinned rather than inherited: torch has moved this default across
     # versions, and TF32 alone drifts fp32 matmuls by ~1e-3 relative, which is
     # large enough to be mistaken for a real numerical regression.

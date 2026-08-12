@@ -62,6 +62,7 @@ def micro_step(
     batch: dict[str, Any],
     criterion: torch.nn.Module,
     accum: int,
+    checkpoint_triangles: bool = True,
 ) -> torch.Tensor:
     """One forward + backward. Returns the unscaled loss for reporting.
 
@@ -74,6 +75,13 @@ def micro_step(
       (model.py:258 and :520) -- a synchronising round trip on the autograd
       path, paid once forward and again in reverse through the backward.
     * `store_pairwise_repr_cpu` is the same trap on the pair track.
+
+    `use_checkpointing_triangles` is the fifth default that is wrong for
+    training, and it is wrong differently: the other four cost time, this one
+    decides whether the paper's configuration runs at all. Without it, depth
+    320 at a 312 crop allocates 76.2 GiB and dies on an 80 GB H100, with
+    micro_batch already at 1. It trades recompute for memory, so it makes the
+    measured step time slower -- and a number that exists beats one that OOMs.
     """
     results = model(
         msa=batch["msas_onehot"],
@@ -86,6 +94,7 @@ def micro_step(
         return_confind_contacts=False,
         store_msa_repr_cpu=False,
         store_pairwise_repr_cpu=False,
+        use_checkpointing_triangles=checkpoint_triangles,
     )
     logits = results["logits"]
     pred = logits.view(-1, logits.shape[-1])[batch["masked_idx"]]
