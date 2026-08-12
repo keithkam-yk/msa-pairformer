@@ -27,7 +27,7 @@ import sys
 import time
 from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, get_args
 
 import torch
 from torch.nn import CrossEntropyLoss
@@ -37,11 +37,17 @@ from bench.config import (
     REPORTED_DAYS,
     TOTAL_EXAMPLES,
     BenchConfig,
+    CompileMode,
 )
 from bench.data import synthetic_batch, to_device
 from bench.drift import set_float32_precision
 from bench.provenance import environment, git_info
-from bench.step import CUEQUIVARIANCE_PRESENT, build_model, micro_step
+from bench.step import (
+    CUEQUIVARIANCE_PRESENT,
+    build_model,
+    compile_stats,
+    micro_step,
+)
 
 Logger = Callable[[str], None]
 
@@ -78,7 +84,11 @@ def run(
     # describes the machine, not the variant.
     env = environment()
 
-    model = build_model(device, use_cuequivariance=cfg.cuequivariance)
+    model = build_model(
+        device,
+        use_cuequivariance=cfg.cuequivariance,
+        compile_mode=cfg.compile_mode,
+    )
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr)
     criterion = CrossEntropyLoss()
     batch = to_device(synthetic_batch(cfg.micro_batch, cfg.depth, cfg.crop), device)
@@ -86,6 +96,7 @@ def run(
 
     log(f"device={device} gpu={env['gpu']} amp={cfg.amp} "
         f"cuequivariance={cfg.cuequivariance} "
+        f"compile={cfg.compile_mode} "
         f"checkpoint_triangles={cfg.checkpoint_triangles}")
     log(f"params={n_params/1e6:.1f}M shape=[{cfg.micro_batch}, {cfg.depth}, "
         f"{cfg.crop}] accum={cfg.accum} effective_batch={cfg.effective_batch}")
@@ -105,8 +116,38 @@ def run(
         optimizer.step()
         return loss
 
+    # Warmup is timed even though it is discarded. Under `torch.compile` the
+    # first step pays for the compilation, and that cost is a fact about the
+    # variant rather than noise to be thrown away: against a 10.5-day run a
+    # ten-minute compile is free, and saying so plainly is what makes the
+    # speedup quotable instead of caveated.
+    warmup_times: list[float] = []
     for _ in range(cfg.warmup):
+        sync()
+        t0 = time.perf_counter()
         optimizer_step()
+        sync()
+        warmup_times.append(time.perf_counter() - t0)
+    if warmup_times:
+        log(f"warmup {sum(warmup_times):.1f}s "
+            f"(first step {warmup_times[0]:.1f}s)")
+
+    compiled = compile_stats() if cfg.compile_mode != "off" else None
+    if compiled is not None:
+        # Same refusal as the cuEquivariance check above, for the same reason.
+        # Dynamo falls back to eager on errors it decides are recoverable, and
+        # a run that compiled nothing would otherwise report the eager path
+        # under the compiled label -- two identical numbers presented as a
+        # finding.
+        if compiled["unique_graphs"] == 0:
+            raise RuntimeError(
+                f"compile_mode={cfg.compile_mode!r} but Dynamo captured no "
+                "graphs, so this would measure the eager path under the "
+                "compiled label. Check for suppressed Dynamo errors."
+            )
+        log(f"compiled {compiled['unique_graphs']} graphs, "
+            f"{compiled['graph_breaks']} breaks")
+
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats()
 
@@ -149,7 +190,9 @@ def run(
             "tokens_per_s": tokens_per_s,
             "peak_gpu_gb": peak_gb,
             "losses": losses,
+            "warmup_times_s": warmup_times,
         },
+        "compile": compiled,
         "projection": {
             "phase": phase.key,
             "phase_steps": phase.steps,
@@ -197,6 +240,9 @@ def build_parser() -> argparse.ArgumentParser:
                     default=defaults.float32_precision)
     ap.add_argument("--no-cuequivariance", dest="cuequivariance", action="store_false",
                     help="force the vanilla PyTorch triangle path")
+    ap.add_argument("--compile", dest="compile_mode", choices=list(get_args(CompileMode)),
+                    default=defaults.compile_mode,
+                    help="torch.compile the repeated core-module leaves")
     ap.add_argument("--json", metavar="PATH", help="write the full result as JSON")
     return ap
 

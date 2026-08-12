@@ -239,3 +239,46 @@ def test_whole_run_covers_both_phases():
         sum(p["days"] for p in whole["phases"].values())
     )
     assert whole["is_measurement"] is False
+
+
+def test_compile_mode_rejects_cuda_graphs_by_name():
+    """`reduce-overhead` replays a static input buffer. Every shape here
+    accumulates gradients over one reused batch tensor, so it would produce a
+    time without producing the gradients that time claims to have cost."""
+    with pytest.raises(ValueError, match="gradient accumulation"):
+        BenchConfig(device="cpu", compile_mode="reduce-overhead")
+    with pytest.raises(ValueError, match="compile_mode"):
+        BenchConfig(device="cpu", compile_mode="fastest")
+
+    for mode in ("off", "default", "max-autotune"):
+        assert BenchConfig(device="cpu", compile_mode=mode).compile_mode == mode
+
+
+def test_compile_targets_never_nest():
+    """A compile boundary inside a region Dynamo is already tracing splits a
+    graph that did not need splitting. `PairwiseBlock` contains a
+    `PreLayerNorm(Transition)`, and both classes are targets."""
+    from bench.step import compile_targets
+    from msa_pairformer.pairwise_operations import PairwiseBlock
+
+    block = PairwiseBlock(dim_pairwise=16, tri_mult_dim_hidden=8,
+                          use_triangle_updates=False, use_pair_updates=False)
+    parent = torch.nn.Module()
+    parent.block = block
+
+    names = compile_targets(parent)
+    assert names == ["block"], names
+    # The nested ones exist -- they are skipped, not absent.
+    assert any(isinstance(m, torch.nn.Module) for _, m in block.named_modules())
+
+
+def test_compile_targets_cover_every_repeated_leaf():
+    """22 layers x 4 units. If a refactor renames a class out of
+    COMPILE_TARGETS, the compiled variant quietly compiles less of the model
+    and reports the difference as a smaller speedup."""
+    from bench.step import build_model, compile_targets
+
+    model = build_model(torch.device("cpu"), use_cuequivariance=False)
+    names = compile_targets(model)
+    per_layer = [n for n in names if n.startswith("core_stack.layers.")]
+    assert len(per_layer) == 22 * 4

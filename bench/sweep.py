@@ -269,6 +269,8 @@ def run(
             "median_step_s": result["measurements"]["median_step_s"],
             "tokens_per_s": result["measurements"]["tokens_per_s"],
             "peak_gpu_gb": result["measurements"]["peak_gpu_gb"],
+            "warmup_s": sum(result["measurements"]["warmup_times_s"]),
+            "compile": result.get("compile"),
             "result": result,
         })
 
@@ -352,17 +354,29 @@ def replace_depth(cfg: BenchConfig, depth: int) -> BenchConfig:
 
 
 def format_table(report: dict[str, Any]) -> str:
-    lines = [f"{'depth':>7}{'s/step':>10}{'tokens/s':>12}{'peak GB':>10}"]
+    lines = [f"{'depth':>7}{'s/step':>10}{'tokens/s':>12}{'peak GB':>10}{'warmup s':>11}"]
     for point in report["points"]:
         if point["oom"]:
-            lines.append(f"{point['depth']:>7}{'OOM':>10}{'-':>12}{'-':>10}")
+            lines.append(f"{point['depth']:>7}{'OOM':>10}{'-':>12}{'-':>10}{'-':>11}")
             continue
         peak = point["peak_gpu_gb"]
         lines.append(
             f"{point['depth']:>7}{point['median_step_s']:>10.3f}"
             f"{point['tokens_per_s']/1e3:>11.1f}k"
             f"{(f'{peak:.1f}' if peak is not None else '-'):>10}"
+            f"{point['warmup_s']:>11.1f}"
         )
+
+    compiled = next(
+        (p["compile"] for p in report["points"] if p.get("compile")), None
+    )
+    if compiled is not None:
+        lines.append(
+            f"\ncompiled at the first depth: {compiled['unique_graphs']} graphs, "
+            f"{compiled['graph_breaks']} breaks"
+        )
+        for reason, count in compiled["graph_break_reasons"].items():
+            lines.append(f"  {count:>4}  {reason}")
 
     fit, estimate = report["fit"], report["paper_estimate"]
     if fit is not None:

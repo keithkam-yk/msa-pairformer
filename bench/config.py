@@ -77,6 +77,14 @@ PAPER_SECONDS_PER_EXAMPLE: float = (
 Amp = Literal["bf16", "fp32"]
 Precision = Literal["highest", "high", "medium"]
 
+# "reduce-overhead" is deliberately absent rather than merely undocumented. It
+# replays CUDA graphs over static input buffers, and every measured shape here
+# accumulates gradients over `accum` micro-steps against one reused batch
+# tensor. That combination produces a number without producing the gradients
+# the number claims to have cost. A knob that is wrong at every setting this
+# harness uses should not be offerable.
+CompileMode = Literal["off", "default", "max-autotune"]
+
 
 @dataclass(frozen=True)
 class BenchConfig:
@@ -100,6 +108,10 @@ class BenchConfig:
     amp: Amp = "bf16"
     lr: float = 1e-4
     cuequivariance: bool = True
+    # Off by default so the baseline stays the baseline. `torch.compile` is an
+    # optimisation under test, not part of the configuration the paper
+    # describes, and every recorded result so far was taken without it.
+    compile_mode: CompileMode = "off"
     # Defaults on, unlike the model's own `use_checkpointing_triangles=False`,
     # because at either phase's shape it is not optional: depth 320 with a 312
     # crop allocates 76.2 GiB and dies on an 80 GB H100 without it, at
@@ -129,6 +141,16 @@ class BenchConfig:
             )
         if self.lr <= 0:
             raise ValueError(f"lr must be > 0, got {self.lr}")
+        if self.compile_mode not in get_args(CompileMode):
+            extra = (
+                " (CUDA graphs replay a static input buffer, which is wrong "
+                "under gradient accumulation over one reused batch)"
+                if self.compile_mode == "reduce-overhead" else ""
+            )
+            raise ValueError(
+                f"compile_mode must be one of {get_args(CompileMode)}, "
+                f"got {self.compile_mode!r}{extra}"
+            )
         if self.phase not in PHASES:
             raise ValueError(
                 f"phase must be one of {sorted(PHASES)}, got {self.phase!r}"

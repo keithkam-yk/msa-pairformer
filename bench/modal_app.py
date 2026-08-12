@@ -7,16 +7,24 @@ back.
 
     modal run bench/modal_app.py::check       # correctness + golden drift
     modal run bench/modal_app.py::check --gpu L4      # same, cheaper card
+    modal run bench/modal_app.py::probe       # does torch.compile work here
     modal run bench/modal_app.py::sweep       # THE baseline: depths + estimate
-    modal run bench/modal_app.py::main        # one fixed shape, both variants
-    modal run bench/modal_app.py::main --variants cuequivariance --steps 10
+    modal run bench/modal_app.py::main        # one fixed shape, chosen variants
+    modal run bench/modal_app.py::sweep --variants cuequivariance,cuequivariance+compile
 
 `sweep` is the baseline to quote. `main` measures a single shape, which is only
 useful when that shape fits -- the paper's does not fit on an 80 GB H100, so a
 bare `main` at default settings OOMs by design rather than by accident.
 
+`probe` is the gate in front of any compiled sweep, and costs about two
+minutes. A compiled ladder is four variants times seven depths of
+111M-parameter builds; the probe answers at a trivial shape whether
+compilation survives the checkpointed triangle updates and how much of the
+model Dynamo captured, which is what decides whether the ladder is worth
+renting.
+
 The entrypoint is never optional. Modal only infers one when a file defines a
-single local entrypoint, and this file has two; the bare form fails with a
+single local entrypoint, and this file has several; the bare form fails with a
 listing rather than running `main`.
 
 Run `check` before trusting anything else: it establishes both that the GPU
@@ -51,6 +59,7 @@ from bench.config import (
     REPORTED_DAYS,
     Amp,
     BenchConfig,
+    CompileMode,
 )
 
 REPO = Path(__file__).parent.parent
@@ -66,6 +75,23 @@ REPO = Path(__file__).parent.parent
 # path perfectly well. The drift *magnitudes* are not card-independent, which
 # is why the device name is recorded in the report and in the output filename.
 DEFAULT_GPU = "H100"
+
+# The measurable variants, as (triangle path, compile mode).
+#
+# Four rather than two, because a single compiled number cannot be attributed.
+# `cuequivariance+compile` is the one asked for and the one anyone running the
+# shipped code would reach for, but the fused triangle kernels are opaque to
+# Dynamo, so what compiles there is the elementwise work *between* them.
+# `vanilla+compile` is the control that says whether Inductor can approach the
+# hand-written kernels on the pair track itself. Without it, a win in the first
+# is unattributable between the two effects.
+VARIANTS: dict[str, tuple[bool, str]] = {
+    "vanilla": (False, "off"),
+    "cuequivariance": (True, "off"),
+    "vanilla+compile": (False, "default"),
+    "cuequivariance+compile": (True, "default"),
+}
+BASELINE_VARIANT = "vanilla"
 
 # Dependencies of the modules the harness touches (model, dataset, and their
 # imports), rather than the full project: no matplotlib, sklearn or tqdm.
@@ -202,6 +228,25 @@ def depth_sweep(
 
 
 @app.function(gpu=DEFAULT_GPU, timeout=3600)
+def compile_probe_fn(depth: int, crop: int, git: dict[str, Any]) -> dict[str, Any]:
+    """All four variants in one container, at a shape small enough to be free.
+
+    One container, for the same reason `depth_sweep` uses one: the compiled
+    variants are compared against the eager ones, and a comparison across two
+    physical cards measures the cards.
+    """
+    import torch
+
+    from bench.probe import format_table
+    from bench.probe import run as probe_run
+
+    report = probe_run(torch.device("cuda"), depth=depth, crop=crop)
+    report["git"] = git
+    print("\n" + format_table(report))
+    return report
+
+
+@app.function(gpu=DEFAULT_GPU, timeout=3600)
 def benchmark(cfg: dict[str, Any], git: dict[str, Any]) -> dict[str, Any]:
     """Measure one configuration.
 
@@ -254,6 +299,39 @@ def check(
 
 
 @app.local_entrypoint()
+def probe(depth: int = 32, crop: int = 64, gpu: str = DEFAULT_GPU,
+          out: str = "") -> None:
+    """Whether the compiled variants work, and what compiled, in ~2 minutes.
+
+    Run this before `sweep --variants ...+compile`. A full ladder is four
+    variants times seven depths of 111M-parameter builds; this answers at a
+    trivial shape whether compilation survives the checkpointed triangle
+    updates, how much of the model Dynamo captured on each triangle path, and
+    whether the compiled path computes the same loss and gradients.
+
+    It reports timings, and they are not throughput. The shape is tiny and
+    there is no optimizer step; the numbers say "this ran", not "this is
+    faster".
+    """
+    from bench.probe import format_table
+    from bench.provenance import git_info
+
+    report = compile_probe_fn.with_options(gpu=gpu).remote(depth, crop, git_info())
+    print("\n" + format_table(report))
+    _write(out or _results_path(gpu, "compile-probe"), report)
+
+    empty = [
+        label for label, entry in report["variants"].items()
+        if entry["compile"] is not None and entry["compile"]["unique_graphs"] == 0
+    ]
+    if empty:
+        raise SystemExit(
+            f"\n{empty} requested compilation and Dynamo captured no graphs, so "
+            "a sweep would measure the eager path under a compiled label."
+        )
+
+
+@app.local_entrypoint()
 def sweep(
     # Empty resolves to bench.sweep.DEFAULT_DEPTHS rather than repeating it
     # here; the two copies diverged once already.
@@ -295,25 +373,24 @@ def sweep(
           f"effective batch {spec.effective_batch}  "
           f"{spec.examples:,} alignments")
     print(f"depths: {ladder}")
-    requested = [v.strip() for v in variants.split(",") if v.strip()]
-    unknown = set(requested) - {"vanilla", "cuequivariance"}
-    if unknown:
-        raise SystemExit(f"unknown variants: {sorted(unknown)}")
+    requested = _requested_variants(variants)
 
     reports: dict[str, Any] = {}
     for name in requested:
         print(f"\n########## {name} ##########")
+        cuequivariance, compile_mode = VARIANTS[name]
         cfg = BenchConfig.for_phase(
             phase, device="cuda", micro_batch=1,
             steps=steps, warmup=warmup, amp="bf16",
-            cuequivariance=(name == "cuequivariance"),
+            cuequivariance=cuequivariance,
+            compile_mode=cast("CompileMode", compile_mode),
         )
         reports[name] = depth_sweep.with_options(gpu=gpu).remote(
             cfg.to_dict(), git, ladder
         )
         print(format_table(reports[name]))
 
-    if {"vanilla", "cuequivariance"} <= reports.keys():
+    if len(reports) > 1:
         _compare_variants(reports)
 
     _write(out or _results_path(gpu, f"sweep-{phase}"),
@@ -321,16 +398,46 @@ def sweep(
             "variants": reports})
 
 
+def _requested_variants(variants: str) -> list[str]:
+    requested = [v.strip() for v in variants.split(",") if v.strip()]
+    unknown = [v for v in requested if v not in VARIANTS]
+    if unknown:
+        raise SystemExit(
+            f"unknown variants: {sorted(unknown)}, known: {sorted(VARIANTS)}"
+        )
+    return requested
+
+
+def _points_by_depth(report: dict[str, Any]) -> dict[int, Any]:
+    return {p["depth"]: p for p in report["points"] if not p["oom"]}
+
+
 def _compare_variants(reports: dict[str, Any]) -> None:
-    """What the fused kernels buy, per depth and at the paper's shape."""
-    fused = {p["depth"]: p for p in reports["cuequivariance"]["points"] if not p["oom"]}
-    plain = {p["depth"]: p for p in reports["vanilla"]["points"] if not p["oom"]}
-    shared = sorted(set(fused) & set(plain))
-    if shared:
-        print(f"\n{'depth':>7}{'vanilla s':>12}{'cuex s':>10}{'speedup':>10}")
+    """What each variant buys over the baseline, per depth and over the run.
+
+    Peak memory sits next to the times on purpose. Compilation changes which
+    activations are kept, and the failure that would quietly ruin a sweep is a
+    variant whose memory ceiling moved down -- that reads as "compile OOMs
+    earlier" when it is really a recompute-policy interaction with the
+    checkpointed triangle updates. A column is cheaper than finding out later.
+    """
+    base_name = BASELINE_VARIANT if BASELINE_VARIANT in reports else next(iter(reports))
+    base = _points_by_depth(reports[base_name])
+    others = [n for n in reports if n != base_name]
+
+    for name in others:
+        theirs = _points_by_depth(reports[name])
+        shared = sorted(set(base) & set(theirs))
+        if not shared:
+            continue
+        print(f"\n{name} vs {base_name}")
+        print(f"{'depth':>7}{'base s':>10}{'this s':>10}{'speedup':>10}"
+              f"{'base GB':>10}{'this GB':>10}")
         for depth in shared:
-            v, c = plain[depth]["median_step_s"], fused[depth]["median_step_s"]
-            print(f"{depth:>7}{v:>12.3f}{c:>10.3f}{v/c:>9.2f}x")
+            b, t = base[depth], theirs[depth]
+            bs, ts = b["median_step_s"], t["median_step_s"]
+            print(f"{depth:>7}{bs:>10.3f}{ts:>10.3f}{bs/ts:>9.2f}x"
+                  f"{_gb(b):>10}{_gb(t):>10}")
 
     runs = {k: r["whole_run"] for k, r in reports.items()}
     if all(runs.values()):
@@ -338,9 +445,14 @@ def _compare_variants(reports: dict[str, Any]) -> None:
               f"{REPORTED_DAYS} days, "
               f"{PAPER_SECONDS_PER_EXAMPLE*1000:.0f} ms per alignment")
         for name, run in runs.items():
-            print(f"  {name:<16}{run['s_per_example']*1000:>6.0f} ms"
+            print(f"  {name:<24}{run['s_per_example']*1000:>6.0f} ms"
                   f"{run['estimated_days']:>8.2f} days"
                   f"{run['ratio_vs_paper']:>8.2f}x vs paper")
+
+
+def _gb(point: dict[str, Any]) -> str:
+    peak = point["peak_gpu_gb"]
+    return f"{peak:.1f}" if peak is not None else "-"
 
 
 @app.local_entrypoint()
@@ -365,7 +477,7 @@ def main(
         print("WARNING: working tree is dirty; this result is not reproducible "
               "from the recorded commit alone.\n")
 
-    requested = [v.strip() for v in variants.split(",") if v.strip()]
+    requested = _requested_variants(variants)
 
     if verify_first:
         print("verifying container ...")
@@ -376,7 +488,8 @@ def main(
             print("\ncorrectness suite FAILED in the container -- not benchmarking.")
             print(res["output"])
             raise SystemExit(1)
-        if "cuequivariance" in requested and not res["cuequivariance_present"]:
+        wants_cuex = any(VARIANTS[name][0] for name in requested)
+        if wants_cuex and not res["cuequivariance_present"]:
             raise SystemExit(
                 "\ncuEquivariance is not present in the container, so the "
                 "'cuequivariance' variant would silently measure the vanilla "
@@ -398,7 +511,8 @@ def main(
     #
     # Reporting both separates "we are running better kernels than the training
     # run did" from "there is real headroom left", which a single number cannot.
-    def config(cuequivariance: bool) -> BenchConfig:
+    def config(name: str) -> BenchConfig:
+        cuequivariance, compile_mode = VARIANTS[name]
         return BenchConfig(
             device="cuda", depth=depth, crop=crop, micro_batch=micro_batch,
             accum=accum, steps=steps, warmup=warmup,
@@ -406,40 +520,39 @@ def main(
             # __post_init__ is what actually rejects a bad value.
             amp=cast("Amp", amp),
             cuequivariance=cuequivariance,
+            compile_mode=cast("CompileMode", compile_mode),
             checkpoint_triangles=checkpoint_triangles,
         )
-
-    configs = {"vanilla": config(False), "cuequivariance": config(True)}
-    unknown = set(requested) - set(configs)
-    if unknown:
-        raise SystemExit(f"unknown variants: {sorted(unknown)}")
 
     results: dict[str, Any] = {}
     for name in requested:
         print(f"=== {name} ===")
         results[name] = benchmark.with_options(gpu=gpu).remote(
-            configs[name].to_dict(), git
+            config(name).to_dict(), git
         )
         print()
 
-    print(f"{'variant':<18}{'s/step':>9}{'ms/align':>10}{'tokens/s':>12}"
+    print(f"{'variant':<24}{'s/step':>9}{'ms/align':>10}{'tokens/s':>12}"
           f"{'peak GB':>10}{'phase days':>12}{'vs paper':>10}")
     for name, res in results.items():
         m, p = res["measurements"], res["projection"]
         peak = f"{m['peak_gpu_gb']:.1f}" if m["peak_gpu_gb"] is not None else "-"
-        print(f"{name:<18}{m['median_step_s']:>9.3f}"
+        print(f"{name:<24}{m['median_step_s']:>9.3f}"
               f"{m['per_example_s']*1000:>10.0f}{m['tokens_per_s']/1e3:>11.1f}k"
               f"{peak:>10}{p['projected_phase_days']:>12.2f}"
               f"{p['speedup_vs_paper']:>9.1f}x")
-    print(f"{'paper (1xH100)':<18}{'-':>9}"
+    print(f"{'paper (1xH100)':<24}{'-':>9}"
           f"{PAPER_SECONDS_PER_EXAMPLE*1000:>10.0f}{'-':>12}{'-':>10}"
           f"{REPORTED_DAYS:>12.1f}{1.0:>9.1f}x  (both phases)")
 
-    if {"vanilla", "cuequivariance"} <= results.keys():
-        fused = results["cuequivariance"]["measurements"]["median_step_s"]
-        plain = results["vanilla"]["measurements"]["median_step_s"]
-        print(f"\nfused triangle kernels are {plain/fused:.2f}x the vanilla path "
-              f"({plain:.3f}s -> {fused:.3f}s per optimizer step)")
+    if BASELINE_VARIANT in results and len(results) > 1:
+        plain = results[BASELINE_VARIANT]["measurements"]["median_step_s"]
+        for name, res in results.items():
+            if name == BASELINE_VARIANT:
+                continue
+            theirs = res["measurements"]["median_step_s"]
+            print(f"{name} is {plain/theirs:.2f}x {BASELINE_VARIANT} "
+                  f"({plain:.3f}s -> {theirs:.3f}s per optimizer step)")
 
     _write(
         out or _results_path(gpu, "baseline"),
