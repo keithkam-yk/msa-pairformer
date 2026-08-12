@@ -1,7 +1,7 @@
-"""Dataloader construction as configuration, not as a 44-parameter signature.
+"""Dataloader construction as configuration, not as a 33-parameter signature.
 
-`init_dataloaders` took 44 positional parameters. Most were one knob written
-twice -- `max_seq_length` and `max_seq_length_val_test`, `max_msa_depth` and
+`init_dataloaders` took 33 parameters. Eight were one knob written twice --
+`max_seq_length` and `max_seq_length_val_test`, `max_msa_depth` and
 `max_msa_depth_val_test`, and so on for six more pairs -- so a caller had to
 keep two parallel argument lists in the right order at every call site. The
 duplication is not the interesting part of the configuration; the *split* is.

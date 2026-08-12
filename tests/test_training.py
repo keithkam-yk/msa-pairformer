@@ -396,7 +396,7 @@ def test_the_split_is_reproducible_and_seed_dependent():
 
 
 def test_each_split_gets_its_own_spec():
-    """The duplication the 44 parameters encoded, now expressed once per split."""
+    """The duplication the 33 parameters encoded, now expressed once per split."""
     datamodule = MSADataModule(
         paths(),
         train=SplitSpec(max_seq_length=312, max_msa_depth=256, batch_size=2, shuffle=True),
