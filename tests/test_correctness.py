@@ -35,9 +35,25 @@ from tests.generate_fixtures import build_cases, param_checksum
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden.pt"
 PACKAGE = "msa_pairformer"
 
-# Tight enough to catch a real numerical change, loose enough to tolerate
-# reduction-order differences between contiguity states.
-RTOL, ATOL = 1e-5, 1e-6
+# Tolerances are per execution path, because the paths do not agree to the same
+# precision and pretending otherwise means either false failures or a test that
+# cannot detect anything.
+#
+# `cpu/vanilla` is measured at exactly 0.0 against these goldens, so its
+# tolerance only has to absorb reduction-order differences between contiguity
+# states. The GPU rows are placeholders until `modal run
+# bench/modal_app.py::drift` reports what the deviation actually is -- see
+# bench/drift.py. Do not tighten them by guessing; the drift report is the only
+# thing that says what is achievable.
+TOLERANCES: dict[str, tuple[float, float]] = {
+    # path: (rtol, atol)
+    "cpu/vanilla": (1e-5, 1e-6),
+    "cuda/vanilla": (1e-4, 1e-5),  # PROVISIONAL - set from the drift report
+    "cuda/cuex": (1e-2, 1e-3),     # PROVISIONAL - set from the drift report
+}
+
+# The suite runs on CPU with the vanilla path unless conftest is told otherwise.
+RTOL, ATOL = TOLERANCES["cpu/vanilla"]
 
 # Cases whose loss would gut the suite. Named explicitly so that a parametrise
 # or fixture-generation bug that silently collects fewer cases fails loudly

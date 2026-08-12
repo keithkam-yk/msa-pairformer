@@ -72,7 +72,7 @@ def param_checksum(module) -> str:
     return h.hexdigest()
 
 
-def make_inputs(seed: int = 1234):
+def make_inputs(seed: int = 1234, device: torch.device | None = None):
     """Deterministic inputs shared by every case, including a padded tail so the
     masking paths are actually exercised rather than trivially all-ones."""
     gen = torch.Generator().manual_seed(seed)
@@ -82,21 +82,32 @@ def make_inputs(seed: int = 1234):
     msa_mask[:, -1] = False  # pad the last sequence
     full_mask = msa_mask[:, :, None] & mask[:, None, :]
     pairwise_mask = mask[:, :, None] & mask[:, None, :]
+    device = device or torch.device("cpu")
     return {
-        "msa": torch.randn(B, S, N, DIM_MSA, generator=gen),
-        "pairwise_repr": torch.randn(B, N, N, DIM_PAIRWISE, generator=gen),
-        "mask": mask,
-        "msa_mask": msa_mask,
-        "full_mask": full_mask,
-        "pairwise_mask": pairwise_mask,
+        "msa": torch.randn(B, S, N, DIM_MSA, generator=gen).to(device),
+        "pairwise_repr": torch.randn(B, N, N, DIM_PAIRWISE, generator=gen).to(device),
+        "mask": mask.to(device),
+        "msa_mask": msa_mask.to(device),
+        "full_mask": full_mask.to(device),
+        "pairwise_mask": pairwise_mask.to(device),
     }
 
 
-def build_cases(pkg: str):
+def build_cases(
+    pkg: str,
+    device: torch.device | None = None,
+    use_cuequivariance: bool | None = None,
+):
     """Yield (name, callable) where the callable returns (module, inputs, outputs).
 
     `pkg` is the package to import from, so the same script drives the upstream
     tree (MSA_Pairformer) and the current one (msa_pairformer).
+
+    `use_cuequivariance` defaults to whatever the ambient
+    `CUEQUIVARIANCE_AVAILABLE` says, so `bench.step.triangle_path` controls the
+    triangle cases the same way it controls every other module. The goldens
+    themselves were recorded with it off; replaying them with it on is how the
+    drift between the two implementations gets measured.
     """
     core = importlib.import_module(f"{pkg}.core")
     pairwise_operations = importlib.import_module(f"{pkg}.pairwise_operations")
@@ -105,19 +116,22 @@ def build_cases(pkg: str):
     regression = importlib.import_module(f"{pkg}.regression")
     model_mod = importlib.import_module(f"{pkg}.model")
 
-    inp = make_inputs()
+    device = device or torch.device("cpu")
+    if use_cuequivariance is None:
+        use_cuequivariance = pairwise_operations.CUEQUIVARIANCE_AVAILABLE
+    inp = make_inputs(device=device)
 
     def case_transition():
         torch.manual_seed(0)
-        mod = core.Transition(dim=DIM_MSA).eval()
+        mod = core.Transition(dim=DIM_MSA).to(device).eval()
         args = {"x": inp["msa"]}
         with torch.no_grad():
             return mod, args, {"out": mod(**args)}
 
     def case_swiglu():
-        mod = core.SwiGLU().eval()
+        mod = core.SwiGLU().to(device).eval()
         gen = torch.Generator().manual_seed(7)
-        args = {"x": torch.randn(B, S, N, 128, generator=gen)}
+        args = {"x": torch.randn(B, S, N, 128, generator=gen).to(device)}
         with torch.no_grad():
             return mod, args, {"out": mod(**args)}
 
@@ -126,7 +140,7 @@ def build_cases(pkg: str):
         mod = pairwise_operations.MSAPairWeightedAveraging(
             dim_msa=DIM_MSA, dim_pairwise=DIM_PAIRWISE,
             heads=8, dim_head=32, dropout=0.0, dropout_type="row",
-        ).eval()
+        ).to(device).eval()
         args = {
             "msa": inp["msa"], "pairwise_repr": inp["pairwise_repr"],
             "mask": inp["mask"], "pairwise_mask": inp["pairwise_mask"],
@@ -140,8 +154,8 @@ def build_cases(pkg: str):
             torch.manual_seed(0)
             mod = pairwise_operations.TriangleMultiplication(
                 dim_pairwise=DIM_PAIRWISE, dim_hidden=DIM_PAIRWISE,
-                direction=direction, use_cuequivariance=False,
-            ).eval()
+                direction=direction, use_cuequivariance=use_cuequivariance,
+            ).to(device).eval()
             args = {"pair_rep": inp["pairwise_repr"], "pairwise_mask": inp["pairwise_mask"]}
             with torch.no_grad():
                 return mod, args, {"out": mod(**args)}
@@ -149,7 +163,7 @@ def build_cases(pkg: str):
 
     def case_pairwise_block():
         torch.manual_seed(0)
-        mod = pairwise_operations.PairwiseBlock(dim_pairwise=DIM_PAIRWISE).eval()
+        mod = pairwise_operations.PairwiseBlock(dim_pairwise=DIM_PAIRWISE).to(device).eval()
         args = {"pairwise_repr": inp["pairwise_repr"], "pairwise_mask": inp["pairwise_mask"]}
         with torch.no_grad():
             return mod, args, {"out": mod(**args)}
@@ -161,7 +175,7 @@ def build_cases(pkg: str):
             outer_product_flavor="presoftmax_differential_attention",
             seq_attn=True, dim_qk=128, chunk_size=None, return_seq_weights=True,
             lambda_init=torch.tensor(0.8, dtype=torch.float32), eps=1e-32,
-        ).eval()
+        ).to(device).eval()
         args = {
             "msa": inp["msa"], "mask": inp["mask"], "msa_mask": inp["msa_mask"],
             "full_mask": inp["full_mask"], "pairwise_mask": inp["pairwise_mask"],
@@ -174,23 +188,23 @@ def build_cases(pkg: str):
         torch.manual_seed(0)
         mod = positional_encoding.RelativePositionEncoding(
             dim_out=DIM_PAIRWISE, r_max=32, s_max=2,
-        ).eval()
+        ).to(device).eval()
         # Scalar inputs, not tensors -- recorded as-is.
         args = {"batch_size": B, "seq_len": N, "complex_chain_break_indices": [[4]]}
         with torch.no_grad():
-            out = mod(device=torch.device("cpu"), **args)
+            out = mod(device=device, **args)
         return mod, args, {"out": out}
 
     def case_lm_head():
         torch.manual_seed(0)
-        mod = regression.LMHead(DIM_MSA, 26).eval()
+        mod = regression.LMHead(DIM_MSA, 26).to(device).eval()
         args = {"msa_repr": inp["msa"]}
         with torch.no_grad():
             return mod, args, {"out": mod(**args)}
 
     def case_contact_head():
         torch.manual_seed(0)
-        mod = regression.LogisticRegressionContactHead(dim_pairwise=DIM_PAIRWISE).eval()
+        mod = regression.LogisticRegressionContactHead(dim_pairwise=DIM_PAIRWISE).to(device).eval()
         args = {"pair_repr": inp["pairwise_repr"]}
         with torch.no_grad():
             return mod, args, {"out": mod(**args)}
@@ -204,13 +218,14 @@ def build_cases(pkg: str):
         ).float()
         mask, msa_mask, full_mask, pairwise_mask = dataset.prepare_msa_masks(tokens)
         return {
-            "msa": onehot, "mask": mask, "msa_mask": msa_mask,
-            "full_mask": full_mask, "pairwise_mask": pairwise_mask,
+            "msa": onehot.to(device), "mask": mask.to(device),
+            "msa_mask": msa_mask.to(device), "full_mask": full_mask.to(device),
+            "pairwise_mask": pairwise_mask.to(device),
         }
 
     def case_model_forward():
         torch.manual_seed(0)
-        mod = model_mod.MSAPairformer().eval()
+        mod = model_mod.MSAPairformer().to(device).eval()
         args = _full_model_inputs()
         with torch.no_grad():
             res = mod(**args, return_cb_contacts=True, return_confind_contacts=True)
@@ -223,7 +238,7 @@ def build_cases(pkg: str):
 
     def case_model_predict_cb():
         torch.manual_seed(0)
-        mod = model_mod.MSAPairformer().eval()
+        mod = model_mod.MSAPairformer().to(device).eval()
         args = _full_model_inputs()
         with torch.no_grad():
             res = mod.predict_cb_contacts(**args)
@@ -231,7 +246,7 @@ def build_cases(pkg: str):
 
     def case_model_predict_confind():
         torch.manual_seed(0)
-        mod = model_mod.MSAPairformer().eval()
+        mod = model_mod.MSAPairformer().to(device).eval()
         args = _full_model_inputs()
         with torch.no_grad():
             res = mod.predict_confind_contacts(**args)

@@ -1,0 +1,143 @@
+"""Check that the fused triangle kernels agree with the PyTorch fallback.
+
+`TriangleMultiplication`'s docstring states that `_vanilla_forward` "must align
+with implementation in cuequivariance_torch.triangle_multiplicative_update in
+order to serve as a fallback". Nothing verified that. It matters more than it
+looks: cuEquivariance is a hard dependency on linux and switches on whenever
+CUDA is present, so the fused path is what every real deployment runs, while
+every golden in `fixtures/golden.pt` -- and every test on a developer laptop --
+exercises only the fallback.
+
+Why this and not recorded cuEquivariance goldens
+------------------------------------------------
+A recorded fixture would be pinned to the GPU that produced it: architecture,
+cuEquivariance version, CUDA version, and Triton's precision defaults
+(`_cuex_forward` passes `precision=None`). One recorded on an H100 would very
+likely fail on a B200 for reasons that are not regressions. Comparing the two
+paths side by side on whatever GPU is present tests the actual claim and stays
+true across hardware.
+
+Requires a CUDA host with cuequivariance_torch installed, so it skips
+everywhere else -- including every machine this was developed on.
+
+    modal run bench/modal_app.py          # runs this as part of `verify`
+"""
+
+import pytest
+import torch
+
+from bench.step import CUEQUIVARIANCE_PRESENT, triangle_path
+from msa_pairformer import pairwise_operations
+from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
+from msa_pairformer.model import MSAPairformer
+
+pytestmark = pytest.mark.skipif(
+    not (torch.cuda.is_available() and CUEQUIVARIANCE_PRESENT),
+    reason="needs a CUDA host with cuequivariance_torch",
+)
+
+B, N, DIM_PAIRWISE = 1, 24, 256
+S = 6
+
+# Provisional. The fused kernel fuses differently and may reduce in a different
+# order or precision, so exact agreement is not expected -- but disagreement
+# beyond this would mean the fallback is not a faithful fallback. Tighten from
+# the deviations the first GPU run reports rather than guessing downward.
+RTOL, ATOL = 1e-2, 1e-3
+
+
+@pytest.fixture(scope="module")
+def device():
+    return torch.device("cuda")
+
+
+def _pair_inputs(device):
+    gen = torch.Generator(device="cpu").manual_seed(1234)
+    pair = torch.randn(B, N, N, DIM_PAIRWISE, generator=gen).to(device)
+    mask = torch.ones(B, N, dtype=torch.bool)
+    mask[:, -2:] = False
+    pairwise_mask = (mask[:, :, None] & mask[:, None, :]).to(device)
+    return pair, pairwise_mask
+
+
+def _build(factory, use_cuequivariance, device, seed=0):
+    """Same seed either side, so the comparison is of kernels and not weights."""
+    with triangle_path(use_cuequivariance) as effective:
+        torch.manual_seed(seed)
+        module = factory().to(device).eval()
+    return module, effective
+
+
+def _report(name, got, want):
+    """Assert agreement, and put the actual deviation in the failure message --
+    the number is what tells us where to set the tolerance."""
+    abs_dev = (got - want).abs().max().item()
+    rel_dev = ((got - want).abs() / want.abs().clamp_min(1e-6)).max().item()
+    torch.testing.assert_close(
+        got, want, rtol=RTOL, atol=ATOL,
+        msg=lambda m: f"{name}: cuEquivariance disagrees with the fallback "
+                      f"(max abs {abs_dev:.3e}, max rel {rel_dev:.3e})\n{m}",
+    )
+    return abs_dev
+
+
+@pytest.mark.parametrize("direction", ["outgoing", "incoming"])
+def test_triangle_multiplication_matches_fallback(device, direction):
+    pair, pairwise_mask = _pair_inputs(device)
+
+    def factory():
+        return pairwise_operations.TriangleMultiplication(
+            dim_pairwise=DIM_PAIRWISE, dim_hidden=DIM_PAIRWISE, direction=direction,
+        )
+
+    fused, effective = _build(factory, True, device)
+    assert effective, "expected the fused path to be selected"
+    vanilla, _ = _build(factory, False, device)
+    assert not vanilla.use_cuequivariance
+
+    with torch.no_grad():
+        got = fused(pair, pairwise_mask=pairwise_mask)
+        want = vanilla(pair, pairwise_mask=pairwise_mask)
+    _report(f"TriangleMultiplication[{direction}]", got, want)
+
+
+def test_pairwise_block_matches_fallback(device):
+    """The block wires both directions plus the transition, so it catches a
+    disagreement in how the two triangle updates compose."""
+    pair, pairwise_mask = _pair_inputs(device)
+
+    def factory():
+        return pairwise_operations.PairwiseBlock(dim_pairwise=DIM_PAIRWISE)
+
+    fused, _ = _build(factory, True, device)
+    vanilla, _ = _build(factory, False, device)
+
+    with torch.no_grad():
+        got = fused(pairwise_repr=pair, pairwise_mask=pairwise_mask)
+        want = vanilla(pairwise_repr=pair, pairwise_mask=pairwise_mask)
+    _report("PairwiseBlock", got, want)
+
+
+def test_full_model_matches_fallback(device):
+    """End to end: 22 layers of accumulated divergence is the number that
+    actually matters, since that is what a user of the shipped weights gets."""
+    torch.manual_seed(0)
+    tokens = torch.randint(0, 20, (B, S, N))
+    onehot = torch.nn.functional.one_hot(
+        tokens, num_classes=len(aa2tok_d)
+    ).float().to(device)
+    mask, msa_mask, full_mask, pairwise_mask = prepare_msa_masks(tokens)
+    kwargs = {
+        "msa": onehot, "mask": mask.to(device), "msa_mask": msa_mask.to(device),
+        "full_mask": full_mask.to(device), "pairwise_mask": pairwise_mask.to(device),
+        "return_cb_contacts": False, "return_confind_contacts": False,
+        "store_msa_repr_cpu": False, "store_pairwise_repr_cpu": False,
+    }
+
+    fused, _ = _build(MSAPairformer, True, device)
+    vanilla, _ = _build(MSAPairformer, False, device)
+
+    with torch.no_grad():
+        got = fused(**kwargs)["logits"]
+        want = vanilla(**kwargs)["logits"]
+    _report("MSAPairformer.logits", got, want)
