@@ -48,14 +48,33 @@ proteingym = [
 # MSA pairing optimization (msa_pairformer/pairing_optimization/*), which uses
 # the MSA Transformer from fair-esm as a baseline / dataset tokenizer.
 pairing = ["fair-esm>=2.0.0"]
-# Throughput harness (bench/). Only modal is extra: bench/train.py itself needs
-# nothing beyond the core dependencies, by design, so it runs anywhere.
-bench = ["modal>=1.0"]
 # Everything above except typecheck: all analysis and pairing extras at once.
 analysis = [
     "msa-pairformer[jacobian]",
     "msa-pairformer[proteingym]",
     "msa-pairformer[pairing]",
+]
+
+# Not extras: nothing here ships. `bench/` and `tests/` are outside the wheel
+# (see tool.hatch.build.targets.wheel), so publishing an extra for them would
+# advertise something an installing user cannot run. Groups are the uv-native
+# home for this and are installed by default on `uv sync`.
+#
+# ruff and ty stay out on purpose -- they run via `uvx`, which keeps tool
+# versions from drifting into the runtime environment and keeps alpha `ty`
+# out of a lock that pins the numerics.
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    # Launches the throughput harness on rented GPUs (bench/modal_app.py).
+    # bench/train.py itself imports nothing beyond the core dependencies, by
+    # design, so the harness still runs on any GPU host without this.
+    "modal>=1.0",
+    # Referenced rather than duplicated, so the group cannot drift from the
+    # published extra. tests/test_typecheck.py imports beartype at module
+    # level, so without it the suite fails to collect rather than skipping --
+    # `uv sync` alone would not install an extra.
+    "msa-pairformer[typecheck]",
 ]
 
 [tool.setuptools]

@@ -45,6 +45,13 @@ GPU = "H100"
 # `torch>=2.5.0` would let the drift table conflate torch-version differences
 # with the device and kernel differences it is trying to isolate. Every
 # tolerance derived from it would then be unattributable.
+#
+# This list is a second source of truth alongside uv.lock, and the two can
+# drift. If they do, "the goldens were recorded under 2.13.0" quietly becomes
+# "local venv under one version, image under another" -- the exact failure this
+# pin exists to prevent. TORCH must track the torch resolved in uv.lock:
+#
+#     uv lock && grep -A1 '^name = "torch"' uv.lock
 TORCH = "2.13.0"
 CUEQUIVARIANCE = "0.11.1"
 

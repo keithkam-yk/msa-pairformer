@@ -30,6 +30,41 @@ git clone git@github.com:yoakiyama/MSA_Pairformer.git
 pip install -e .
 ```
 
+### Developing on the repository
+
+Dependencies are locked with [uv](https://docs.astral.sh/uv/). One command creates
+the virtualenv, installs the project in editable mode, and installs the dev tools:
+
+```bash
+uv sync
+```
+
+That resolves from `uv.lock`, so everyone gets the same versions — which matters
+more than usual here: the golden fixtures in `tests/fixtures/` were recorded under
+a specific torch build, and a different one shifts the numbers the correctness
+suite compares against.
+
+Run things through `uv run` so they use that environment:
+
+```bash
+uv run pytest
+```
+
+Linting and type checking are deliberately not in the lock — they run as one-off
+tools, which keeps their versions out of the runtime environment:
+
+```bash
+uvx ruff check
+uvx ty check
+```
+
+The optional extras (`jacobian`, `proteingym`, `pairing`, `analysis`, `typecheck`)
+are for installing users and are not synced by default. Add them as needed:
+
+```bash
+uv sync --extra analysis
+```
+
 ### Upgrading from 1.0.2 and earlier
 
 The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8). Import
