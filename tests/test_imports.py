@@ -117,7 +117,6 @@ NOT_TIER_0 = {
     "plotting.py": "matplotlib",
     "categorical_jacobian.py": "jacobian extra: jax",
     "proteingym_utils.py": "proteingym extra: numba, pandas",
-    "potts_diffpalm_utils.py": "MSA parsing, duplicated by pairing_optimization/msa_parsing.py; phase 2 deletes it",
     "data_downloader.py": "shells out to wget to fetch structures",
     "training_utils.py": "the hand-written training loop; phase 5 replaces it with training/",
 }
