@@ -598,7 +598,29 @@ not installed. The tokenizer dictionaries are compared by value as well as by
 source, because commit 3 hand-carries them into a new file. The baseline holds
 248 symbols and 8 constants.
 
-**`ruff` and `ty`**, which must stay clean.
+**`ruff` and `ty`.** The gate is `uvx ruff check bench tests` and
+`uvx ty check bench tests`, both of which pass at `ddcbc26` and must keep
+passing. It is **not** the whole package: `uvx ruff check msa_pairformer` finds
+64 errors at `ddcbc26` — 21 `B006` mutable default arguments, 10 `E741`
+ambiguous names, 9 `F841` unused locals, and 24 others — and has never been
+clean. That legacy is out of scope here; fixing it would be a behaviour change
+smuggled into a move.
+
+The count is pinned instead. Moving a function carries its lint errors with it,
+so the package total must stay at exactly 64 through commits 2, 3 and 4. A
+higher number means new code was written where only moved code was expected.
+Any file created by this refactor must itself be clean.
+
+Count the diagnostics, not the output lines:
+
+```
+uvx ruff check msa_pairformer --output-format=concise | grep -c '^msa_pairformer/'
+```
+
+`wc -l` gives 66, because ruff also prints a total and a count of what is
+auto-fixable. The second of those two lines appears only when something is
+fixable, so it can come and go on its own and move the total independently of
+the code.
 
 Commits 2, 3 (the moves) and 4 must show **no symbol-level change at all**.
 Commits 3 (the `_run` retirement), 5 and 6.2 change source on purpose, so for
