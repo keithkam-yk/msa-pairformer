@@ -1,13 +1,12 @@
+
+import einx
 import torch
 import torch.nn.functional as F
-from torch.nn import Module
-from typing import List
-import einx
 from einops import pack
+from torch.nn import Module
+
 from .core import LinearNoBias
-from .custom_typing import (
-    Float
-)
+from .custom_typing import Float
 
 # Molecule features
 """
@@ -45,7 +44,7 @@ class RelativePositionEncoding(Module):
         batch_size: int, 
         seq_len: int,
         device: torch.device,
-        complex_chain_break_indices: List[List[int]] | None = None
+        complex_chain_break_indices: list[list[int]] | None = None
     ) -> Float['b n n dp']:
 
         # One-hot encode distances

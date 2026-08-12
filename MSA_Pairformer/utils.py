@@ -1,22 +1,22 @@
-import subprocess
-import os
-import torch
 import multiprocessing as mp
-from tqdm import tqdm
-from subprocess import Popen, PIPE
-from Bio.PDB import *
-from typing import Optional, Dict
+import subprocess
+from subprocess import PIPE
+
 import matplotlib.pyplot as plt
-from sklearn.mixture import GaussianMixture
 import numpy as np
+import torch
 import torch.nn.functional as F
+from Bio.PDB import MMCIFIO, PDBIO, MMCIFParser, Select
+from sklearn.mixture import GaussianMixture
+from tqdm import tqdm
+
 
 def _run(x):
     "Generic run."
     if isinstance(x, str):
-        res = subprocess.run(x.split(' '), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        res = subprocess.run(x.split(' '), capture_output=True, text=True)
     elif isinstance(x, list):
-        res = subprocess.run(x, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        res = subprocess.run(x, capture_output=True, text=True)
     else:
         print("Must pass a string or a list of strings to _run()")
         return -1
@@ -44,7 +44,7 @@ def write_chain_from_pdb(structure_file_path, chain_ids, out_file_path: None, ig
     if out_file_path is None:
         chain_id_str = '_'.join(chain_ids)
         out_file_path = structure_file_path.replace('.pdb', f'_{chain_id_str}.pdb')
-    with open(structure_file_path, "r") as inFile, open(out_file_path, "w") as outFile:
+    with open(structure_file_path) as inFile, open(out_file_path, "w") as outFile:
         for line in inFile.readlines():
             if line[:6] in ['HEADER', 'TITLE ']:
                 outFile.write(line)
@@ -91,7 +91,7 @@ def convert_cif_to_pdb(input_cif_path, output_pdb_path):
 
 def get_distance_matrix(structure_file_path, chain_id):
     # Load coordinates
-    with open(structure_file_path, "r") as oFile:
+    with open(structure_file_path) as oFile:
         cif_lines_l = [l for l in oFile.readlines() if 
                        (l.startswith('ATOM') and (l.split()[6] == chain_id) and th
                         (((l.split()[3] == 'CA') and (l.split()[5]=='GLY')) or 
@@ -155,7 +155,7 @@ def run_batch_confind(
     """Run confind in batch."""
     if nproc is None:
         nproc = mp.cpu_count() - cpu_buffer
-    zipped_paths = zip(structure_file_paths_l, output_contact_file_paths_l)
+    zipped_paths = zip(structure_file_paths_l, output_contact_file_paths_l, strict=False)
     param_d_l = [{'structure_file_path': structure_file_path, 'output_contact_file_path': output_contact_file_path, 'bin_path': bin_path, 'rot_lib_path': rot_lib_path} for 
                  structure_file_path, output_contact_file_path in zipped_paths]
     with mp.Pool(processes=nproc) as pool:
@@ -260,10 +260,10 @@ def run_batch_confind(
 def compute_precisions(
     predictions: torch.Tensor,
     targets: torch.Tensor,
-    src_lengths: Optional[torch.Tensor] = None,
+    src_lengths: torch.Tensor | None = None,
     minsep: int = 6,
-    maxsep: Optional[int] = None,
-    override_length: Optional[int] = None,  # for casp
+    maxsep: int | None = None,
+    override_length: int | None = None,  # for casp
 ):
     if isinstance(predictions, np.ndarray):
         predictions = torch.from_numpy(predictions)
@@ -340,7 +340,7 @@ def compute_precisions(
 def evaluate_contact_prediction(
     predictions: torch.Tensor,
     targets: torch.Tensor,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     if isinstance(targets, np.ndarray):
         targets = torch.from_numpy(targets)
     contact_ranges = [
@@ -364,7 +364,7 @@ def evaluate_contact_prediction(
     return metrics
 
 def extract_confind_contacts(confind_file_path):
-    with open(confind_file_path, "r") as oFile:
+    with open(confind_file_path) as oFile:
         lines = oFile.readlines()
         # Get protein length
         max_res_idx = int(lines[-2].split()[1].split(',')[1])
@@ -382,7 +382,7 @@ def extract_confind_contacts(confind_file_path):
     return contact_a
 
 def extract_homooligomeric_confind_contacts(confind_file_path):
-    with open(confind_file_path, "r") as oFile:
+    with open(confind_file_path) as oFile:
         lines = oFile.readlines()
         # Get protein length
         observed_chains_d = {}
@@ -537,7 +537,7 @@ def get_p_at_l(gt_contacts_a, pred_contacts_a, minsep=24, upper_triangle=True):
 
 def get_coords(structure_file_path, chain_id):
     # Load coordinates
-    with open(structure_file_path, "r") as oFile:
+    with open(structure_file_path) as oFile:
         cif_lines_l = [l for l in oFile.readlines() if 
                        (l.startswith('ATOM') and (l.split()[4] == chain_id) and
                         (((l.split()[2] == 'CA') and (l.split()[3]=='GLY')) or 
@@ -573,7 +573,7 @@ def get_coords_cif(structure_file_path, chain_id):
         "MSE": "M"
     }
 
-    with open(structure_file_path, "r") as f:
+    with open(structure_file_path) as f:
         lines = f.readlines()
 
     # --- Parse _atom_site loop header ---

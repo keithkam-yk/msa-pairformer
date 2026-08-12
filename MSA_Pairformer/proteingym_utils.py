@@ -1,15 +1,15 @@
 # All code below is originally from the ProteinGym codebase to standardize analyses: https://github.com/OATML-Markslab/ProteinGym
 # Please follow their citation instructions when using this code https://github.com/OATML-Markslab/ProteinGym?tab=readme-ov-file#reference
+import itertools
 import os
 import random
+from collections import defaultdict
+
+import numba
 import numpy as np
 import pandas as pd
-import numba
-from numba import prange
-from collections import defaultdict
-import itertools
 from Bio import SeqIO
-from typing import List, Tuple
+from numba import prange
 
 GAP = "-"
 MATCH_GAP = GAP
@@ -56,7 +56,7 @@ def calc_weights_fast(matrix_mapped, identity_threshold, empty_value, num_cpus=1
                                                               invalid_value=empty_value)
 
     # Empty sequences: weight 0
-    weights = np.zeros((N))
+    weights = np.zeros(N)
     weights[~empty_idx] = 1.0 / num_cluster_members
     return weights
 
@@ -94,7 +94,7 @@ def map_from_alphabet(alphabet, default):
         default = map_[default]
     except KeyError:
         raise ValueError(
-            "Default {} is not in alphabet {}".format(default, alphabet)
+            f"Default {default} is not in alphabet {alphabet}"
         )
 
     return defaultdict(lambda: default, map_)
@@ -148,7 +148,7 @@ def calc_num_cluster_members_nogaps(matrix, identity_threshold, invalid_value):
 
     # Empty sequences are filtered out before this function and are ignored
     # minimal cluster size is 1 (self)
-    num_neighbors = np.ones((N))
+    num_neighbors = np.ones(N)
     L_non_gaps = L - np.sum(matrix == invalid_value, axis=1)  # Edit: From EVE, use the non-gapped length
     # compare all pairs of sequences
     for i in range(N - 1):
@@ -199,7 +199,7 @@ def calc_num_cluster_members_nogaps_parallel(matrix, identity_threshold, invalid
 
     # Empty sequences are filtered out before this function and are ignored
     # minimal cluster size is 1 (self)
-    num_neighbors = np.ones((N))
+    num_neighbors = np.ones(N)
     L_non_gaps = L - np.sum(matrix == invalid_value, axis=1)  # Edit: From EVE, use the non-gapped length
     # compare all pairs of sequences
     # Edit: Rewrote loop without any dependencies between inner and outer loops, so that it can be parallelized
@@ -239,7 +239,7 @@ def calc_num_cluster_members_nogaps_parallel_print(matrix, identity_threshold, i
 
     # Empty sequences are filtered out before this function and are ignored
     # minimal cluster size is 1 (self)
-    num_neighbors = np.ones((N))
+    num_neighbors = np.ones(N)
     L_non_gaps = L - np.sum(matrix == invalid_value, axis=1)  # Edit: From EVE, use the non-gapped length
     # compare all pairs of sequences
     # Edit: Rewrote loop without any dependencies between inner and outer loops, so that it can be parallelized
@@ -345,7 +345,7 @@ class MSA_processing:
 
         self.seq_name_to_sequence = defaultdict(str)
         name = ""
-        with open(self.MSA_location, "r") as msa_data:
+        with open(self.MSA_location) as msa_data:
             for i, line in enumerate(msa_data):
                 line = line.rstrip()
                 if line.startswith(">"):
@@ -383,7 +383,7 @@ class MSA_processing:
         if self.remove_sequences_with_indeterminate_AA_in_focus_cols:
             num_sequences_removed_due_to_indeterminate_AAs = 0
             num_sequences_before_indeterminate_AA_drop = len(self.seq_name_to_sequence)
-            alphabet_set = set(list(self.alphabet))
+            alphabet_set = set(self.alphabet)
             seq_names_to_remove = []
             for seq_name, sequence in self.seq_name_to_sequence.items():
                 for letter in sequence:
@@ -394,7 +394,7 @@ class MSA_processing:
             for seq_name in seq_names_to_remove:
                 num_sequences_removed_due_to_indeterminate_AAs+=1
                 del self.seq_name_to_sequence[seq_name]
-            print("Proportion of sequences dropped due to indeterminate AAs: {}%".format(round(float(num_sequences_removed_due_to_indeterminate_AAs/num_sequences_before_indeterminate_AA_drop*100),2)))
+            print(f"Proportion of sequences dropped due to indeterminate AAs: {round(float(num_sequences_removed_due_to_indeterminate_AAs/num_sequences_before_indeterminate_AA_drop*100),2)}%")
         
         print("Number of sequences after preprocessing:", len(self.seq_name_to_sequence))
         self.num_sequences = len(self.seq_name_to_sequence.keys())
@@ -410,12 +410,12 @@ class MSA_processing:
         # Remove columns that would be gaps in the wild type
         non_gap_wt_cols = [aa != '-' for aa in msa_df.sequence[focus_seq_name]]
         msa_df['sequence'] = msa_df['sequence'].apply(
-            lambda x: ''.join([aa for aa, non_gap_ind in zip(x, non_gap_wt_cols) if non_gap_ind]))
+            lambda x: ''.join([aa for aa, non_gap_ind in zip(x, non_gap_wt_cols, strict=False) if non_gap_ind]))
         assert 0.0 <= threshold_sequence_frac_gaps <= 1.0, "Invalid fragment filtering parameter"
         assert 0.0 <= threshold_focus_cols_frac_gaps <= 1.0, "Invalid focus position filtering parameter"
         print("Calculating proportion of gaps")
         msa_array = np.array([list(seq) for seq in msa_df.sequence])
-        gaps_array = np.array(list(map(lambda seq: [aa == '-' for aa in seq], msa_array)))
+        gaps_array = np.array([[aa == '-' for aa in seq] for seq in msa_array])
         # Identify fragments with too many gaps
         seq_gaps_frac = gaps_array.mean(axis=1)
         seq_below_threshold = seq_gaps_frac <= threshold_sequence_frac_gaps
@@ -431,12 +431,12 @@ class MSA_processing:
             return ''.join([aa.lower() if aa_ix in index_cols_below_threshold else aa for aa_ix, aa in enumerate(seq)])
         msa_df['sequence'] = msa_df['sequence'].apply(
             lambda seq: ''.join([aa.upper() if upper_case_ind else aa.lower() for aa, upper_case_ind in
-             zip(seq, index_cols_below_threshold)]))
+             zip(seq, index_cols_below_threshold, strict=False)]))
         msa_df = msa_df[seq_below_threshold]
         # Overwrite seq_name_to_sequence with clean version
         seq_name_to_sequence = defaultdict(str)
         # Create a dictionary from msa_df.index to msa_df.sequence
-        seq_name_to_sequence = dict(zip(msa_df.index, msa_df.sequence))
+        seq_name_to_sequence = dict(zip(msa_df.index, msa_df.sequence, strict=False))
         # for seq_idx in range(len(msa_df['sequence'])):
         #     seq_name_to_sequence[msa_df.index[seq_idx]] = msa_df.sequence[seq_idx]
 
@@ -455,7 +455,7 @@ class MSA_processing:
         # Refactored into its own function so that we can call it separately
         if self.use_weights:
             if os.path.isfile(self.weights_location):
-                print("Loading sequence weights from disk: {}".format(self.weights_location))
+                print(f"Loading sequence weights from disk: {self.weights_location}")
                 self.weights = np.load(file=self.weights_location)
             else:
                 print("Computing sequence weights")
@@ -528,7 +528,7 @@ def process_msa(
     hhfilter_max_seq_id=100,
     hhfilter_min_seq_id=0,
     num_cpus=1
-) -> List[Tuple[str, str]]:
+) -> list[tuple[str, str]]:
     if filter_msa:
         input_folder = '/'.join(filename.split('/')[:-1])
         msa_name = filename.split('/')[-1].split('.')[0]
@@ -547,10 +547,10 @@ def process_msa(
         output_filename = os.path.join(
             input_folder,
             'hhfiltered',
-            f"{msa_name}_hhfiltered_cov_{str(hhfilter_min_cov)}_maxid_{str(hhfilter_max_seq_id)}_minid_{str(hhfilter_min_seq_id)}.a2m"
+            f"{msa_name}_hhfiltered_cov_{hhfilter_min_cov!s}_maxid_{hhfilter_max_seq_id!s}_minid_{hhfilter_min_seq_id!s}.a2m"
         )
         # bin_file = os.path.join(path_to_hhfilter, 'bin', 'hhfilter')
-        os.system(f"{hhfilter_bin} -cov {str(hhfilter_min_cov)} -id {str(hhfilter_max_seq_id)} -qid {str(hhfilter_min_seq_id)} -i {preprocessed_filename_prefix}_UC.a2m -o {output_filename} -maxseq 10000000")
+        os.system(f"{hhfilter_bin} -cov {hhfilter_min_cov!s} -id {hhfilter_max_seq_id!s} -qid {hhfilter_min_seq_id!s} -i {preprocessed_filename_prefix}_UC.a2m -o {output_filename} -maxseq 10000000")
         filename = output_filename
 
     MSA = MSA_processing(

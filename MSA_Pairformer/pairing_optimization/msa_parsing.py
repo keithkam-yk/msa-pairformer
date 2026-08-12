@@ -2,15 +2,13 @@
 # Original author: Umberto Lupo et al. (2024), Pairing interacting protein sequences using masked language modeling
 
 # %% auto 0
-__all__ = ['deletekeys', 'translation', 'read_sequence', 'remove_insertions', 'read_msa']
+__all__ = ['deletekeys', 'read_msa', 'read_sequence', 'remove_insertions', 'translation']
 
 # %% ../nbs/02_msa_parsing.ipynb 3
-from typing import List, Tuple
-import string
 import itertools
+import string
 
 from Bio import SeqIO
-
 
 deletekeys = dict.fromkeys(string.ascii_lowercase)
 deletekeys["."] = None
@@ -18,7 +16,7 @@ deletekeys["*"] = None
 translation = str.maketrans(deletekeys)
 
 
-def read_sequence(filename: str) -> Tuple[str, str]:
+def read_sequence(filename: str) -> tuple[str, str]:
     """Reads the first (reference) sequences from a fasta or MSA file."""
     record = next(SeqIO.parse(filename, "fasta"))
     return record.description, str(record.seq)
@@ -29,7 +27,7 @@ def remove_insertions(sequence: str) -> str:
     return sequence.translate(translation)
 
 
-def read_msa(filename: str, nseq: int) -> List[Tuple[str, str]]:
+def read_msa(filename: str, nseq: int) -> list[tuple[str, str]]:
     """Reads the first nseq sequences from an MSA file, automatically removes insertions."""
     if nseq == -1:
         nseq = len([elem.id for elem in SeqIO.parse(filename, "fasta")])

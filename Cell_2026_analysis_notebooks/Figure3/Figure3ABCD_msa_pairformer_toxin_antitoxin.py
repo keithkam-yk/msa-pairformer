@@ -23,8 +23,8 @@ from tqdm import tqdm
 from glob import glob
 from copy import deepcopy
 
-from MSA_Pairformer.model import MSAPairformer
-from MSA_Pairformer.dataset import aa2tok_d, prepare_msa_masks
+from msa_pairformer.model import MSAPairformer
+from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 torch.set_float32_matmul_precision('high')

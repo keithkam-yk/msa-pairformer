@@ -1,13 +1,11 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import Module, LayerNorm, Linear, Parameter, Sigmoid, ModuleList, GELU, Sequential
 from einops import rearrange
-from .core import SwiGLU, RMSNorm
-from .custom_typing import (
-    Float,
-    Bool,
-    typecheck
-)
+from torch.nn import GELU, LayerNorm, Linear, Module, Parameter, Sequential, Sigmoid
+
+from .core import RMSNorm, SwiGLU
+from .custom_typing import Bool, Float
+
 
 ##########################
 # Language modeling head #

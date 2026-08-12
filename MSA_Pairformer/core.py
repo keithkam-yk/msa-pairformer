@@ -1,18 +1,14 @@
-import torch
-import torch.nn.functional as F
-from torch.nn import Module
-from torch import nn
-from torch.nn import Linear, Sequential, LayerNorm
-from torch import Tensor
 from functools import partial
 from typing import Literal
-from einops import pack, unpack
+
 import einx
-from .custom_typing import (
-    Float,
-    Bool,
-    typecheck
-)
+import torch
+import torch.nn.functional as F
+from einops import pack, unpack
+from torch import Tensor, nn
+from torch.nn import LayerNorm, Linear, Module, Sequential
+
+from .custom_typing import Bool, Float, typecheck
 
 # Linear layer without bias term (simple linear transformation)
 LinearNoBias = partial(Linear, bias = False)

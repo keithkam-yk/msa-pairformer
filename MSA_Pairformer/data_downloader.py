@@ -1,7 +1,10 @@
-import os
-import msa_model.utils
 import multiprocessing as mp
+import os
+
 from tqdm import tqdm
+
+import msa_model.utils
+
 
 def download_AF_pdb(prot_id, out_dir):
     url = f"https://alphafold.ebi.ac.uk/files/AF-{prot_id}-F1-model_v4.pdb"

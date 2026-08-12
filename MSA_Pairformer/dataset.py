@@ -1,22 +1,18 @@
-import re
 import os
-import numpy as np
-import tempfile
+import re
 import subprocess
-import einx
-
+import tempfile
+from copy import deepcopy
 from glob import glob
-from typing import List, Union, Tuple
 from pathlib import Path
 
-from Bio import SeqIO
-
-from scipy.spatial.distance import cdist
-
+import einx
+import numpy as np
 import torch
-from torch.utils.data import Dataset
+from Bio import SeqIO
+from scipy.spatial.distance import cdist
 from torch.nn.functional import one_hot
-from copy import deepcopy
+from torch.utils.data import Dataset
 
 # Amino acid code to character
 code2aa_d = {
@@ -84,7 +80,7 @@ ESM_SEQUENCE_VOCAB = [
     "O", ".", "-", "|",
     "<mask>"
 ]
-esm_tok2aa_d = {ind: alph for ind, alph in enumerate(ESM_SEQUENCE_VOCAB)}
+esm_tok2aa_d = dict(enumerate(ESM_SEQUENCE_VOCAB))
 esm_aa2tok_d = {alph: ind for ind, alph in enumerate(ESM_SEQUENCE_VOCAB)}
 esmtok_to_pairformertok_d = {esm_aa2tok_d[aa]: aa2tok_d[aa] if aa in aa2tok_d else -1 for aa in ESM_SEQUENCE_VOCAB}
 esmtok_to_pairformertok_d[esm_aa2tok_d['<unk>']] = aa2tok_d['X'] # Handle unknown tokens with X
@@ -101,7 +97,7 @@ def convert_tokens_esm2pairformer(batch_tokens: torch.Tensor, device: torch.devi
 class MSA:
     def __init__(
         self,
-        msa_file_path: Union[str, Path], # Path to MSA file
+        msa_file_path: str | Path, # Path to MSA file
         max_length: int = 1024, # Maximum length of the MSA (default is 1024)
         max_tokens: int = 1048576, # Maximum number of tokens in the MSA (default is 1024 * 1024)
         max_seqs: int = 1024, # Maximum number of sequences in the MSA (default is 1024)
@@ -201,7 +197,7 @@ class MSA:
         seq_l = []
         ids_l = []
         valid_indices = None
-        with open(self.msa_file_path, "r") as oFile:
+        with open(self.msa_file_path) as oFile:
             for record in SeqIO.parse(oFile, "fasta"):
                 sequence = str(record.seq)
                 if remove_lowercase_cols:
@@ -457,7 +453,7 @@ def msa_mlm(
     # Return masked MSA and indices of tokens to predict
     return masked_msas, mlm_indices
 
-class CollateAFBatch():
+class CollateAFBatch:
     def __init__(
         self,
         max_seq_length,
@@ -509,7 +505,7 @@ class CollateAFBatch():
             msas = np.full(shape, self.pad_tok, dtype=dtype)
         elif isinstance(tokenized_msa_l[0], torch.Tensor):
             msas = torch.full(shape, self.pad_tok, dtype=dtype)
-        for msa, seq in zip(msas, tokenized_msa_l):
+        for msa, seq in zip(msas, tokenized_msa_l, strict=False):
             msaslice = tuple(slice(dim) for dim in seq.shape)
             msa[msaslice] = seq
         output_dict['msas'] = msas
@@ -619,7 +615,7 @@ def create_msa_subset_mask(subset_msa_idx_l, L):
 class trRosettaContactMSADataset(Dataset):
     def __init__(
         self,
-        paired_paths_l: List[Tuple[Union[str, Path], Union[str, Path]]],
+        paired_paths_l: list[tuple[str | Path, str | Path]],
         max_seq_length: int = 1024,
         max_msa_depth: int = 1024,
         min_msa_depth: int = 8,
@@ -668,7 +664,7 @@ class trRosettaContactMSADataset(Dataset):
         res_d['msa_crop_bounds'] = (msa.random_crop_min, msa.random_crop_max)
         return res_d
 
-class CollatetrRosettaContactMSABatch():
+class CollatetrRosettaContactMSABatch:
     def __init__(
         self, 
         max_seq_length: int, 
@@ -702,7 +698,7 @@ class CollatetrRosettaContactMSABatch():
             msas = np.full(shape, self.pad_tok, dtype=dtype)
         elif isinstance(tokenized_msa_l[0], torch.Tensor):
             msas = torch.full(shape, self.pad_tok, dtype=dtype)
-        for msa, seq in zip(msas, tokenized_msa_l):
+        for msa, seq in zip(msas, tokenized_msa_l, strict=False):
             msaslice = tuple(slice(dim) for dim in seq.shape)
             msa[msaslice] = seq
         output_dict['msas'] = msas

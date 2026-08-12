@@ -1,9 +1,8 @@
-import torch
 import jax
 import jax.numpy as jnp
 import numpy as np
-from tqdm import tqdm
-from .dataset import aa2tok_d
+import torch
+
 
 def get_contacts_from_coev(x, symm=True, center=True, rm=1, mask_only=False):
     # convert jacobian (L,A,L,A) to contact map (L,L)

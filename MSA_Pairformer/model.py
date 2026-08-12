@@ -1,22 +1,22 @@
-import torch
-from torch.nn import Module, ModuleList, Sequential
-import numpy as np
-import einx
 import os
-from math import exp
 from functools import partial
+from glob import glob
+from math import exp
+from pathlib import Path
+
+import einx
+import torch
 from einops.layers.torch import Rearrange
 from huggingface_hub import snapshot_download
-from pathlib import Path
-from typing import List
-from glob import glob
+from torch.nn import Module, ModuleList, Sequential
 
-from MSA_Pairformer.core import LinearNoBias, PreLayerNorm, Transition, exists
-from MSA_Pairformer.outer_product import OuterProduct
-from MSA_Pairformer.regression import LMHead, LogisticRegressionContactHead, MRFHead
-from MSA_Pairformer.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock, cuex_is_available
-from MSA_Pairformer.positional_encoding import RelativePositionEncoding
-from MSA_Pairformer.custom_typing import Float, Bool
+from msa_pairformer.core import LinearNoBias, PreLayerNorm, Transition, exists
+from msa_pairformer.custom_typing import Bool, Float
+from msa_pairformer.outer_product import OuterProduct
+from msa_pairformer.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock, cuex_is_available
+from msa_pairformer.positional_encoding import RelativePositionEncoding
+from msa_pairformer.regression import LMHead, LogisticRegressionContactHead
+
 
 class CoreModule(Module):
     """
@@ -148,8 +148,8 @@ class CoreModule(Module):
         seq_weights: Float['b s'] | None = None,
         seq_weights_dict: dict = None,
         query_only: bool = True,
-        return_msa_repr_layer_idx: List[int] | int | None = None,
-        return_pairwise_repr_layer_idx: List[int] | int | None = None,
+        return_msa_repr_layer_idx: list[int] | int | None = None,
+        return_pairwise_repr_layer_idx: list[int] | int | None = None,
         return_repr_after_layer_idx: int | None = None,
         return_seq_weights: bool = False,
         store_pairwise_repr_cpu: bool = True,
@@ -383,16 +383,16 @@ class MSAPairformer(Module):
             # If weights have already been saved
             weights_files_l = glob(os.path.join(weights_dir, "*/snapshots/*/*"))
             if (
-                any([os.path.basename(p) == "model_cuex.bin" for p in weights_files_l]) and 
-                any([os.path.basename(p) == "confind_contact.bin" for p in weights_files_l]) and
-                any([os.path.basename(p) == "contact.bin" for p in weights_files_l]) #and
+                any(os.path.basename(p) == "model_cuex.bin" for p in weights_files_l) and 
+                any(os.path.basename(p) == "confind_contact.bin" for p in weights_files_l) and
+                any(os.path.basename(p) == "contact.bin" for p in weights_files_l) #and
                 # any([os.path.basename(p) == "mrf_head.bin" for p in weights_files_l])
             ):
-                main_weights_path = [p for p in weights_files_l if os.path.basename(p) == 'model_cuex.bin'][0]
+                main_weights_path = next(p for p in weights_files_l if os.path.basename(p) == 'model_cuex.bin')
                 checkpoint = torch.load(main_weights_path, weights_only=True, map_location=device)
-                confind_contact_path = [p for p in weights_files_l if os.path.basename(p) == 'confind_contact.bin'][0]
+                confind_contact_path = next(p for p in weights_files_l if os.path.basename(p) == 'confind_contact.bin')
                 confind_contact_checkpoint = torch.load(confind_contact_path, weights_only=True, map_location=device)
-                cb_contact_path = [p for p in weights_files_l  if os.path.basename(p) == 'contact.bin'][0]
+                cb_contact_path = next(p for p in weights_files_l  if os.path.basename(p) == 'contact.bin')
                 cb_contact_checkpoint = torch.load(cb_contact_path, weights_only=True, map_location=device)
                 # mrf_head_path = [p for p in weights_files_l if os.path.basename(p) == 'mrf_head.bin'][0]
                 # mrf_head_checkpoint = torch.load(mrf_head_path, weights_only=True, map_location=device)
@@ -415,7 +415,7 @@ class MSAPairformer(Module):
     def init_representations(
         self,
         msa: Float['b s n d'],
-        complex_chain_break_indices: List[int] | None = None,
+        complex_chain_break_indices: list[int] | None = None,
     ):
         # Initialize pair representation
         batch_size, _, seq_len, _ = msa.shape
@@ -456,9 +456,9 @@ class MSAPairformer(Module):
         return_confind_contacts: bool = True,
         return_seq_weights: bool = False,
         query_only: bool = True,
-        return_pairwise_repr_layer_idx: List[int] | int | None = None,
-        return_msa_repr_layer_idx: List[int] | int | None = None,
-        complex_chain_break_indices: List[int] | None = None,
+        return_pairwise_repr_layer_idx: list[int] | int | None = None,
+        return_msa_repr_layer_idx: list[int] | int | None = None,
+        complex_chain_break_indices: list[int] | None = None,
         return_repr_after_layer_idx: int | None = None,
         store_msa_repr_cpu: bool = True,
         store_pairwise_repr_cpu: bool = True,
@@ -541,7 +541,7 @@ class MSAPairformer(Module):
         pairwise_mask: Bool['b n n'] | None = None,
         seq_weights: Float['b s'] | None = None,
         seq_weights_dict: dict = {},
-        complex_chain_break_indices: List[int] | None = None,
+        complex_chain_break_indices: list[int] | None = None,
         return_seq_weights: bool = False,
     ):
         # Initialize representations
@@ -581,7 +581,7 @@ class MSAPairformer(Module):
         pairwise_mask: Bool['b n n'] | None = None,
         seq_weights: Float['b s'] | None = None,
         seq_weights_dict: dict = {},
-        complex_chain_break_indices: List[int] | None = None,
+        complex_chain_break_indices: list[int] | None = None,
         return_seq_weights: bool = False,
     ):
         # Initialize representations
@@ -620,7 +620,7 @@ class MSAPairformer(Module):
         pairwise_mask: Bool['b n n'] | None = None,
         seq_weights: Float['b s'] | None = None,
         seq_weights_dict: dict = {},
-        complex_chain_break_indices: List[int] | None = None,
+        complex_chain_break_indices: list[int] | None = None,
         return_seq_weights: bool = False,
         store_pairwise_repr_cpu: bool = False,
     ):
@@ -663,7 +663,7 @@ class MSAPairformer(Module):
         pairwise_mask: Bool['b n n'] | None = None,
         seq_weights: Float['b s'] | None = None,
         seq_weights_dict: dict = {},
-        complex_chain_break_indices: List[int] | None = None,
+        complex_chain_break_indices: list[int] | None = None,
         store_pairwise_repr_cpu: bool = False
     ):
         # Initialize representations

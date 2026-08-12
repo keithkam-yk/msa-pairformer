@@ -38,14 +38,45 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["MSA_Pairformer*"]
+include = ["msa_pairformer*"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["MSA_Pairformer"]
+packages = ["msa_pairformer"]
 
 [tool.hatch.build.targets.sdist]
-only-include = ["MSA_Pairformer", "README.md", "LICENSE", "MIT_LICENSE", "pyproject.toml"]
+only-include = ["msa_pairformer", "README.md", "LICENSE", "MIT_LICENSE", "pyproject.toml"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+# Paper-reproduction code and notebooks are archival: reformatting them risks
+# the published results, so they are linted separately (if ever), not here.
+extend-exclude = ["Cell_2026_analysis_notebooks", "*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "C4", "RUF"]
+ignore = [
+    # Research code keeps unused loop/unpack bindings for readability.
+    "RUF059",
+    # `dict(...)` kwargs blocks are used deliberately for module config.
+    "C408",
+    # jaxtyping shape annotations (Float['b s n d']) are not forward references.
+    # See msa_pairformer/custom_typing.py.
+    "F722",
+]
+
+[tool.ty.src]
+include = ["msa_pairformer"]
+
+[tool.ty.environment]
+python = ".venv"
+
+[tool.ty.rules]
+# Counterpart to ruff's F722: jaxtyping shape annotations such as
+# Float['b s n d'] subscript a runtime object, which is not a type expression.
+# See msa_pairformer/custom_typing.py.
+invalid-type-form = "ignore"

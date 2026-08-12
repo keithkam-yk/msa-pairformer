@@ -2,27 +2,29 @@
 # Original author: Umberto Lupo et al. (2024), Pairing interacting protein sequences using masked language modeling
 
 # Progress bars
-from tqdm import tqdm
-from einops import einsum
+from pathlib import Path
+
+import einx
 
 # NumPy
 import numpy as np
 
 # Torch
 import torch
-from pathlib import Path
-import einx
-from scipy.optimize import linear_sum_assignment
-
+from einops import einsum
 from huggingface_hub import snapshot_download
+from scipy.optimize import linear_sum_assignment
+from tqdm import tqdm
+
+from msa_pairformer.dataset import aa2tok_d
+
+# MSA Pairformer imports
+from msa_pairformer.model import MSAPairformer
+from msa_pairformer.regression import MRFHead
 
 # DiffPALM imports
 from .gumbel_sinkhorn_utils import MSA_inverse_permutation
 
-# MSA Pairformer imports
-from MSA_Pairformer.model import MSAPairformer
-from MSA_Pairformer.regression import MRFHead
-from MSA_Pairformer.dataset import aa2tok_d
 
 def DCN(x):
     return x.detach().clone().cpu().numpy()

@@ -10,7 +10,7 @@ from typing import List, Tuple
 import torch
 from torch.nn.functional import one_hot
 
-from MSA_Pairformer.dataset import aa2tok_d, prepare_msa_masks
+from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
 
 import msa_utils
 

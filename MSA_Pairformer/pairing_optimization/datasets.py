@@ -1,10 +1,7 @@
-import numpy as np
-from numpy.random import default_rng
-
-import torch
-
 import esm
-
+import numpy as np
+import torch
+from numpy.random import default_rng
 
 _, msa_alphabet = esm.pretrained.esm_msa1b_t12_100M_UR50S()
 msa_batch_converter = msa_alphabet.get_batch_converter()

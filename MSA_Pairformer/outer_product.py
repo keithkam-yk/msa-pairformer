@@ -1,16 +1,15 @@
-import torch
 from functools import partial
+from typing import Literal
+
+import torch
 from einops import rearrange
 from torch import nn
-from torch.nn import Module, LayerNorm, Linear
-from typing import Literal, Optional
-from .core import to_pairwise_mask, LinearNoBias, SwiGLU, exists, RMSNorm
-from .custom_typing import (
-    Float,
-    Bool
-)
-import sys
+from torch.nn import LayerNorm, Linear, Module
+
 from .chunk_layer import chunk_layer
+from .core import LinearNoBias, SwiGLU, exists, to_pairwise_mask
+from .custom_typing import Bool, Float
+
 
 class OuterProductMean(Module):
     def __init__(
@@ -50,7 +49,7 @@ class OuterProductMean(Module):
         self.return_seq_weights = return_seq_weights
     def _opm(self, a, b):
         outer = torch.einsum("...bac,...dae->...bdce", a, b)
-        outer = outer.reshape(outer.shape[:-2] + (-1,))
+        outer = outer.reshape((*outer.shape[:-2], -1))
         outer = self.to_pairwise_repr(outer)
         outer = self.activation(outer)
         return outer
@@ -62,10 +61,10 @@ class OuterProductMean(Module):
         b,
         chunk_size
     ):
-        a_reshape = a.reshape((-1,) + a.shape[-3:])
-        b_reshape = b.reshape((-1,) + b.shape[-3:])
+        a_reshape = a.reshape((-1, *a.shape[-3:]))
+        b_reshape = b.reshape((-1, *b.shape[-3:]))
         out = []
-        for a_prime, b_prime in zip(a_reshape, b_reshape):
+        for a_prime, b_prime in zip(a_reshape, b_reshape, strict=False):
             outer = chunk_layer(
                 partial(self._opm, b=b_prime),
                 {"a": a_prime},
@@ -196,7 +195,7 @@ class PresoftmaxDifferentialOuterProductMean(Module):
 
     def _opm(self, a, b, pair_denom):
         outer = torch.einsum("...bac,...dae->...bdce", a, b)
-        outer = outer.reshape(outer.shape[:-2] + (-1,))
+        outer = outer.reshape((*outer.shape[:-2], -1))
         outer = outer / (pair_denom.unsqueeze(-1) + self.eps)
         outer = self.to_pairwise_repr(outer)
         outer = self.activation(outer)
@@ -209,10 +208,10 @@ class PresoftmaxDifferentialOuterProductMean(Module):
         b,
         chunk_size
     ):
-        a_reshape = a.reshape((-1,) + a.shape[-3:])
-        b_reshape = b.reshape((-1,) + b.shape[-3:])
+        a_reshape = a.reshape((-1, *a.shape[-3:]))
+        b_reshape = b.reshape((-1, *b.shape[-3:]))
         out = []
-        for a_prime, b_prime in zip(a_reshape, b_reshape):
+        for a_prime, b_prime in zip(a_reshape, b_reshape, strict=False):
             outer = chunk_layer(
                 partial(self._opm, b=b_prime),
                 {"a": a_prime},
@@ -317,10 +316,10 @@ class OuterProduct(Module):
         dim_opm_hidden: int,
         outer_product_flavor: Literal["vanilla", "vanilla_attention", "presoftmax_differential_attention"],
         seq_attn: bool = False,
-        dim_qk: Optional[int] = None,
-        chunk_size: Optional[int] = None,
-        return_seq_weights: Optional[bool] = False,
-        lambda_init: Optional[float] = None,
+        dim_qk: int | None = None,
+        chunk_size: int | None = None,
+        return_seq_weights: bool | None = False,
+        lambda_init: float | None = None,
         eps: float = 1e-32,
     ):
         super().__init__()

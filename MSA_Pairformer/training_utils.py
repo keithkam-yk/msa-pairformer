@@ -1,20 +1,13 @@
-import os
 import random
+
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from pathlib import Path
+
 # from shortuuid import uuid
-
 import torch
-from torch.nn import CrossEntropyLoss
-from torch.utils.data import DataLoader, random_split, Dataset
-from torch.optim import Adam, Optimizer
-from torch.optim.lr_scheduler import LambdaLR, LRScheduler
 
-import sys
 # sys.path.append("../funcs/")
-from .dataset import MSADataset, MSAConfindContactMapDataset, CollateAFBatch, CollateMSAConfindContactMapBatch, MSA, aa2tok_d, tok2aa_d, nTokenTypes, trRosettaContactMSADataset, CollatetrRosettaContactMSABatch
+from .dataset import CollateAFBatch, CollatetrRosettaContactMSABatch, MSADataset, aa2tok_d, trRosettaContactMSADataset
+
 
 def init_dataloaders(
     msa_file_paths,

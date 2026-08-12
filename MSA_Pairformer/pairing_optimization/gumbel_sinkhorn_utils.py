@@ -2,17 +2,17 @@
 # Original author: Umberto Lupo et al. (2024), Pairing interacting protein sequences using masked language modeling
 # Modified from: https://github.com/perrying/gumbel-sinkhorn
 
+
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 import torch
-from typing import Tuple
+from scipy.optimize import linear_sum_assignment
 
 
 def sample_uniform(log_alpha_size: torch.Size):
     return torch.rand(log_alpha_size)
 
 
-def sinkhorn_norm(alpha: torch.Tensor, n_iter: int = 20) -> Tuple[torch.Tensor,]:
+def sinkhorn_norm(alpha: torch.Tensor, n_iter: int = 20) -> tuple[torch.Tensor,]:
     for _ in range(n_iter):
         alpha = alpha / alpha.sum(-1, keepdim=True)
         alpha = alpha / alpha.sum(-2, keepdim=True)
@@ -21,7 +21,7 @@ def sinkhorn_norm(alpha: torch.Tensor, n_iter: int = 20) -> Tuple[torch.Tensor,]
 
 def log_sinkhorn_norm(
     log_alpha: torch.Tensor, n_iter: int = 20
-) -> Tuple[torch.Tensor,]:
+) -> tuple[torch.Tensor,]:
     for _ in range(n_iter):
         log_alpha = log_alpha - torch.logsumexp(log_alpha, -1, keepdim=True)
         log_alpha = log_alpha - torch.logsumexp(log_alpha, -2, keepdim=True)
@@ -38,7 +38,7 @@ def gumbel_sinkhorn(
     noise_std: bool = False,
     rand_perm=None,
     cost_bias=None,
-) -> Tuple[torch.Tensor,]:
+) -> tuple[torch.Tensor,]:
     if noise:
         if noise_std:
             noise_factor = noise_factor * torch.std(log_alpha)
@@ -66,7 +66,7 @@ def gumbel_matching(
     noise_std: bool = False,
     rand_perm=None,
     cost_bias=None,
-) -> Tuple[torch.Tensor,]:
+) -> tuple[torch.Tensor,]:
     if noise:
         if noise_std:
             noise_factor = noise_factor * torch.std(log_alpha)
@@ -82,9 +82,7 @@ def gumbel_matching(
     return assignment_mat
 
 
-def no_noise_matching(
-    log_alpha: torch.Tensor
-) -> Tuple[torch.Tensor,]:
+def no_noise_matching(log_alpha: torch.Tensor) -> tuple[torch.Tensor,]:
     np_log_alpha = log_alpha.detach().to("cpu").numpy()
     np_assignment_mat = gen_assignment(np_log_alpha)
     assignment_mat = torch.from_numpy(np_assignment_mat).float().to(log_alpha.device)

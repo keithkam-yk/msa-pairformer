@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 import numpy as np
-from copy import deepcopy
+
 
 def plot_contact_map(
     cons,
@@ -31,7 +33,7 @@ def plot_contact_map(
 
     #### Plot lower triangle matrix using top-L or ground truth contacts ####
 
-    for n, (con, cutoff, s, c) in enumerate(zip(cons,cutoffs,ss,cc)):
+    for n, (con, cutoff, s, c) in enumerate(zip(cons,cutoffs,ss,cc, strict=False)):
         if con.shape[0] > max_L:
             max_L = con.shape[0]
         
@@ -132,7 +134,7 @@ def eval_hetero_oligomer(
     precision_d = {}
     total_interface_contacts = None
     monomer_top_d = {}
-    for i, (con, cutoff, s, c) in enumerate(zip(cons, cutoffs, ss, cc)):
+    for i, (con, cutoff, s, c) in enumerate(zip(cons, cutoffs, ss, cc, strict=False)):
         # Iterate over both chains separately
         for chain_idx in range(2):
             chain_start_idx = chain_idx * chain_break_pos
@@ -225,7 +227,7 @@ def eval_hetero_oligomer(
                 
                 # Plot false positives
                 ax.scatter(filtered_j[vals_sort_idx][bad], filtered_i[vals_sort_idx][bad] + chain_break_pos, c="red", s=s, alpha=0.8, edgecolors='none', rasterized=True)
-            precision_d[f"interface"] = (len(bad) - bad.sum()) / len(bad)
+            precision_d["interface"] = (len(bad) - bad.sum()) / len(bad)
             # Plot true positives
             ax.scatter(filtered_j[vals_sort_idx][first_map_vals == 1], filtered_i[vals_sort_idx][first_map_vals == 1] + chain_break_pos, c=c, s=s, alpha=0.8, edgecolors='none', rasterized=True)
         else:

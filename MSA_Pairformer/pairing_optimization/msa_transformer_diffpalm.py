@@ -1,30 +1,30 @@
 # Adapted from https://github.com/Bitbol-Lab/DiffPALM/blob/main/diffpalm/msa_parsing.py
 # Original author: Umberto Lupo et al. (2024), Pairing interacting protein sequences using masked language modeling
 
-from pathlib import Path
 from copy import deepcopy
 
-# Progress bars
-from tqdm import tqdm
+import esm
+import matplotlib.cm as cm
+
+# PLOTTING
+import matplotlib.pyplot as plt
 
 # NumPy
 import numpy as np
 
 # Torch and ESM
 import torch
-import esm
+from matplotlib.colors import CenteredNorm
 
-from MSA_Pairformer.pairing_optimization.gumbel_sinkhorn_utils import (
-    gumbel_sinkhorn,
-    gumbel_matching,
+# Progress bars
+from tqdm import tqdm
+
+from msa_pairformer.pairing_optimization.gumbel_sinkhorn_utils import (
     MSA_inverse_permutation,
+    gumbel_matching,
+    gumbel_sinkhorn,
     sample_uniform,
 )
-
-# PLOTTING
-import matplotlib.pyplot as plt
-from matplotlib.colors import CenteredNorm
-import matplotlib.cm as cm
 
 msa_transformer, _ = esm.pretrained.esm_msa1b_t12_100M_UR50S()
 msa_transformer = msa_transformer.eval()
@@ -101,7 +101,7 @@ class PermutationsMixin:
             self._effective_depth_not_fixed = []
             self._effective_fixed_pairings_zip = []
             for species_idx, (species_size, species_fixed_pairings) in enumerate(
-                zip(self.species_sizes, _fixed_pairings)
+                zip(self.species_sizes, _fixed_pairings, strict=False)
             ):
                 # Check uniqueness of pairs (i, j)
                 n_fixed = len(set(species_fixed_pairings))
@@ -112,7 +112,7 @@ class PermutationsMixin:
                     )
                 fixed_pairings_arr = np.zeros((species_size, species_size), dtype=int)
                 if species_fixed_pairings:
-                    species_fixed_pairings_zip = tuple(zip(*species_fixed_pairings))
+                    species_fixed_pairings_zip = tuple(zip(*species_fixed_pairings, strict=False))
                 else:
                     # species_fixed_pairings is an empty list
                     species_fixed_pairings_zip = (tuple(), tuple())
@@ -154,7 +154,7 @@ class PermutationsMixin:
                 start += species_size
             start = 0
             for species_size, (rows_fixed, cols_fixed) in zip(
-                self.species_sizes, self._effective_fixed_pairings_zip
+                self.species_sizes, self._effective_fixed_pairings_zip, strict=False
             ):
                 self._effective_mask_not_fixed_cat[:, start:, ...][
                     :, rows_fixed, :length_left
@@ -197,7 +197,7 @@ class PermutationsMixin:
 
         null_model = 1
         null_model = len(self.species_sizes)
-        _depth = [0] + list(np.cumsum(self.species_sizes))
+        _depth = [0, *list(np.cumsum(self.species_sizes))]
         for k in range(1, len(_depth)):
             for ii in range(2):
                 elem, elem1 = _depth[k - 1], _depth[k]
@@ -310,7 +310,7 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         if self._effective_fixed_pairings_zip is not None:
             start = 0
             for species_size, (_, cols_fixed) in zip(
-                self.species_sizes, self._effective_fixed_pairings_zip
+                self.species_sizes, self._effective_fixed_pairings_zip, strict=False
             ):
                 mask[:, start:, ...][:, cols_fixed, ...] = False
                 start += species_size
@@ -430,7 +430,7 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
                         func(la, noise_mat=nm, rand_perm=rp, **params)
                         if la.size(0)
                         else la
-                        for la, nm, rp in zip(log_alpha, noise_mat, rand_perm)
+                        for la, nm, rp in zip(log_alpha, noise_mat, rand_perm, strict=False)
                     ]
                 )
 
@@ -574,7 +574,7 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
                     gs_mat = _gs_mat.clone()
                     start = 0
                     for species_size, species_fixed_pairings in zip(
-                        self.species_sizes, self._effective_fixed_pairings_zip
+                        self.species_sizes, self._effective_fixed_pairings_zip, strict=False
                     ):
                         gs_matching_mat[start:, start:][species_fixed_pairings] = 1.0
                         gs_mat[start:, start:][species_fixed_pairings] = 1.0

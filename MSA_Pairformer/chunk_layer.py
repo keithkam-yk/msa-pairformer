@@ -1,8 +1,11 @@
 # Adapted from https://github.com/yoakiyama/openfold/blob/main/openfold/utils/chunk_utils.py
 
-import torch
-from typing import Callable, Dict, Optional, Tuple, Any
+from collections.abc import Callable
 from functools import partial
+from typing import Any
+
+import torch
+
 
 def dict_map(fn, dic, leaf_type):
     new_dict = {}
@@ -57,16 +60,16 @@ def _fetch_dims(tree):
 
 def chunk_layer(
     layer: Callable,
-    inputs: Dict[str, Any],
+    inputs: dict[str, Any],
     chunk_size: int,
     no_batch_dims: int,
     low_mem: bool = False,
     _out: Any = None,
     _add_into_out: bool = False,
-    select_chunk_fn_d: Optional[Dict[str, Callable]] = None,
-    orig_batch_dims: Optional[Dict[str, Tuple]] = None,
-    flat_batch_dim: Optional[int] = None,
-    og_batch_dim: Optional[Tuple] = None,
+    select_chunk_fn_d: dict[str, Callable] | None = None,
+    orig_batch_dims: dict[str, tuple] | None = None,
+    flat_batch_dim: int | None = None,
+    og_batch_dim: tuple | None = None,
 ) -> Any:
     if not (len(inputs) > 0):
         raise ValueError("Must provide at least one input")
@@ -75,8 +78,8 @@ def chunk_layer(
         orig_batch_dims = {}
         initial_dims = [shape[:no_batch_dims] for shape in _fetch_dims(inputs)]
         for k in inputs.keys():
-            orig_batch_dims[k] = tuple([max(s) for s in zip(*initial_dims)])
-        og_batch_dim = tuple([max(s) for s in zip(*initial_dims)])
+            orig_batch_dims[k] = tuple([max(s) for s in zip(*initial_dims, strict=False)])
+        og_batch_dim = tuple([max(s) for s in zip(*initial_dims, strict=False)])
 
     def _prep_inputs(t, batch_dim):
             if(not low_mem):
@@ -93,7 +96,7 @@ def chunk_layer(
     prepped_inputs = tensor_tree_map(prep_inputs_fn_d, inputs)
     prepped_outputs = None
     if(_out is not None):
-        reshape_fn = lambda t: t.view([-1] + list(t.shape[no_batch_dims:]))
+        reshape_fn = lambda t: t.view([-1, *list(t.shape[no_batch_dims:])])
         prepped_outputs = tensor_tree_map(reshape_fn, _out)
 
     if flat_batch_dim is None:
@@ -133,7 +136,7 @@ def chunk_layer(
 
         # Allocate space for the output
         if out is None:
-            allocate = lambda t: t.new_zeros((flat_batch_dim,) + t.shape[1:])
+            allocate = lambda t: t.new_zeros((flat_batch_dim, *t.shape[1:]))
             out = tensor_tree_map(allocate, output_chunk)
 
         # Put the chunk in its pre-allocated space
@@ -151,7 +154,7 @@ def chunk_layer(
 
             assign(out, output_chunk)
         elif out_type is tuple:
-            for x1, x2 in zip(out, output_chunk):
+            for x1, x2 in zip(out, output_chunk, strict=False):
                 if(_add_into_out):
                     x1[i: i + chunk_size] += x2
                 else:

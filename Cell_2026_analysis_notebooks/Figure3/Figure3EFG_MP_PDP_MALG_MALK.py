@@ -21,13 +21,13 @@ from huggingface_hub import snapshot_download
 from pathlib import Path
 from scipy.optimize import linear_sum_assignment
 
-from MSA_Pairformer.dataset import esmtok_to_pairformertok_d, aa2tok_d
-from MSA_Pairformer.model import MSAPairformer
-from MSA_Pairformer.regression import MRFHead
+from msa_pairformer.dataset import esmtok_to_pairformertok_d, aa2tok_d
+from msa_pairformer.model import MSAPairformer
+from msa_pairformer.regression import MRFHead
 
-from MSA_Pairformer.pairing_optimization.mp_pdp import MP_PDP
-from MSA_Pairformer.pairing_optimization.msa_parsing import read_msa
-from MSA_Pairformer.pairing_optimization.datasets import generate_dataset, dataset_tokenizer
+from msa_pairformer.pairing_optimization.mp_pdp import MP_PDP
+from msa_pairformer.pairing_optimization.msa_parsing import read_msa
+from msa_pairformer.pairing_optimization.datasets import generate_dataset, dataset_tokenizer
 
 def save_parameters(parameters_all, filepath):
     """Saves the parameters dictionary"""
