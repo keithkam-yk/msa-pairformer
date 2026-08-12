@@ -17,6 +17,15 @@ Each case checks two things in order:
    tolerance. Bitwise equality is not asserted because einsum/bmm may pick
    different reduction orders depending on tensor contiguity.
 
+Every case runs on each available execution path -- CPU vanilla, CUDA vanilla,
+CUDA with the fused cuEquivariance kernels -- against the same goldens, at a
+tolerance chosen per path. One reference for all three is the point: comparing
+the fused kernels against our own PyTorch fallback would only establish that
+two of our implementations agree, which is the weaker claim.
+
+The CUDA paths skip on a machine without a GPU, so locally this suite is still
+a single-path CPU run.
+
 A missing `golden.pt` is a **collection error**, not a skip: the suite cannot
 report green without it, because "no goldens" is indistinguishable from "no
 regressions" to everything downstream.
@@ -24,12 +33,14 @@ regressions" to everything downstream.
     pytest tests/test_correctness.py
 """
 
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
 import pytest
 import torch
 
+from bench.step import CUEQUIVARIANCE_PRESENT, triangle_path
 from tests.generate_fixtures import build_cases, param_checksum
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden.pt"
@@ -42,7 +53,7 @@ PACKAGE = "msa_pairformer"
 # `cpu/vanilla` is measured at exactly 0.0 against these goldens, so its
 # tolerance only has to absorb reduction-order differences between contiguity
 # states. The GPU rows are placeholders until `modal run
-# bench/modal_app.py::drift` reports what the deviation actually is -- see
+# bench/modal_app.py::check` reports what the deviation actually is -- see
 # bench/drift.py. Do not tighten them by guessing; the drift report is the only
 # thing that says what is achievable.
 TOLERANCES: dict[str, tuple[float, float]] = {
@@ -52,8 +63,61 @@ TOLERANCES: dict[str, tuple[float, float]] = {
     "cuda/cuex": (1e-2, 1e-3),     # PROVISIONAL - set from the drift report
 }
 
-# The suite runs on CPU with the vanilla path unless conftest is told otherwise.
-RTOL, ATOL = TOLERANCES["cpu/vanilla"]
+
+@dataclass(frozen=True)
+class ExecutionPath:
+    """One device and triangle implementation, replayed against the goldens.
+
+    The path is part of how cases are *built*, not a setting applied around
+    them. `PairwiseBlock` and `MSAPairformer` read `CUEQUIVARIANCE_AVAILABLE`
+    when they construct their submodules, and construction happens inside the
+    case callable -- so both `build_cases` and the call it returns have to sit
+    inside the context, exactly as `bench/drift.py` does it.
+
+    Reusing a registry built once across several paths would silently defeat
+    this: conftest forces vanilla for the whole session, so a `cuda/cuex` case
+    drawing from that registry would compare vanilla output against vanilla
+    goldens and pass while testing nothing.
+    """
+
+    device: torch.device
+    cuequivariance: bool
+
+    @property
+    def label(self) -> str:
+        return f"{self.device.type}/{'cuex' if self.cuequivariance else 'vanilla'}"
+
+    @property
+    def tolerance(self) -> tuple[float, float]:
+        return TOLERANCES[self.label]
+
+    def replay(self, name: str):
+        with triangle_path(self.cuequivariance) as effective:
+            assert effective == self.cuequivariance, (
+                f"{self.label}: asked for cuequivariance={self.cuequivariance} "
+                f"but got {effective}. The fixture should have skipped."
+            )
+            cases = dict(
+                build_cases(PACKAGE, device=self.device, use_cuequivariance=effective)
+            )
+            return cases[name]()
+
+
+PATHS = [
+    ExecutionPath(torch.device("cpu"), False),
+    ExecutionPath(torch.device("cuda"), False),
+    ExecutionPath(torch.device("cuda"), True),
+]
+
+
+@pytest.fixture(params=PATHS, ids=lambda p: p.label)
+def path(request) -> ExecutionPath:
+    p: ExecutionPath = request.param
+    if p.device.type == "cuda" and not torch.cuda.is_available():
+        pytest.skip("needs a CUDA host")
+    if p.cuequivariance and not CUEQUIVARIANCE_PRESENT:
+        pytest.skip("needs cuequivariance_torch")
+    return p
 
 # Cases whose loss would gut the suite. Named explicitly so that a parametrise
 # or fixture-generation bug that silently collects fewer cases fails loudly
@@ -83,20 +147,22 @@ def recorded_case_names():
     return sorted(load_fixture()["cases"])
 
 
-@pytest.fixture(scope="module")
-def case_registry():
-    """Map each recorded case name to the callable that reproduces it."""
-    cases = dict(build_cases(PACKAGE))
-    missing = set(load_fixture()["cases"]) - set(cases)
+def test_every_recorded_case_has_a_generator():
+    """Checked once rather than per case: a fixture entry with no generator is a
+    fixture/code mismatch, not a numerical failure of any one path."""
+    missing = set(load_fixture()["cases"]) - set(dict(build_cases(PACKAGE)))
     assert not missing, f"fixture has cases with no generator: {sorted(missing)}"
-    return cases
 
 
 @pytest.mark.parametrize("name", recorded_case_names())
-def test_case_matches_upstream(case_registry, name):
+def test_case_matches_upstream(path: ExecutionPath, name):
     expected = load_fixture()["cases"][name]
-    module, _inputs, actual = case_registry[name]()
+    module, _inputs, actual = path.replay(name)
+    rtol, atol = path.tolerance
 
+    # Path-independent by construction: the fused and vanilla triangle paths
+    # share one set of parameters and differ only in `forward`, so a mismatch
+    # here is always a change to initialisation, never a change of kernel.
     got_checksum = param_checksum(module)
     assert got_checksum == expected["param_checksum"], (
         f"{name}: module initialisation changed -- parameter checksum "
@@ -118,9 +184,12 @@ def test_case_matches_upstream(case_registry, name):
         assert have.shape == want.shape, (
             f"{name}.{key}: shape {tuple(have.shape)} != {tuple(want.shape)}"
         )
+        # The goldens were recorded on CPU; move them rather than the output, so
+        # a GPU result is never rounded on its way to the comparison.
         torch.testing.assert_close(
-            have, want, rtol=RTOL, atol=ATOL,
-            msg=lambda m, _n=name, _k=key: f"{_n}.{_k} diverged from upstream:\n{m}",
+            have, want.to(have.device), rtol=rtol, atol=atol,
+            msg=lambda m, _n=name, _k=key, _p=path.label:
+                f"{_n}.{_k} diverged from upstream on {_p}:\n{m}",
         )
 
 

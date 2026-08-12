@@ -38,11 +38,27 @@ GPU = "H100"
 # imports), rather than the full project: no matplotlib, sklearn or tqdm.
 # The cuequivariance stack is linux-only and so cannot be exercised locally on
 # macOS -- on Modal it installs, and the fused triangle kernels engage. That
-# makes this the first time that path runs at all, which is why `verify` exists.
+# makes this the first time that path runs at all, which is why `check` exists.
+#
+# torch is pinned exactly, and the constraint is numerical rather than hygienic:
+# the goldens in tests/fixtures were recorded under this version, so a floating
+# `torch>=2.5.0` would let the drift table conflate torch-version differences
+# with the device and kernel differences it is trying to isolate. Every
+# tolerance derived from it would then be unattributable.
+TORCH = "2.13.0"
+CUEQUIVARIANCE = "0.11.1"
+
+# cu13, not the cu12 that pyproject.toml pins for linux. torch 2.13's PyPI wheel
+# is built against CUDA 13 (it pulls nvidia-cudnn-cu13, nvidia-nccl-cu13), so
+# the cu12 ops wheels resolve *alongside* a second, CUDA 12 stack -- both
+# nvidia-cublas 13.1.1.3 and nvidia-cublas-cu12 12.9.2.10 in one image, with
+# ops compiled against an ABI torch is not using. Model code only ever imports
+# `cuequivariance_torch` (pairwise_operations.py:31), so which ops variant sits
+# underneath is invisible to it, and matching torch's CUDA major costs nothing.
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "torch>=2.5.0",
+        f"torch=={TORCH}",
         "numpy>=1.26,<2.0",
         "einops>=0.8.0",
         "einx>=0.3.0",
@@ -55,10 +71,10 @@ image = (
         "pytest>=8.0",
     )
     .pip_install(
-        "cuequivariance>=0.7.0",
-        "cuequivariance-torch>=0.7.0",
-        "cuequivariance-ops-cu12>=0.7.0",
-        "cuequivariance-ops-torch-cu12>=0.7.0",
+        f"cuequivariance=={CUEQUIVARIANCE}",
+        f"cuequivariance-torch=={CUEQUIVARIANCE}",
+        f"cuequivariance-ops-cu13=={CUEQUIVARIANCE}",
+        f"cuequivariance-ops-torch-cu13=={CUEQUIVARIANCE}",
     )
     .add_local_python_source("msa_pairformer", "bench")
     .add_local_dir(REPO / "tests", remote_path="/root/tests")

@@ -8,12 +8,14 @@ recorded on CPU with the vanilla implementation -- so on a GPU host the suite
 would build fused modules, feed them CPU tensors, and fail for a reason that
 has nothing to do with the code under test.
 
-Forcing vanilla makes the correctness suite host-independent: it answers "does
-this code still reproduce upstream's numerics", which is a question about the
-model, not about which kernels the machine happens to offer.
+Forcing vanilla makes the default host-independent: a test that does not say
+which kernels it wants gets the same ones everywhere, rather than inheriting
+whatever the machine happens to offer.
 
-`test_cuequivariance.py` opts back in explicitly -- that is the one place where
-the kernels *are* the subject.
+Tests for which the kernels *are* the subject opt back in explicitly, by
+entering `triangle_path` themselves -- `test_correctness.ExecutionPath.replay`
+and `test_cuequivariance.py`. `triangle_path` restores the previous value on
+exit, so nesting inside this session-wide force is safe.
 """
 
 import pytest

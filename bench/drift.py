@@ -129,6 +129,15 @@ def worst(config: dict) -> tuple[float, float]:
 
 def format_table(report: dict) -> str:
     lines = [f"{'configuration':<26}{'max abs':>12}{'max rel':>12}  notes"]
+    # Deviations of the vanilla row for each device, so a cuex row can be
+    # compared against its own baseline. `effective_cuequivariance` only says
+    # the Python package imported (pairwise_operations.py:31); an ops extension
+    # that fails to load against this torch is a later, separate failure. Two
+    # bitwise-identical rows are the observable signature of that: the fused
+    # kernels cannot reproduce the fallback exactly, so if they match, they did
+    # not run. This is a note rather than an assertion -- a reporter that fails
+    # cannot report.
+    vanilla_by_device: dict[str, tuple[float, float]] = {}
     for config in report["configurations"]:
         label = f"{config['device']}/" + (
             "cuex" if config["effective_cuequivariance"] else "vanilla"
@@ -137,6 +146,12 @@ def format_table(report: dict) -> str:
         notes = []
         if config["requested_cuequivariance"] and not config["effective_cuequivariance"]:
             notes.append("REQUESTED CUEX BUT RAN VANILLA")
+        if config["effective_cuequivariance"]:
+            baseline = vanilla_by_device.get(config["device"])
+            if baseline == (max_abs, max_rel):
+                notes.append("IDENTICAL TO VANILLA - FUSED KERNELS DID NOT ENGAGE")
+        else:
+            vanilla_by_device[config["device"]] = (max_abs, max_rel)
         bad_checksums = [
             n for n, e in config["cases"].items() if e.get("checksum_matches") is False
         ]
