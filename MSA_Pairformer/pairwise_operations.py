@@ -25,6 +25,7 @@ from .custom_typing import Bool, Float, typecheck
 _env = Env()
 _env.read_env()
 
+CUEQUIVARIANCE_AVAILABLE = False
 try:
     if torch.cuda.is_available():
         import cuequivariance_torch as cuex

@@ -3,15 +3,15 @@ import os
 
 from tqdm import tqdm
 
-import msa_model.utils
+from msa_pairformer import utils as mp_utils
 
 
 def download_AF_pdb(prot_id, out_dir):
     url = f"https://alphafold.ebi.ac.uk/files/AF-{prot_id}-F1-model_v4.pdb"
     cmd = f"wget -P {out_dir} {url}"
-    res = msa_model.utils._run(cmd)
+    res = mp_utils._run(cmd)
     log_file_prefix = os.path.join(out_dir, "download.log")
-    msa_model.utils.write_log(log_file_prefix, res)
+    mp_utils.write_log(log_file_prefix, res)
 
 def download_rcsb_pdb(pdb_id, out_dir, log=False, cif=False):
     if not cif:
@@ -20,10 +20,10 @@ def download_rcsb_pdb(pdb_id, out_dir, log=False, cif=False):
     else:
         url = f"https://files.rcsb.org/download/{pdb_id}.cif"
         cmd = f"wget {url} -O {out_dir}/{pdb_id}.cif"
-    res = msa_model.utils._run(cmd)
+    res = mp_utils._run(cmd)
     if log:
         log_file_prefix = os.path.join(out_dir, "download.log")
-        msa_model.utils.write_log(log_file_prefix, res)
+        mp_utils.write_log(log_file_prefix, res)
 
 def download_rcsb_pdb_mp(param_d: dict):
     pdb_id = param_d["pdb_id"]

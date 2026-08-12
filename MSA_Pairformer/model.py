@@ -61,6 +61,11 @@ class CoreModule(Module):
         self.dim_pairwise = dim_pairwise
         self.depth = depth
 
+        # Copy before mutating: opm_kwargs defaults to a dict built once at import
+        # time, and popping from it would leak across instantiations (and mutate a
+        # caller-supplied dict in place).
+        opm_kwargs = dict(opm_kwargs)
+
         # Automatically assign lambda init if not provided (for presoftmax differential attention)
         if ('lambda_init' not in opm_kwargs) or (opm_kwargs['lambda_init'] is None):
             auto_lambda_init = True
@@ -744,4 +749,3 @@ class MSAPairformer(Module):
         #     pairwise_mask,
         #     mask,
         # )
-        return w, b

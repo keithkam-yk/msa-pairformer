@@ -93,7 +93,7 @@ def get_distance_matrix(structure_file_path, chain_id):
     # Load coordinates
     with open(structure_file_path) as oFile:
         cif_lines_l = [l for l in oFile.readlines() if 
-                       (l.startswith('ATOM') and (l.split()[6] == chain_id) and th
+                       (l.startswith('ATOM') and (l.split()[6] == chain_id) and
                         (((l.split()[3] == 'CA') and (l.split()[5]=='GLY')) or 
                          ((l.split()[3]=='CB') and (l.split()[5] != 'GLY'))))]
     coords_a = np.array([[float(xyz) for xyz in l.split()[10:13]] for l in cif_lines_l])

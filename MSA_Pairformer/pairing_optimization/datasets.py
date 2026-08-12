@@ -122,7 +122,7 @@ def generate_dataset(parameters, msa_data, get_species_name, return_species=Fals
             ]
         dataset["positive_examples"] = {
             "left": [msa_data[0][i] for i in rand_idxs_pos_l],
-            "right": [msa_data[1][i] for i in rand_idxs_rand_idxs_pos_rpos],
+            "right": [msa_data[1][i] for i in rand_idxs_pos_r],
         }
         # Print data
         if verbose:
