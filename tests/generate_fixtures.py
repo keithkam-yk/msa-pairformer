@@ -41,17 +41,19 @@ ordinary unit tests instead.
 
 Weights come from `torch.manual_seed(seed)` immediately before construction
 rather than being stored, which keeps fixtures small. Each case records a
-checksum over the module's parameters so that a change to *initialisation* fails
-with a distinct, obvious message instead of masquerading as a numerical
-regression.
+*fingerprint* of the module's parameters -- exact shapes and key names, plus
+per-key statistics compared at a tolerance -- so that a change to
+*initialisation* fails with a distinct, obvious message instead of
+masquerading as a numerical regression. See `param_fingerprint` for why a
+checksum could not do this job across architectures.
 
 Triangle multiplication is recorded on the **vanilla PyTorch path**. A CUDA host
 takes `_cuex_forward` instead and will not reproduce these values bitwise.
 """
 
 import argparse
-import hashlib
 import importlib
+import math
 import platform
 import sys
 
@@ -63,13 +65,68 @@ B, S, N = 1, 6, 10
 DIM_MSA, DIM_PAIRWISE = 464, 256
 
 
-def param_checksum(module) -> str:
-    h = hashlib.sha256()
-    sd = module.state_dict()
-    for key in sorted(sd):
-        h.update(key.encode())
-        h.update(sd[key].detach().float().cpu().numpy().tobytes())
-    return h.hexdigest()
+# How far two fingerprints of the same initialisation may sit apart. Sized for
+# accumulated last-bit noise over a reduction, not for a real change: a
+# different distribution, an extra layer or a reordered draw moves these
+# statistics by orders of magnitude, never by 1e-5.
+FINGERPRINT_RTOL = 1e-5
+FINGERPRINT_ATOL = 1e-8
+
+
+def param_fingerprint(module) -> dict[str, dict[str, object]]:
+    """Summarise a module's parameters in a way that survives a rebuild.
+
+    This replaced a SHA-256 over the raw bytes, which could not survive one:
+    parameters that are *computed* rather than drawn -- `q_proj.weight +
+    randn_like(...) * 0.1` in outer_product.py, and `normal_(std=0.1)` -- come
+    out 1 ULP apart on x86 and arm, because the scaling vectorises differently.
+    The values agree to seven significant figures; the hash of them does not
+    agree at all, and a hash has no tolerance to spend. Four cases therefore
+    failed in the linux container while passing on the macOS host that recorded
+    them, which reads exactly like "someone changed the model's init".
+
+    Shapes and key names still have to match exactly -- those are structural,
+    and no floating-point argument excuses a changed one. The statistics are
+    positive-definite or extremal on purpose: a plain sum can cancel to near
+    zero, where a relative comparison stops meaning anything.
+    """
+    out: dict[str, dict[str, object]] = {}
+    for key, tensor in module.state_dict().items():
+        value = tensor.detach().float().cpu()
+        entry: dict[str, object] = {"shape": tuple(value.shape)}
+        if value.numel():
+            entry.update({
+                "abs_sum": value.abs().sum().item(),
+                "sq_sum": value.square().sum().item(),
+                "min": value.min().item(),
+                "max": value.max().item(),
+            })
+        out[key] = entry
+    return out
+
+
+def compare_fingerprints(got: dict, want: dict) -> list[str]:
+    """Return one message per disagreement; empty means the two match."""
+    problems = []
+    missing, extra = sorted(set(want) - set(got)), sorted(set(got) - set(want))
+    if missing:
+        problems.append(f"parameters missing: {missing}")
+    if extra:
+        problems.append(f"unexpected parameters: {extra}")
+
+    for key in sorted(set(got) & set(want)):
+        g, w = got[key], want[key]
+        if tuple(g["shape"]) != tuple(w["shape"]):
+            problems.append(f"{key}: shape {g['shape']} != {w['shape']}")
+            continue
+        for stat in ("abs_sum", "sq_sum", "min", "max"):
+            if stat not in w:
+                continue
+            a, b = float(g[stat]), float(w[stat])
+            if not math.isclose(a, b, rel_tol=FINGERPRINT_RTOL,
+                                abs_tol=FINGERPRINT_ATOL):
+                problems.append(f"{key}.{stat}: {a:.8g} != {b:.8g}")
+    return problems
 
 
 def make_inputs(seed: int = 1234, device: torch.device | None = None):
@@ -282,7 +339,7 @@ def main():
         cases[name] = {
             "inputs": inputs,
             "outputs": outputs,
-            "param_checksum": param_checksum(module),
+            "param_fingerprint": param_fingerprint(module),
         }
         shapes = ", ".join(
             f"{k}{tuple(v.shape)}" for k, v in outputs.items() if torch.is_tensor(v)

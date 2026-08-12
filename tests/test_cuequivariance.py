@@ -36,7 +36,20 @@ pytestmark = pytest.mark.skipif(
     reason="needs a CUDA host with cuequivariance_torch",
 )
 
-B, N, DIM_PAIRWISE = 1, 24, 256
+# N is the paper's crop, and the size is load-bearing rather than realism for
+# its own sake. Measured on an H100 at bf16, comparing the fused path against
+# the fallback:
+#
+#     n=24    bitwise identical    fused 0.282ms  vanilla 0.358ms
+#     n=128   max abs 1.6e-2       fused 0.506ms  vanilla 0.524ms
+#     n=312   max abs 1.6e-2       fused 0.891ms  vanilla 2.099ms
+#
+# cuEquivariance declines small shapes and falls back to its own PyTorch
+# reference -- which `_vanilla_forward` was written to mirror op for op, so the
+# two agree bitwise. This test used to run at n=24 and therefore passed by
+# comparing the fallback with itself. Anything that claims to cover the fused
+# kernels has to be large enough for them to engage.
+B, N, DIM_PAIRWISE = 1, 312, 256
 S = 6
 
 # Provisional. The fused kernel fuses differently and may reduce in a different

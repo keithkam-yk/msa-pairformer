@@ -73,7 +73,11 @@ def measure(
     Records per-case deviations and any failure, rather than raising: one case
     that cannot run on a given path must not hide the numbers for the rest.
     """
-    from tests.generate_fixtures import build_cases, param_checksum
+    from tests.generate_fixtures import (
+        build_cases,
+        compare_fingerprints,
+        param_fingerprint,
+    )
 
     with triangle_path(use_cuequivariance) as effective:
         cases = dict(build_cases(PACKAGE, device=device, use_cuequivariance=effective))
@@ -94,7 +98,9 @@ def measure(
                 # Parameters are compared on the host in fp32, so this should
                 # hold on any device. If it does not, the outputs below are
                 # comparing different models and mean nothing.
-                "checksum_matches": param_checksum(module) == expected["param_checksum"],
+                "fingerprint_problems": compare_fingerprints(
+                    param_fingerprint(module), expected["param_fingerprint"]
+                ),
                 "outputs": {},
             }
             for key, want in expected["outputs"].items():
@@ -152,11 +158,11 @@ def format_table(report: dict) -> str:
                 notes.append("IDENTICAL TO VANILLA - FUSED KERNELS DID NOT ENGAGE")
         else:
             vanilla_by_device[config["device"]] = (max_abs, max_rel)
-        bad_checksums = [
-            n for n, e in config["cases"].items() if e.get("checksum_matches") is False
+        mismatched = [
+            n for n, e in config["cases"].items() if e.get("fingerprint_problems")
         ]
-        if bad_checksums:
-            notes.append(f"checksum mismatch: {len(bad_checksums)} case(s)")
+        if mismatched:
+            notes.append(f"parameter mismatch: {len(mismatched)} case(s)")
         errors = [n for n, e in config["cases"].items() if "error" in e]
         if errors:
             notes.append(f"errors: {len(errors)}")

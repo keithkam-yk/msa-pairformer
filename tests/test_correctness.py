@@ -41,7 +41,7 @@ import pytest
 import torch
 
 from bench.step import CUEQUIVARIANCE_PRESENT, triangle_path
-from tests.generate_fixtures import build_cases, param_checksum
+from tests.generate_fixtures import build_cases, compare_fingerprints, param_fingerprint
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden.pt"
 PACKAGE = "msa_pairformer"
@@ -163,11 +163,13 @@ def test_case_matches_upstream(path: ExecutionPath, name):
     # Path-independent by construction: the fused and vanilla triangle paths
     # share one set of parameters and differ only in `forward`, so a mismatch
     # here is always a change to initialisation, never a change of kernel.
-    got_checksum = param_checksum(module)
-    assert got_checksum == expected["param_checksum"], (
-        f"{name}: module initialisation changed -- parameter checksum "
-        f"{got_checksum[:16]} != recorded {expected['param_checksum'][:16]}. "
-        "Outputs cannot be meaningfully compared; if this change is "
+    problems = compare_fingerprints(
+        param_fingerprint(module), expected["param_fingerprint"]
+    )
+    assert not problems, (
+        f"{name}: module initialisation changed --\n  "
+        + "\n  ".join(problems)
+        + "\nOutputs cannot be meaningfully compared; if this change is "
         "intentional, regenerate the fixtures."
     )
 
@@ -191,6 +193,38 @@ def test_case_matches_upstream(path: ExecutionPath, name):
             msg=lambda m, _n=name, _k=key, _p=path.label:
                 f"{_n}.{_k} diverged from upstream on {_p}:\n{m}",
         )
+
+
+def test_fingerprint_tolerates_last_bit_noise_but_not_a_real_change():
+    """The fingerprint replaced an exact hash, so it has to earn both halves.
+
+    Too tight and it fails on the 1-ULP cross-architecture differences that
+    motivated the change; too loose and it stops detecting the thing it exists
+    to detect. This pins both ends rather than trusting the tolerance to be
+    well chosen.
+    """
+    torch.manual_seed(0)
+    module = torch.nn.Linear(64, 64)
+    baseline = param_fingerprint(module)
+
+    with torch.no_grad():
+        ulp = torch.finfo(torch.float32).eps * module.weight.abs().clamp_min(1e-6)
+        module.weight += ulp
+    assert not compare_fingerprints(param_fingerprint(module), baseline), (
+        "a one-ULP perturbation trips the fingerprint, which is the failure "
+        "mode it was introduced to remove"
+    )
+
+    with torch.no_grad():
+        module.weight[0, 0] += 0.5
+    problems = compare_fingerprints(param_fingerprint(module), baseline)
+    assert problems, "a single changed weight goes undetected"
+    assert any("weight" in p for p in problems), problems
+
+    torch.manual_seed(0)
+    wider = torch.nn.Linear(64, 128)
+    shape_problems = compare_fingerprints(param_fingerprint(wider), baseline)
+    assert any("shape" in p for p in shape_problems), shape_problems
 
 
 def test_fixture_covers_the_core_stack():
