@@ -207,7 +207,7 @@ def format_table(report: dict[str, Any]) -> str:
         f"probe shape [1, {shape['depth']}, {shape['crop']}] -- not a throughput "
         "measurement",
         f"\n{'variant':<24}{'1st pass s':>12}{'2nd pass s':>12}{'peak GB':>10}"
-        f"{'graphs':>9}{'breaks':>8}",
+        f"{'new graphs':>12}{'breaks':>8}",
     ]
     for label, entry in report["variants"].items():
         stats = entry["compile"] or {}
@@ -216,8 +216,21 @@ def format_table(report: dict[str, Any]) -> str:
             f"{label:<24}{entry['first_pass_s']:>12.2f}"
             f"{entry['second_pass_s']:>12.2f}"
             f"{(f'{peak:.2f}' if peak is not None else '-'):>10}"
-            f"{stats.get('unique_graphs', '-'):>9}"
+            f"{stats.get('unique_graphs', '-'):>12}"
             f"{stats.get('graph_breaks', '-'):>8}"
+        )
+
+    # "new" is doing real work in that heading. All four variants run in one
+    # process and three of the four compiled module kinds are identical
+    # between the triangle paths, so the second compiled variant hits Dynamo's
+    # code cache and legitimately reports fewer new graphs than the first.
+    # Only `PairwiseBlock` differs between them.
+    compiled = [e for e in report["variants"].values() if e["compile"]]
+    if len(compiled) > 1:
+        lines.append(
+            f"\n(one process, so a later variant reuses cached code: "
+            f"{compiled[-1]['compile']['process_graphs']} graphs compiled in "
+            "total)"
         )
 
     for label, entry in report["variants"].items():

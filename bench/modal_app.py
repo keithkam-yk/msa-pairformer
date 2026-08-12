@@ -322,7 +322,7 @@ def probe(depth: int = 32, crop: int = 64, gpu: str = DEFAULT_GPU,
 
     empty = [
         label for label, entry in report["variants"].items()
-        if entry["compile"] is not None and entry["compile"]["unique_graphs"] == 0
+        if entry["compile"] is not None and entry["compile"]["process_graphs"] == 0
     ]
     if empty:
         raise SystemExit(

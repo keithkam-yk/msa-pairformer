@@ -115,43 +115,63 @@ def compile_in_place(model: torch.nn.Module, mode: str) -> list[str]:
     return names
 
 
-def compile_stats() -> dict[str, Any]:
-    """How much of the model Dynamo actually captured.
+# Where the Dynamo counters stood when the current model started compiling.
+# The counters are cumulative and process-global; a sweep builds seven models
+# in one process, so only the difference describes the model in hand.
+_COUNTER_BASELINE: dict[str, dict[str, int]] = {}
 
-    The number that matters is `unique_graphs`. If compilation silently fell
-    back to eager -- a suppressed Dynamo error, a mode that did nothing -- this
-    is zero and the run would otherwise report the eager path under the
-    compiled label. That is the same failure `train.run` already refuses for
-    cuEquivariance, and it is likelier here.
 
-    `graph_breaks` is the interesting half. On the cuEquivariance path the
-    fused triangle kernels are opaque to Dynamo, so a break at each call is
-    expected and the compiled region is the elementwise work between them; the
-    reasons say whether that is what happened.
-    """
+def _graph_counters() -> dict[str, dict[str, int]]:
     from torch._dynamo.utils import counters
 
-    breaks = counters.get("graph_break", {})
+    return {group: dict(values) for group, values in counters.items()}
+
+
+def reset_compile_stats() -> None:
+    """Mark where this model's compilation begins.
+
+    A snapshot rather than `counters.clear()`. Clearing would throw away the
+    process total, and the process total is what distinguishes "this model
+    reused code compiled for an earlier one" from "nothing ever compiled" --
+    two situations that both show zero new graphs and mean opposite things.
+    """
+    global _COUNTER_BASELINE
+    _COUNTER_BASELINE = _graph_counters()
+
+
+def compile_stats() -> dict[str, Any]:
+    """How much of the model Dynamo captured, since the last reset.
+
+    `unique_graphs` counts *new* compilations. A second model of the same
+    classes in the same process hits Dynamo's code cache and reports zero
+    without anything having gone wrong, which is exactly what a depth sweep
+    does from its second depth onwards. `process_graphs` is therefore the
+    field to test against zero: no graph anywhere in the process means
+    compilation silently fell back to eager, and the run would otherwise
+    report the eager path under the compiled label.
+
+    `graph_breaks` is the interesting half. The fused triangle kernels could
+    have been opaque to Dynamo, in which case the compiled region would be
+    only the elementwise work between them -- a much weaker claim. The break
+    reasons say which of the two happened.
+    """
+    now = _graph_counters()
+    breaks = {
+        reason: count - _COUNTER_BASELINE.get("graph_break", {}).get(reason, 0)
+        for reason, count in now.get("graph_break", {}).items()
+    }
+    breaks = {reason: count for reason, count in breaks.items() if count > 0}
+    process_graphs = now.get("stats", {}).get("unique_graphs", 0)
     return {
-        "unique_graphs": counters.get("stats", {}).get("unique_graphs", 0),
+        "unique_graphs": process_graphs
+        - _COUNTER_BASELINE.get("stats", {}).get("unique_graphs", 0),
+        "process_graphs": process_graphs,
         "graph_breaks": sum(breaks.values()),
         # Ten is enough to see the pattern; the tail is the same reasons again.
         "graph_break_reasons": dict(
             sorted(breaks.items(), key=lambda kv: -kv[1])[:10]
         ),
     }
-
-
-def reset_compile_stats() -> None:
-    """Zero the counters, so `compile_stats` describes this model only.
-
-    Dynamo's counters are process-global and a sweep measures many models in
-    one process. Without this, depth 224 would report every graph break since
-    depth 32.
-    """
-    from torch._dynamo.utils import counters
-
-    counters.clear()
 
 
 def build_model(

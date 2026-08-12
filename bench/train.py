@@ -139,13 +139,18 @@ def run(
         # a run that compiled nothing would otherwise report the eager path
         # under the compiled label -- two identical numbers presented as a
         # finding.
-        if compiled["unique_graphs"] == 0:
+        # `process_graphs`, not `unique_graphs`: from the sweep's second depth
+        # onwards this model reuses code Dynamo compiled for the first one, so
+        # zero *new* graphs is the normal case rather than a failure.
+        if compiled["process_graphs"] == 0:
             raise RuntimeError(
-                f"compile_mode={cfg.compile_mode!r} but Dynamo captured no "
-                "graphs, so this would measure the eager path under the "
-                "compiled label. Check for suppressed Dynamo errors."
+                f"compile_mode={cfg.compile_mode!r} but Dynamo has captured no "
+                "graphs anywhere in this process, so this would measure the "
+                "eager path under the compiled label. Check for suppressed "
+                "Dynamo errors."
             )
-        log(f"compiled {compiled['unique_graphs']} graphs, "
+        log(f"compiled {compiled['unique_graphs']} new graphs "
+            f"({compiled['process_graphs']} in this process), "
             f"{compiled['graph_breaks']} breaks")
 
     if device.type == "cuda":

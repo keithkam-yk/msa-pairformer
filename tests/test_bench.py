@@ -282,3 +282,32 @@ def test_compile_targets_cover_every_repeated_leaf():
     names = compile_targets(model)
     per_layer = [n for n in names if n.startswith("core_stack.layers.")]
     assert len(per_layer) == 22 * 4
+
+
+def test_compile_stats_distinguishes_cache_reuse_from_never_compiling():
+    """A sweep builds seven models in one process. From the second depth on,
+    Dynamo hits its code cache and captures zero *new* graphs -- which is the
+    normal case, not a fallback to eager. Testing the wrong field would abort
+    every sweep after its first depth."""
+    from bench.step import compile_stats, reset_compile_stats
+
+    reset_compile_stats()
+    fresh = compile_stats()
+    assert fresh["unique_graphs"] == 0
+
+    @torch.compile
+    def double(x: torch.Tensor) -> torch.Tensor:
+        return x + x
+
+    double(torch.ones(3))
+    first = compile_stats()
+    assert first["unique_graphs"] >= 1
+    assert first["process_graphs"] >= first["unique_graphs"]
+
+    # A second model of the same classes: nothing new, but the process has
+    # demonstrably compiled something.
+    reset_compile_stats()
+    double(torch.ones(3))
+    again = compile_stats()
+    assert again["unique_graphs"] == 0
+    assert again["process_graphs"] >= 1

@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "kind": "compile-probe",
+  "git": {
+    "commit": "8777f84f912b3557806ea7f6133cd7cf7737ce8c",
+    "branch": "main",
+    "dirty": false
+  },
+  "environment": {
+    "python": "3.11.12",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "cuequivariance_available": true,
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "gpu_count": 1
+  },
+  "precision": {
+    "float32_matmul_precision": "highest",
+    "allow_tf32_matmul": false,
+    "allow_tf32_cudnn": false
+  },
+  "shape": {
+    "micro_batch": 1,
+    "depth": 32,
+    "crop": 64
+  },
+  "cuequivariance_present": true,
+  "variants": {
+    "vanilla": {
+      "cuequivariance": false,
+      "compile_mode": "off",
+      "compiled_modules": 90,
+      "first_pass_s": 2.8064937519999997,
+      "second_pass_s": 0.287052945000001,
+      "loss": 3.350949287414551,
+      "grad_norm": 13.386738777160645,
+      "peak_gpu_gb": 3.288588523864746,
+      "compile": null
+    },
+    "vanilla+compile": {
+      "cuequivariance": false,
+      "compile_mode": "default",
+      "compiled_modules": 90,
+      "first_pass_s": 35.337146301,
+      "second_pass_s": 0.12291764200000443,
+      "loss": 3.351005792617798,
+      "grad_norm": 13.382426261901855,
+      "peak_gpu_gb": 2.4509472846984863,
+      "compile": {
+        "unique_graphs": 4,
+        "graph_breaks": 0,
+        "graph_break_reasons": {}
+      }
+    },
+    "cuequivariance": {
+      "cuequivariance": true,
+      "compile_mode": "off",
+      "compiled_modules": 90,
+      "first_pass_s": 0.47105708299999804,
+      "second_pass_s": 0.2908411120000025,
+      "loss": 3.350949287414551,
+      "grad_norm": 13.386266708374023,
+      "peak_gpu_gb": 4.136786460876465,
+      "compile": null
+    },
+    "cuequivariance+compile": {
+      "cuequivariance": true,
+      "compile_mode": "default",
+      "compiled_modules": 90,
+      "first_pass_s": 9.921624911999999,
+      "second_pass_s": 0.19383325599999068,
+      "loss": 3.351102828979492,
+      "grad_norm": 13.385892868041992,
+      "peak_gpu_gb": 2.4609456062316895,
+      "compile": {
+        "unique_graphs": 1,
+        "graph_breaks": 0,
+        "graph_break_reasons": {}
+      }
+    }
+  },
+  "comparisons": {
+    "vanilla+compile": {
+      "loss_rel": 1.6862446548890423e-05,
+      "grad_norm_rel": 0.00032214830890304086,
+      "speedup_second_pass": 2.335327462594756,
+      "compile_overhead_s": 35.21422865899999,
+      "peak_gb_delta": -0.8376412391662598
+    },
+    "cuequivariance+compile": {
+      "loss_rel": 4.5820318892343594e-05,
+      "grad_norm_rel": 2.7927154013552365e-05,
+      "speedup_second_pass": 1.5004706519505429,
+      "compile_overhead_s": 9.727791656000008,
+      "peak_gb_delta": -1.6758408546447754
+    }
+  }
+}
