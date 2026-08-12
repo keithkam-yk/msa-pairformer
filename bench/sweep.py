@@ -64,6 +64,19 @@ DEFAULT_DEPTHS: tuple[int, ...] = (32, 64, 96, 128, 160, 192, 224)
 MIN_POINTS_TO_QUOTE = 5
 
 
+def resolve_depths(spec: str = "") -> list[int]:
+    """Parse a comma-separated depth list, defaulting to `DEFAULT_DEPTHS`.
+
+    Exists so the CLI default is not a second copy of `DEFAULT_DEPTHS`. It was,
+    and they diverged immediately: the ladder here grew to six fitting points
+    while the entrypoint kept its own three-point string, so a rerun commissioned
+    to fix a three-point fit silently measured the same three depths again.
+    """
+    if not spec.strip():
+        return list(DEFAULT_DEPTHS)
+    return [int(part) for part in spec.split(",") if part.strip()]
+
+
 def fit_line(xs: list[float], ys: list[float]) -> dict[str, Any]:
     """Least-squares fit of y = slope * x + intercept, with r^2.
 

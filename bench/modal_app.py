@@ -256,7 +256,9 @@ def check(
 
 @app.local_entrypoint()
 def sweep(
-    depths: str = "64,128,192,224,256",
+    # Empty resolves to bench.sweep.DEFAULT_DEPTHS rather than repeating it
+    # here; the two copies diverged once already.
+    depths: str = "",
     variants: str = "vanilla,cuequivariance",
     steps: int = 5,
     warmup: int = 2,
@@ -278,14 +280,15 @@ def sweep(
     was measured and what it is compared against.
     """
     from bench.provenance import git_info
-    from bench.sweep import format_table
+    from bench.sweep import format_table, resolve_depths
 
     git = git_info()
     if git["dirty"]:
         print("WARNING: working tree is dirty; this result is not reproducible "
               "from the recorded commit alone.\n")
 
-    ladder = [int(d) for d in depths.split(",") if d.strip()]
+    ladder = resolve_depths(depths)
+    print(f"depths: {ladder}")
     requested = [v.strip() for v in variants.split(",") if v.strip()]
     unknown = set(requested) - {"vanilla", "cuequivariance"}
     if unknown:

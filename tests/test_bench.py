@@ -14,7 +14,14 @@ import torch
 
 from bench.config import BenchConfig
 from bench.data import synthetic_batch
-from bench.sweep import curvature_bracket, fit_line, replace_depth
+from bench.sweep import (
+    DEFAULT_DEPTHS,
+    MIN_POINTS_TO_QUOTE,
+    curvature_bracket,
+    fit_line,
+    replace_depth,
+    resolve_depths,
+)
 from bench.sweep import run as sweep_run
 from bench.train import run
 
@@ -172,3 +179,16 @@ def test_sweep_refuses_to_quote_too_few_points():
     assert estimate["quotable"] is False
     assert estimate["estimated_step_s_low"] <= estimate["estimated_step_s_high"]
     assert estimate["extrapolation_reach"] == pytest.approx(320 / 8)
+
+
+def test_resolve_depths_defaults_to_the_module_ladder():
+    """The CLI default used to be a second copy of DEFAULT_DEPTHS. They
+    diverged, and a rerun meant to replace a three-point fit measured the same
+    three depths again."""
+    assert resolve_depths("") == list(DEFAULT_DEPTHS)
+    assert resolve_depths("   ") == list(DEFAULT_DEPTHS)
+    assert resolve_depths("32,64, 96") == [32, 64, 96]
+
+    # Enough points to make the quoting gate satisfiable at all, or the default
+    # ladder cannot produce a usable estimate however well it fits.
+    assert len(DEFAULT_DEPTHS) > MIN_POINTS_TO_QUOTE
