@@ -9,10 +9,10 @@ triangle path in float32 on CPU. They are therefore only meaningful for that
 path: they do not cover the cuEquivariance kernels, bfloat16 autocast, or the
 pretrained weights.
 
-Run directly:      python tests/test_smoke.py
-Or under pytest:   pytest tests/test_smoke.py
+    pytest tests/test_smoke.py
 """
 
+import pytest
 import torch
 
 from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
@@ -26,21 +26,23 @@ REFERENCE_SUMS = {
 }
 TOLERANCE = 1e-4
 
+NUM_SEQS, SEQ_LEN, SEED = 8, 24, 0
 
-def build_inputs(num_seqs: int = 8, seq_len: int = 24, seed: int = 0):
-    torch.manual_seed(seed)
-    tokens = torch.randint(0, 20, (1, num_seqs, seq_len))
+
+@pytest.fixture(scope="module")
+def forward_outputs():
+    """One forward pass shared by every assertion below.
+
+    Module-scoped because each parametrised case would otherwise rebuild a
+    111M-parameter model and re-run the whole stack for a single sum.
+    """
+    torch.manual_seed(SEED)
+    tokens = torch.randint(0, 20, (1, NUM_SEQS, SEQ_LEN))
     onehot = torch.nn.functional.one_hot(tokens, num_classes=len(aa2tok_d)).float()
     mask, msa_mask, full_mask, pairwise_mask = prepare_msa_masks(tokens)
-    return onehot, mask, msa_mask, full_mask, pairwise_mask
 
-
-def run_forward():
-    onehot, mask, msa_mask, full_mask, pairwise_mask = build_inputs()
-
-    torch.manual_seed(0)
-    model = MSAPairformer()
-    model.eval()
+    torch.manual_seed(SEED)
+    model = MSAPairformer().eval()
 
     with torch.no_grad():
         return model(
@@ -54,25 +56,7 @@ def run_forward():
         )
 
 
-def test_forward_matches_reference():
-    res = run_forward()
-    for key, expected in REFERENCE_SUMS.items():
-        actual = res[key].double().sum().item()
-        assert abs(actual - expected) < TOLERANCE, (
-            f"{key}: expected {expected:.6f}, got {actual:.6f} "
-            f"(delta {actual - expected:.3e})"
-        )
-
-
-if __name__ == "__main__":
-    res = run_forward()
-    ok = True
-    for key, expected in REFERENCE_SUMS.items():
-        actual = res[key].double().sum().item()
-        delta = actual - expected
-        status = "ok" if abs(delta) < TOLERANCE else "MISMATCH"
-        if status != "ok":
-            ok = False
-        print(f"{key:28s} shape={tuple(res[key].shape)} sum={actual:.6f} {status}")
-    print("smoke test passed" if ok else "smoke test FAILED")
-    raise SystemExit(0 if ok else 1)
+@pytest.mark.parametrize(("key", "expected"), sorted(REFERENCE_SUMS.items()))
+def test_forward_matches_reference(forward_outputs, key, expected):
+    actual = forward_outputs[key].double().sum().item()
+    assert actual == pytest.approx(expected, abs=TOLERANCE)

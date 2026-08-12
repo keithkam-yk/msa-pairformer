@@ -85,6 +85,16 @@ only-include = [
     "pyproject.toml",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    # A test that `return`s instead of asserting is reported as a pass, so a
+    # hand-rolled skip (`return SKIP_REASON`) reads as green while checking
+    # nothing. Use @pytest.mark.skipif. Escalated narrowly rather than via a
+    # blanket -W error, which torch/jaxtyping deprecations would drown out.
+    "error::pytest.PytestReturnNotNoneWarning",
+]
+
 [tool.ruff]
 target-version = "py310"
 line-length = 120
