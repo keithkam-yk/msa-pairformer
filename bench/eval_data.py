@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pickletools
+import time
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,17 +51,30 @@ class Source:
     note: str
 
 
-# The paper's own bundle: Zenodo 10.5281/zenodo.20603231, CC-BY-4.0. Its
+# The paper's own bundle: Zenodo 10.5281/zenodo.21495175, CC-BY-4.0. Its
 # entries are already `Figure2_.../`, `Figure5_.../`, so it unpacks at the root
 # of the data tree and reproduces exactly the paths the notebooks expect.
+#
+# This is the *second* version of the deposit, and the version matters. The
+# first (10.5281/zenodo.20603231, 2026-06-09, 2,959,081,472 bytes,
+# md5 c205477a9cb93ad09bbc49ff6336b435) is a **truncated upload**: it downloads
+# to its full declared length and matches its published MD5, so nothing about
+# the transfer looks wrong, but the bytes themselves end mid-stream. Its last
+# megabyte contains no end-of-central-directory record, no Zip64 EOCD and no
+# central-directory entries at all, so no zip tool can open it. The 2026-07-22
+# version below is 631 MB larger and ends in a well-formed EOCD.
+#
+# Pin the version DOI, never the concept DOI (10.5281/zenodo.20603230): the
+# concept resolves to "latest", which would silently change the data under a
+# benchmark whose whole purpose is comparability against fixed numbers.
 ZENODO = Source(
     name="MSA_Pairformer_data.zip",
-    url="https://zenodo.org/api/records/20603231/files/MSA_Pairformer_data.zip/content",
-    size=2959081472,
-    md5="c205477a9cb93ad09bbc49ff6336b435",
+    url="https://zenodo.org/api/records/21495175/files/MSA_Pairformer_data.zip/content",
+    size=3590716422,
+    md5="0672b426338d9caeb9c2744d9bbc3e6e",
     published=True,
     dest="",
-    note="MSA Pairformer analysis data (Zenodo 10.5281/zenodo.20603231)",
+    note="MSA Pairformer analysis data (Zenodo 10.5281/zenodo.21495175, v2)",
 )
 
 # ProteinGym v1.3. Only fetched for pieces the Zenodo bundle turns out not to
@@ -104,23 +118,76 @@ PROTEINGYM = {
 }
 
 
+class Progress:
+    """Periodic one-line progress for work measured in bytes or in items.
+
+    Ticks on elapsed time rather than on count, so a fast link does not flood
+    the log and a slow one still reports. That matters more than usual here:
+    this runs in a Modal container whose only window is streamed stdout, and a
+    multi-gigabyte fetch that prints nothing for ten minutes is
+    indistinguishable from one that has hung. Every line is flushed for the
+    same reason -- buffered output arrives only at exit, which is exactly when
+    it is no longer useful.
+    """
+
+    def __init__(self, label: str, total: int | None, unit: str = "B", every: float = 10.0):
+        self.label = label
+        self.total = total
+        self.unit = unit
+        self.every = every
+        self.done = 0
+        self.start = time.monotonic()
+        self.last = self.start
+
+    def _scale(self, n: float) -> str:
+        return f"{n / 1e9:.2f} GB" if self.unit == "B" else f"{n:,.0f}"
+
+    def advance(self, n: int = 1) -> None:
+        self.done += n
+        now = time.monotonic()
+        if now - self.last >= self.every:
+            self.last = now
+            self.report()
+
+    def report(self) -> None:
+        elapsed = time.monotonic() - self.start
+        rate = self.done / elapsed if elapsed else 0.0
+        line = f"  {self.label}: {self._scale(self.done)}"
+        if self.total:
+            pct = 100 * self.done / self.total
+            remaining = (self.total - self.done) / rate if rate else 0.0
+            line += f" / {self._scale(self.total)} ({pct:.0f}%), {remaining / 60:.1f} min left"
+        suffix = "GB/s" if self.unit == "B" else f"{self.unit}/s"
+        divisor = 1e9 if self.unit == "B" else 1.0
+        print(f"{line}, {rate / divisor:.2f} {suffix}", flush=True)
+
+
 def fetch(source: Source, into: Path) -> tuple[Path, int, str]:
     """Download to `into`, returning the path, observed size and observed MD5.
 
     Streams and hashes in one pass -- a 3 GB archive is not read twice. Raises
     if the source publishes a checksum and the download does not match it; an
     unpublished checksum is returned for recording, never enforced here.
+
+    The zip check after the checksum is not redundant with it. A deposit can be
+    served at its full declared length, match its published MD5, and still be a
+    truncated archive -- that is exactly what the first version of the Zenodo
+    bundle is. A matching checksum attests only that we received what was
+    uploaded, never that what was uploaded is intact.
     """
     into.mkdir(parents=True, exist_ok=True)
     path = into / source.name
     digest = hashlib.md5()
     size = 0
+    progress = Progress(f"fetch {source.name}", source.size)
 
     with urlopen(source.url) as response, path.open("wb") as out:
         while chunk := response.read(CHUNK):
             out.write(chunk)
             digest.update(chunk)
             size += len(chunk)
+            progress.advance(len(chunk))
+    progress.report()
 
     observed = digest.hexdigest()
     if source.md5 and observed != source.md5:
@@ -141,8 +208,16 @@ def unpack(archive: Path, root: Path, dest: str) -> int:
     target = root / dest if dest else root
     target.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive) as zf:
-        members = zf.namelist()
-        zf.extractall(target)
+        members = zf.infolist()
+        # Member by member rather than `extractall`, which offers no hook to
+        # report from. Extraction here writes into a network filesystem and is
+        # the slowest step by a wide margin, so it is the one that most needs
+        # to say how far along it is.
+        progress = Progress(f"unpack {archive.name}", len(members), unit="files")
+        for info in members:
+            zf.extract(info, target)
+            progress.advance()
+        progress.report()
     return len(members)
 
 
@@ -199,6 +274,7 @@ def inventory(root: Path, tree_depth: int = 3) -> dict[str, Any]:
     enough to be a results or metadata table.
     """
     root = Path(root)
+    print(f"  inventory: walking {root}", flush=True)
     tree: dict[str, dict[str, int]] = {}
     for path in root.rglob("*"):
         if not path.is_file():
@@ -209,13 +285,14 @@ def inventory(root: Path, tree_depth: int = 3) -> dict[str, Any]:
         entry["files"] += 1
         entry["bytes"] += path.stat().st_size
 
-    pickles = {
-        str(p.relative_to(root)): _probe_pickle(p)
-        for p in sorted(root.rglob("*.pkl"))
-    }
+    pkl_paths = sorted(root.rglob("*.pkl"))
+    print(f"  inventory: probing {len(pkl_paths)} pickles", flush=True)
+    pickles = {str(p.relative_to(root)): _probe_pickle(p) for p in pkl_paths}
 
     csvs: dict[str, dict[str, Any]] = {}
-    for p in sorted(root.rglob("*.csv")):
+    csv_paths = sorted(root.rglob("*.csv"))
+    print(f"  inventory: reading {len(csv_paths)} csv headers", flush=True)
+    for p in csv_paths:
         rel = str(p.relative_to(root))
         size = p.stat().st_size
         info: dict[str, Any] = {"bytes": size}

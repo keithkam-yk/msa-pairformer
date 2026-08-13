@@ -17,8 +17,12 @@ Volume can be traced back to the code that populated it, or rebuilt if it is
 lost.
 
 Fetching runs *here* rather than on a developer machine because the bundle is
-2.96 GB and the container's link to Zenodo is an order of magnitude faster than
+3.59 GB and the container's link to Zenodo is an order of magnitude faster than
 a laptop's. Nothing large ever lands locally.
+
+Both long steps report progress on a timer to flushed stdout, which is the only
+window into a container: a multi-gigabyte fetch that prints nothing for ten
+minutes cannot be told apart from one that has hung.
 
 Unpacking goes straight into the mounted Volume rather than into `/tmp` and
 then copying across, which is the pattern Modal documents. The reason to
@@ -101,17 +105,18 @@ def ingest(names: list[str], git_sha: str | None, force: bool) -> dict[str, Any]
     for name in names:
         source = SOURCES[name]
         if name in done:
-            print(f"{name}: already in the manifest, skipping (--force to redo)")
+            print(f"{name}: already in the manifest, skipping (--force to redo)", flush=True)
             continue
 
-        print(f"{name}: fetching {source.url}")
+        print(f"{name}: fetching {source.url}", flush=True)
         archive, size, observed = fetch(source, Path("/tmp"))
         print(f"{name}: {size} bytes, md5 {observed}"
-              f"{' (matches published)' if source.published else ' (observed only)'}")
+              f"{' (matches published)' if source.published else ' (observed only)'}",
+              flush=True)
 
         members = unpack(archive, root, source.dest)
         archive.unlink()
-        print(f"{name}: unpacked {members} members into {source.dest or '<root>'}")
+        print(f"{name}: unpacked {members} members into {source.dest or '<root>'}", flush=True)
 
         entries.append(
             {
