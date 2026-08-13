@@ -30,7 +30,8 @@ Scope
 Only the **forward-pass path** is covered. Three things are deliberately out of
 scope because the upstream reference cannot execute them at all:
 
-* `utils.compute_precision` -- returns None upstream (it never returns a value).
+* `evaluate.contacts.compute_precision` -- returns None upstream (it never
+  returns a value).
 * `chunk_layer(..., low_mem=True)` -- upstream references an undefined
   `_chunk_slice`.
 * The outer product's `chunk_size` path -- upstream's differential `_chunk`
@@ -53,6 +54,7 @@ takes `_cuex_forward` instead and will not reproduce these values bitwise.
 
 import argparse
 import importlib
+import importlib.util
 import math
 import platform
 import sys
@@ -150,6 +152,50 @@ def make_inputs(seed: int = 1234, device: torch.device | None = None):
     }
 
 
+# Where each module the cases need lives, per tree. `pkg` names two different
+# layouts: this repository after phase 4, and the upstream worktree the goldens
+# were recorded from, which is still flat and still calls the heads module
+# `regression.py`. Both must resolve, so the difference is a table rather than a
+# `try`/`except ImportError` -- an except clause here would also swallow a
+# genuinely missing third-party dependency raised from *inside* one of these
+# modules and then fail somewhere unrelated.
+#
+# The keys are the roles the cases ask for. The case *names* are unchanged and
+# still say `regression.LMHead`: they are the fixture keys, and renaming one
+# would orphan a golden.
+LAYOUTS = {
+    "nn": {
+        "core": "nn.core",
+        "pairwise_operations": "nn.pairwise_operations",
+        "outer_product": "nn.outer_product",
+        "positional_encoding": "nn.positional_encoding",
+        "heads": "nn.heads",
+        "model": "nn.model",
+        "tokens": "tokens",
+        "features": "features",
+    },
+    "flat": {
+        "core": "core",
+        "pairwise_operations": "pairwise_operations",
+        "outer_product": "outer_product",
+        "positional_encoding": "positional_encoding",
+        "heads": "regression",
+        "model": "model",
+        "tokens": "dataset",
+        "features": "dataset",
+    },
+}
+
+
+def module_paths(pkg: str) -> dict[str, str]:
+    """Pick a layout by looking for `nn/`, which only the current tree has.
+
+    `find_spec` answers without importing the module, and it finds `nn` even
+    though it is a namespace package with no `__init__.py`.
+    """
+    return LAYOUTS["nn" if importlib.util.find_spec(f"{pkg}.nn") else "flat"]
+
+
 def build_cases(
     pkg: str,
     device: torch.device | None = None,
@@ -166,12 +212,13 @@ def build_cases(
     themselves were recorded with it off; replaying them with it on is how the
     drift between the two implementations gets measured.
     """
-    core = importlib.import_module(f"{pkg}.core")
-    pairwise_operations = importlib.import_module(f"{pkg}.pairwise_operations")
-    outer_product = importlib.import_module(f"{pkg}.outer_product")
-    positional_encoding = importlib.import_module(f"{pkg}.positional_encoding")
-    regression = importlib.import_module(f"{pkg}.regression")
-    model_mod = importlib.import_module(f"{pkg}.model")
+    where = module_paths(pkg)
+    core = importlib.import_module(f"{pkg}.{where['core']}")
+    pairwise_operations = importlib.import_module(f"{pkg}.{where['pairwise_operations']}")
+    outer_product = importlib.import_module(f"{pkg}.{where['outer_product']}")
+    positional_encoding = importlib.import_module(f"{pkg}.{where['positional_encoding']}")
+    regression = importlib.import_module(f"{pkg}.{where['heads']}")
+    model_mod = importlib.import_module(f"{pkg}.{where['model']}")
 
     device = device or torch.device("cpu")
     if use_cuequivariance is None:
@@ -267,13 +314,17 @@ def build_cases(
             return mod, args, {"out": mod(**args)}
 
     def _full_model_inputs():
-        dataset = importlib.import_module(f"{pkg}.dataset")
+        # This tree split `dataset.py` into `tokens.py` and `features.py`; the
+        # upstream tree still has the one module, so both keys point at
+        # `dataset` there.
+        tokens_mod = importlib.import_module(f"{pkg}.{where['tokens']}")
+        features_mod = importlib.import_module(f"{pkg}.{where['features']}")
         gen = torch.Generator().manual_seed(99)
         tokens = torch.randint(0, 20, (B, S, N), generator=gen)
         onehot = torch.nn.functional.one_hot(
-            tokens, num_classes=len(dataset.aa2tok_d)
+            tokens, num_classes=len(tokens_mod.aa2tok_d)
         ).float()
-        mask, msa_mask, full_mask, pairwise_mask = dataset.prepare_msa_masks(tokens)
+        mask, msa_mask, full_mask, pairwise_mask = features_mod.prepare_msa_masks(tokens)
         return {
             "msa": onehot.to(device), "mask": mask.to(device),
             "msa_mask": msa_mask.to(device), "full_mask": full_mask.to(device),

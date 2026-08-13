@@ -48,7 +48,7 @@ def environment() -> dict[str, Any]:
     afterwards would make an A/B of the two triangle paths look as though it had
     run on two different hosts.
     """
-    from msa_pairformer import pairwise_operations
+    from msa_pairformer.nn import pairwise_operations
 
     return {
         "python": sys.version.split()[0],

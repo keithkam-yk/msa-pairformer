@@ -79,18 +79,18 @@ shapes on an 80 GB card and replaces the extrapolation with a measurement.
 
 ### Upgrading from 1.0.2 and earlier
 
-The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8). Import
-it under the new name:
+The python package was renamed from `MSA_Pairformer` to `msa_pairformer` (PEP 8), and the
+model now lives under `msa_pairformer/nn/`. Import it under the new name:
 
 ```py
-from msa_pairformer.model import MSAPairformer     # new
-from MSA_Pairformer.model import MSAPairformer     # old, deprecated but still works
+from msa_pairformer import MSAPairformer          # new: the package facade
+from msa_pairformer.nn.model import MSAPairformer # new: the module path
+from MSA_Pairformer.model import MSAPairformer    # old, no longer works
 ```
 
-The old spelling keeps working through a compatibility shim (`MSA_Pairformer.py`) that
-aliases `MSA_Pairformer.*` onto the identical `msa_pairformer.*` modules and raises a
-`DeprecationWarning`. Both spellings resolve to the same module objects, so mixing them
-is safe. The shim will be removed in a future release -- please migrate your imports.
+The compatibility shim (`MSA_Pairformer.py`) that aliased `MSA_Pairformer.*` onto
+`msa_pairformer.*` has been removed. Import from `msa_pairformer`, and prefer the
+facade -- it is the surface the package promises to keep at a stable path.
 
 Note that `MSA_Pairformer/` and `msa_pairformer/` are the *same* directory on
 case-insensitive filesystems (macOS, Windows). If you are upgrading in place there,
@@ -131,8 +131,10 @@ The model's weights can be downloaded from Huggingface under [HuggingFace/yakiya
 import torch
 import numpy as np
 from huggingface_hub import login
-from msa_pairformer.model import MSAPairformer
-from msa_pairformer.dataset import MSA, prepare_msa_masks, aa2tok_d
+from msa_pairformer.nn.model import MSAPairformer
+from msa_pairformer.msa import MSA
+from msa_pairformer.features import prepare_msa_masks
+from msa_pairformer.tokens import aa2tok_d
 
 # Use the GPU if available
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')

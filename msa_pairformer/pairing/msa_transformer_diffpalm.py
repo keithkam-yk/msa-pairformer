@@ -19,7 +19,7 @@ from matplotlib.colors import CenteredNorm
 # Progress bars
 from tqdm import tqdm
 
-from msa_pairformer.pairing_optimization.gumbel_sinkhorn_utils import (
+from msa_pairformer.pairing.sinkhorn import (
     MSA_inverse_permutation,
     gumbel_matching,
     gumbel_sinkhorn,

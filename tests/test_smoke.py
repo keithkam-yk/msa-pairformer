@@ -15,8 +15,9 @@ pretrained weights.
 import pytest
 import torch
 
-from msa_pairformer.dataset import aa2tok_d, prepare_msa_masks
-from msa_pairformer.model import MSAPairformer
+from msa_pairformer.features import prepare_msa_masks
+from msa_pairformer.nn.model import MSAPairformer
+from msa_pairformer.tokens import aa2tok_d
 
 # Output sums for seed 0, S=8, N=24, float32, CPU, vanilla triangle path.
 REFERENCE_SUMS = {

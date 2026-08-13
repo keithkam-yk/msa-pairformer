@@ -8,9 +8,9 @@ from scipy.optimize import linear_sum_assignment
 from tqdm import tqdm
 
 
-from msa_pairformer.pairing_optimization.msa_transformer_diffpalm import DiffPALM
-from msa_pairformer.pairing_optimization.msa_parsing import read_msa
-from msa_pairformer.pairing_optimization.datasets import generate_dataset, dataset_tokenizer
+from msa_pairformer.pairing.msa_transformer_diffpalm import DiffPALM
+from msa_pairformer.msa import read_msa
+from msa_pairformer.pairing.esm_datasets import generate_dataset, dataset_tokenizer
 
 def save_parameters(parameters_all, filepath):
     """Saves the parameters dictionary"""

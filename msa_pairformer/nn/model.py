@@ -10,12 +10,12 @@ from einops.layers.torch import Rearrange
 from huggingface_hub import snapshot_download
 from torch.nn import Module, ModuleList, Sequential
 
-from msa_pairformer.core import LinearNoBias, PreLayerNorm, Transition, exists
-from msa_pairformer.custom_typing import Bool, Float, typecheck
-from msa_pairformer.outer_product import OuterProduct
-from msa_pairformer.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock, cuex_is_available
-from msa_pairformer.positional_encoding import RelativePositionEncoding
-from msa_pairformer.regression import LMHead, LogisticRegressionContactHead
+from msa_pairformer.nn.core import LinearNoBias, PreLayerNorm, Transition, exists
+from msa_pairformer.nn.custom_typing import Bool, Float, typecheck
+from msa_pairformer.nn.heads import LMHead, LogisticRegressionContactHead
+from msa_pairformer.nn.outer_product import OuterProduct
+from msa_pairformer.nn.pairwise_operations import MSAPairWeightedAveraging, PairwiseBlock, cuex_is_available
+from msa_pairformer.nn.positional_encoding import RelativePositionEncoding
 
 
 class CoreModule(Module):

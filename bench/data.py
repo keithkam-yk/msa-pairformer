@@ -2,8 +2,8 @@
 
 Random tokens are not a shortcut that costs accuracy here. `CollateAFBatch`
 pads every batch to the fixed configured maximum -- see the commented-out
-pad-to-batch-max line in `dataset.py` -- so the tensors reaching the model are
-always [B, max_depth, max_length] regardless of the underlying MSA. Real data
+pad-to-batch-max line in `data/msa_datasets.py` -- so the tensors reaching the
+model are always [B, max_depth, max_length] regardless of the MSA. Real data
 changes which entries are padding; it does not change a single shape, and
 therefore does not change a single FLOP.
 
@@ -19,7 +19,8 @@ from typing import Any
 import torch
 from torch.nn.functional import one_hot
 
-from msa_pairformer.dataset import msa_mlm, nTokenTypes, prepare_msa_masks
+from msa_pairformer.features import msa_mlm, prepare_msa_masks
+from msa_pairformer.tokens import nTokenTypes
 
 BATCH_KEYS = ("msas", "msas_onehot", "mask", "msa_mask", "full_mask", "pairwise_mask")
 
