@@ -321,7 +321,11 @@ def _probe_pickle(path: Path) -> dict[str, Any]:
     if isinstance(obj, dict):
         keys = list(obj.keys())
         out["n_keys"] = len(keys)
-        out["keys"] = [str(k) for k in keys[:40]]
+        # Generous, because for the ground-truth pickles the key list *is* the
+        # target list -- which targets a benchmark can score is the question
+        # the inventory is for, and a truncated sample cannot answer it. The
+        # cap only exists to stop a 117k-entry lookup table flooding the file.
+        out["keys"] = [str(k) for k in keys[:300]]
         first = obj[keys[0]] if keys else None
         out["value_type"] = type(first).__name__
         if isinstance(first, dict):
