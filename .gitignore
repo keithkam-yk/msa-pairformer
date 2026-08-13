@@ -43,3 +43,7 @@ coverage.xml
 .pytest_cache/
 # Local virtualenv
 .venv/
+
+# Claude Code: share skills, keep machine-local state out
+.claude/settings.local.json
+.claude/worktrees/
