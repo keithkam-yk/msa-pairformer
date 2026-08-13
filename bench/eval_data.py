@@ -25,10 +25,11 @@ import json
 import pickletools
 import time
 import zipfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 CHUNK = 1 << 22  # 4 MiB; large enough that a 3 GB fetch is not syscall-bound.
 
@@ -166,12 +167,35 @@ class Progress:
             print(f"{line}, {rate:.1f} {self.unit}/s", flush=True)
 
 
-def fetch(source: Source, into: Path) -> tuple[Path, int, str]:
+def fetch(
+    source: Source,
+    into: Path,
+    *,
+    attempts: int = 8,
+    opener: Callable[[Request], Any] = urlopen,
+    backoff: float = 3.0,
+) -> tuple[Path, int, str]:
     """Download to `into`, returning the path, observed size and observed MD5.
 
-    Streams and hashes in one pass -- a 3 GB archive is not read twice. Raises
-    if the source publishes a checksum and the download does not match it; an
-    unpublished checksum is returned for recording, never enforced here.
+    Streams and hashes in one pass -- a 3.6 GB archive is not read twice.
+    Raises if the source publishes a checksum and the download does not match
+    it; an unpublished checksum is returned for recording, never enforced here.
+
+    **Resumes.** Zenodo drops long transfers part-way, and it does so without
+    an error: the socket simply returns end-of-stream early, so a naive read
+    loop exits *cleanly* holding a third of a file. Only the checksum catches
+    that, and only after twenty wasted minutes. Each attempt therefore resumes
+    from the bytes already on disk with a Range request, and the loop ends on
+    the declared length rather than on a quiet EOF.
+
+    Resumption is the dangerous part, because appending to the wrong offset
+    produces a file that is the right length and entirely corrupt. Two guards:
+    a resumed request must be answered with `206 Partial Content`, and anything
+    else restarts from zero with a fresh digest; and the digest is only ever
+    fed bytes in order, never rewound, so it stays valid across attempts.
+
+    `opener` is a seam for the tests -- the retry path is the code that most
+    needs checking and the one a network cannot be relied on to exercise.
 
     The zip check after the checksum is not redundant with it. A deposit can be
     served at its full declared length, match its published MD5, and still be a
@@ -183,14 +207,54 @@ def fetch(source: Source, into: Path) -> tuple[Path, int, str]:
     path = into / source.name
     digest = hashlib.md5()
     size = 0
-    progress = Progress(f"fetch {source.name}", source.size)
+    total = source.size
+    progress = Progress(f"fetch {source.name}", total)
 
-    with urlopen(source.url) as response, path.open("wb") as out:
-        while chunk := response.read(CHUNK):
-            out.write(chunk)
-            digest.update(chunk)
-            size += len(chunk)
-            progress.advance(len(chunk))
+    for attempt in range(1, attempts + 1):
+        request = Request(source.url)
+        if size:
+            request.add_header("Range", f"bytes={size}-")
+
+        response = opener(request)
+        try:
+            resuming = size > 0 and getattr(response, "status", 200) == 206
+            if size and not resuming:
+                print(
+                    f"  {source.name}: server ignored Range and restarted the "
+                    f"body; discarding {size} bytes and starting over",
+                    flush=True,
+                )
+                digest, size = hashlib.md5(), 0
+                progress = Progress(f"fetch {source.name}", total)
+            if total is None:
+                length = response.headers.get("Content-Length")
+                total = size + int(length) if length else None
+                progress.total = total
+
+            with path.open("ab" if resuming else "wb") as out:
+                while chunk := response.read(CHUNK):
+                    out.write(chunk)
+                    digest.update(chunk)
+                    size += len(chunk)
+                    progress.advance(len(chunk))
+        finally:
+            response.close()
+
+        if total is None or size >= total:
+            break
+
+        print(
+            f"  {source.name}: stream ended early at {size:,} of {total:,} bytes; "
+            f"resuming (attempt {attempt + 1} of {attempts})",
+            flush=True,
+        )
+        time.sleep(backoff * attempt)
+    else:
+        raise ValueError(
+            f"{source.name}: still {total - size:,} bytes short after {attempts} "
+            f"attempts -- the source is dropping the connection faster than this "
+            f"can resume"
+        )
     progress.report()
 
     observed = digest.hexdigest()

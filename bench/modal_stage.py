@@ -16,9 +16,10 @@ appends to `_manifest.json` at the Volume root -- between them, a populated
 Volume can be traced back to the code that populated it, or rebuilt if it is
 lost.
 
-Fetching runs *here* rather than on a developer machine because the bundle is
-3.59 GB and the container's link to Zenodo is an order of magnitude faster than
-a laptop's. Nothing large ever lands locally.
+Fetching runs *here* rather than on a developer machine because the 3.59 GB has
+to end up in the Volume, and routing it through a laptop to get there is pure
+waste. Not for speed: Zenodo serves this at around 2 MB/s no matter who asks,
+so the container's link is no better than a laptop's.
 
 Both long steps report progress on a timer to flushed stdout, which is the only
 window into a container: a multi-gigabyte fetch that prints nothing for ten
