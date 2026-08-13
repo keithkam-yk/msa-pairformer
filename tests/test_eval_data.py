@@ -118,6 +118,19 @@ def test_unreadable_pickle_is_a_finding_not_a_failure(tmp_path: Path) -> None:
     assert "load_error" in probe
 
 
+def test_tree_counts_against_the_directory_at_the_depth_limit(tmp_path: Path) -> None:
+    """Sibling directories below the limit must stay distinct, not merge upward."""
+    for sub in ("uniref_msas", "logan_msas"):
+        deep = tmp_path / "Figure5" / "ProteinGym" / sub / "extra"
+        deep.mkdir(parents=True)
+        (deep / "x.a3m").write_text("seq")
+
+    tree = inventory(tmp_path, tree_depth=3)["tree"]
+    assert "Figure5/ProteinGym/uniref_msas" in tree
+    assert "Figure5/ProteinGym/logan_msas" in tree
+    assert "Figure5/ProteinGym" not in tree
+
+
 def test_unpack_is_idempotent(tmp_path: Path) -> None:
     """Re-running a partially finished ingest repairs it rather than doubling it."""
     archive = tmp_path / "a.zip"

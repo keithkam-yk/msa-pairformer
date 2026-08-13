@@ -1,0 +1,1278 @@
+{
+  "root": "/root/data",
+  "total_files": 1012,
+  "total_bytes": 12898381310,
+  "tree": {
+    ".": {
+      "files": 1,
+      "bytes": 528
+    },
+    "Figure2_heterooligomer_contact_prediction": {
+      "files": 1,
+      "bytes": 112723868
+    },
+    "Figure2_heterooligomer_contact_prediction/msas": {
+      "files": 30,
+      "bytes": 46584670
+    },
+    "Figure2_heterooligomer_contact_prediction/unpaired_msas": {
+      "files": 30,
+      "bytes": 526010976
+    },
+    "Figure3_toxin_antitoxin": {
+      "files": 13,
+      "bytes": 20910557
+    },
+    "Figure4_Response_Regulator": {
+      "files": 4,
+      "bytes": 20079475
+    },
+    "Figure4_Response_Regulator/contact_matrices": {
+      "files": 9,
+      "bytes": 384222
+    },
+    "Figure5_CASP_ProteinGym": {
+      "files": 1,
+      "bytes": 122404057
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym": {
+      "files": 825,
+      "bytes": 11992087824
+    },
+    "Figure5_CASP_ProteinGym/logan_uniref_msas": {
+      "files": 49,
+      "bytes": 42273677
+    },
+    "Figure5_CASP_ProteinGym/uniref_msas": {
+      "files": 49,
+      "bytes": 14921456
+    }
+  },
+  "pickles": {
+    "Figure2_heterooligomer_contact_prediction/target_data.pkl": {
+      "bytes": 112723868,
+      "type": "dict",
+      "n_keys": 30,
+      "keys": [
+        "4HR7_A_4HR7_B",
+        "2WDQ_C_2WDQ_D",
+        "3IP4_A_3IP4_B",
+        "1I1Q_A_1I1Q_B",
+        "1EP3_A_1EP3_B",
+        "3G5O_A_3G5O_B",
+        "1RM6_A_1RM6_C",
+        "3A0R_A_3A0R_D",
+        "2Y69_A_2Y69_C",
+        "2D1P_B_2D1P_C",
+        "2Y69_A_2Y69_B",
+        "1B70_A_1B70_B",
+        "2NU9_A_2NU9_B",
+        "1RM6_A_1RM6_B",
+        "3MML_A_3MML_B",
+        "1ZUN_A_1ZUN_B",
+        "1TYG_B_1TYG_A",
+        "1BXR_A_1BXR_B",
+        "3IP4_B_3IP4_C",
+        "1W85_A_1W85_B",
+        "1EFP_A_1EFP_B",
+        "1RM6_B_1RM6_C",
+        "3RRL_A_3RRL_B",
+        "3IP4_A_3IP4_C",
+        "3OAA_H_3OAA_G",
+        "1QOP_A_1QOP_B",
+        "3PNL_A_3PNL_B",
+        "3RPF_A_3RPF_D",
+        "2VPZ_A_2VPZ_B",
+        "2ONK_A_2ONK_C"
+      ],
+      "value_type": "dict",
+      "value_keys": [
+        "pdb_id",
+        "msa_file",
+        "query_seq",
+        "chain_data_d",
+        "chains",
+        "contacts_a",
+        "cif_mask",
+        "msa_mask",
+        "chain_break"
+      ]
+    },
+    "Figure4_Response_Regulator/pdb2alignment_seqs.pkl": {
+      "bytes": 385,
+      "type": "dict",
+      "n_keys": 3,
+      "keys": [
+        "4E7P",
+        "4CBV",
+        "1NXS"
+      ],
+      "value_type": "str"
+    },
+    "Figure4_Response_Regulator/seqid2subfamily.pkl": {
+      "bytes": 3114831,
+      "type": "dict",
+      "n_keys": 117119,
+      "keys": [
+        "1NXS",
+        "4CBV",
+        "4E7P",
+        "A0A1H8EP14_STIAU/4-116",
+        "A0A084JPW5_9FIRM/5-114",
+        "A0A5R9GI55_9BACL/8-117",
+        "A0A1V0RP11_9RHOB/5-114",
+        "A0A0M1JPE3_9CYAN/3-113",
+        "A0A1L3GTD8_9BACT/5-114",
+        "A0A0Q3TH90_9BACI/4-113",
+        "A0A848GA89_9RHOO/3-113",
+        "A0A928X4F3_LEPEC/3-115",
+        "A0A1E5T734_9BACT/3-113",
+        "A0A1Q5P5F4_9BACI/6-115",
+        "A0A937FI78_9CLOT/6-115",
+        "A0A7K1L2I4_9ACTN/6-116",
+        "A0A924A680_9BACT/1-109",
+        "A0A256BDD4_9CYAN/3-113",
+        "A0A176U5F3_9FIRM/4-113",
+        "A0A923NCG7_9FIRM/4-110",
+        "A0A4S8PU02_9ACTN/15-125",
+        "A0A385NTW4_9BACI/4-113",
+        "A0A3G9IIZ6_9ACTN/18-128",
+        "A0A4V2J4J8_9BACL/5-114",
+        "A0A4R3MPR6_9BACI/6-115",
+        "A0A1W6B4C7_9GAMM/3-113",
+        "A0A6B2SHL8_9ACTN/22-132",
+        "A0A939PAY4_9ACTN/4-113",
+        "Q8XL49_CLOPE/3-112",
+        "A0A0F5JYL2_9BURK/3-112",
+        "A0A938X328_9CLOT/3-113",
+        "F4A1Y7_MAHA5/5-114",
+        "A0A5C5XEG1_9PLAN/12-122",
+        "A0A1I1D2F6_9FIRM/4-113",
+        "A0A0A5HV94_9BACI/6-114",
+        "R5R074_9FIRM/7-116",
+        "A0A1M6BS15_PSEXY/6-116",
+        "A0A1G8R686_9SPHI/4-114",
+        "A0A1I0W2F4_9FIRM/4-113",
+        "A0A917CM19_9BACL/4-113"
+      ],
+      "value_type": "str"
+    },
+    "Figure5_CASP_ProteinGym/target_data.pkl": {
+      "bytes": 122404057,
+      "type": "dict",
+      "n_keys": 49,
+      "keys": [
+        "T1146",
+        "T1181",
+        "T1179",
+        "T1130",
+        "T1132",
+        "T1178",
+        "T1188",
+        "T1131",
+        "T1119",
+        "T1139",
+        "T1170",
+        "T1183",
+        "T1173",
+        "T1153",
+        "T1110",
+        "T1182",
+        "T1162",
+        "T1147",
+        "T1113",
+        "T1158",
+        "T1122",
+        "T1160",
+        "T1127",
+        "T1169",
+        "T1109",
+        "T1145",
+        "T1123",
+        "T1120",
+        "T1175",
+        "T1124",
+        "T1152",
+        "T1125",
+        "T1176",
+        "T1184",
+        "T1163",
+        "T1121",
+        "T1159",
+        "T1174",
+        "T1187",
+        "T1161"
+      ],
+      "value_type": "dict",
+      "value_keys": [
+        "msa_subset_idx_l",
+        "contacts_a",
+        "uniref_msa_file",
+        "logan_msa_file"
+      ]
+    }
+  },
+  "csvs": {
+    "Figure3_toxin_antitoxin/Library_fitness_vs_parE3_replicate_A.csv": {
+      "bytes": 249648,
+      "header": "ALAL,-0.0016727206188067868",
+      "rows": 9193
+    },
+    "Figure3_toxin_antitoxin/Library_fitness_vs_parE3_replicate_B.csv": {
+      "bytes": 248861,
+      "header": "ALAL,0.0090518830398788816",
+      "rows": 9193
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A140D2T1_ZIKV_Sourisseau_2019.csv": {
+      "bytes": 33038220
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A192B1T2_9HIV1_Haddox_2018.csv": {
+      "bytes": 10997746
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A1I9GEU1_NEIME_Kennouche_2019.csv": {
+      "bytes": 163233,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 922
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A247D711_LISMN_Stadelmann_2021.csv": {
+      "bytes": 188807,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1653
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A2Z5U3Z0_9INFA_Doud_2016.csv": {
+      "bytes": 6293694,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 10715
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A0A2Z5U3Z0_9INFA_Wu_2014.csv": {
+      "bytes": 1376678,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2350
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A4D664_9INFA_Soh_2019.csv": {
+      "bytes": 11333400
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A4GRB6_PSEAI_Chen_2020.csv": {
+      "bytes": 1457899,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5004
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/A4_HUMAN_Seuma_2022.csv": {
+      "bytes": 11890296
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/AACC1_PSEAI_Dandage_2018.csv": {
+      "bytes": 360704,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1801
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ACE2_HUMAN_Chan_2020.csv": {
+      "bytes": 1840157,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2223
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ADRB2_HUMAN_Jones_2020.csv": {
+      "bytes": 3425091,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7800
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/AICDA_HUMAN_Gajula_2014_3cycles.csv": {
+      "bytes": 46852,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 209
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/AMFR_HUMAN_Tsuboyama_2023_4G3O.csv": {
+      "bytes": 232242,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2972
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/AMIE_PSEAE_Wrenbeck_2017.csv": {
+      "bytes": 2257311,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6227
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ANCSZ_Hobbs_2022.csv": {
+      "bytes": 3069548,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_bin_score,DMS_score_bin",
+      "rows": 4670
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ARGR_ECOLI_Tsuboyama_2023_1AOY.csv": {
+      "bytes": 124147,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1287
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/B2L11_HUMAN_Dutta_2010_binding-Mcl-1.csv": {
+      "bytes": 37226,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 170
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BBC1_YEAST_Tsuboyama_2023_1TG0.csv": {
+      "bytes": 194166,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2069
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BCHB_CHLTE_Tsuboyama_2023_2KRU.csv": {
+      "bytes": 128400,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1572
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BLAT_ECOLX_Deng_2012.csv": {
+      "bytes": 1528324,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4996
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BLAT_ECOLX_Firnberg_2014.csv": {
+      "bytes": 1443286,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4783
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BLAT_ECOLX_Jacquier_2013.csv": {
+      "bytes": 298807,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 989
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BLAT_ECOLX_Stiffler_2015.csv": {
+      "bytes": 1540539,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4996
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BRCA1_HUMAN_Findlay_2018.csv": {
+      "bytes": 3463590,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1837
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/BRCA2_HUMAN_Erwood_2022_HEK293T.csv": {
+      "bytes": 911656,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 265
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/C6KNH7_9INFA_Lee_2018.csv": {
+      "bytes": 6392407,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 10754
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CALM1_HUMAN_Weile_2017.csv": {
+      "bytes": 308544,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1813
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CAPSD_AAV2S_Sinai_2021.csv": {
+      "bytes": 33124725
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CAR11_HUMAN_Meitlis_2020_gof.csv": {
+      "bytes": 2792735,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2374
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CAR11_HUMAN_Meitlis_2020_lof.csv": {
+      "bytes": 2817484,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2395
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CAS9_STRP1_Spencer_2017_positive.csv": {
+      "bytes": 11338062
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CASP3_HUMAN_Roychowdhury_2020.csv": {
+      "bytes": 446462,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1567
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CASP7_HUMAN_Roychowdhury_2020.csv": {
+      "bytes": 517317,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1680
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CATR_CHLRE_Tsuboyama_2023_2AMI.csv": {
+      "bytes": 191931,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1903
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CBPA2_HUMAN_Tsuboyama_2023_1O6X.csv": {
+      "bytes": 208988,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2068
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CBS_HUMAN_Sun_2020.csv": {
+      "bytes": 4144925,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7217
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CBX4_HUMAN_Tsuboyama_2023_2K28.csv": {
+      "bytes": 182963,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2282
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CCDB_ECOLI_Adkar_2012.csv": {
+      "bytes": 134880,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1176
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CCDB_ECOLI_Tripathi_2016.csv": {
+      "bytes": 189534,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1663
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CCR5_HUMAN_Gill_2023.csv": {
+      "bytes": 2264116,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6137
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CD19_HUMAN_Klesmith_2019_FMC_singles.csv": {
+      "bytes": 2195953,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3761
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CP2C9_HUMAN_Amorosi_2021_abundance.csv": {
+      "bytes": 3259960,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6370
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CP2C9_HUMAN_Amorosi_2021_activity.csv": {
+      "bytes": 3143321,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6142
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CSN4_MOUSE_Tsuboyama_2023_1UFM.csv": {
+      "bytes": 337659,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3295
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/CUE1_YEAST_Tsuboyama_2023_2MYX.csv": {
+      "bytes": 128731,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1580
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/D7PM05_CLYGR_Somermeyer_2022.csv": {
+      "bytes": 6603965,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 24515
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DLG4_HUMAN_Faure_2021.csv": {
+      "bytes": 5280599,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6976
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DLG4_RAT_McLaughlin_2012.csv": {
+      "bytes": 1170212,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1576
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DN7A_SACS2_Tsuboyama_2023_1JIC.csv": {
+      "bytes": 83093,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1008
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DNJA1_HUMAN_Tsuboyama_2023_2LO1.csv": {
+      "bytes": 214092,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2264
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DOCK1_MOUSE_Tsuboyama_2023_2M0Y.csv": {
+      "bytes": 280406,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2915
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DYR_ECOLI_Nguyen_2023.csv": {
+      "bytes": 502385,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2916
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/DYR_ECOLI_Thompson_2019.csv": {
+      "bytes": 421539,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2363
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ENVZ_ECOLI_Ghose_2023.csv": {
+      "bytes": 96788,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1121
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ENV_HV1B9_DuenasDecamp_2016.csv": {
+      "bytes": 325465,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 375
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ENV_HV1BR_Haddox_2016.csv": {
+      "bytes": 11403804
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/EPHB2_HUMAN_Tsuboyama_2023_1F0M.csv": {
+      "bytes": 186573,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1960
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ERBB2_HUMAN_Elazar_2016.csv": {
+      "bytes": 418439,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 326
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ESTA_BACSU_Nutschel_2020.csv": {
+      "bytes": 491879,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2172
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/F7YBW8_MESOW_Aakre_2015.csv": {
+      "bytes": 1138237,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 9192
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/F7YBW8_MESOW_Ding_2023.csv": {
+      "bytes": 1127187,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7922
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/FECA_ECOLI_Tsuboyama_2023_2D1U.csv": {
+      "bytes": 191022,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1886
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/FKBP3_HUMAN_Tsuboyama_2023_2KFV.csv": {
+      "bytes": 119196,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1237
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GAL4_YEAST_Kitzman_2015.csv": {
+      "bytes": 1069367,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1195
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GCN4_YEAST_Staller_2018.csv": {
+      "bytes": 1052617,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2638
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GDIA_HUMAN_Silverstein_2021.csv": {
+      "bytes": 539560,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1154
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GFP_AEQVI_Sarkisyan_2016.csv": {
+      "bytes": 14347114
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GLPA_HUMAN_Elazar_2016.csv": {
+      "bytes": 43682,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 245
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/GRB2_HUMAN_Faure_2021.csv": {
+      "bytes": 15881632
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HCP_LAMBD_Tsuboyama_2023_2L6Q.csv": {
+      "bytes": 85686,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1040
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HECD1_HUMAN_Tsuboyama_2023_3DKM.csv": {
+      "bytes": 577528,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5586
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HEM3_HUMAN_Loggerenberg_2023.csv": {
+      "bytes": 2167272,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5689
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HIS7_YEAST_Pokusaeva_2019.csv": {
+      "bytes": 136039043
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HMDH_HUMAN_Jiang_2019.csv": {
+      "bytes": 15234779
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HSP82_YEAST_Cote-Hammarlof_2020_growth-H2O2.csv": {
+      "bytes": 1654182,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2252
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HSP82_YEAST_Flynn_2019.csv": {
+      "bytes": 9755209
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HSP82_YEAST_Mishra_2016.csv": {
+      "bytes": 3157884,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4323
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HXK4_HUMAN_Gersing_2022_activity.csv": {
+      "bytes": 4172568,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 8570
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/HXK4_HUMAN_Gersing_2023_abundance.csv": {
+      "bytes": 4130371,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 8396
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/I6TAH8_I68A0_Doud_2015.csv": {
+      "bytes": 4969950,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 9462
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/IF1_ECOLI_Kelsic_2016.csv": {
+      "bytes": 119908,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1367
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ILF3_HUMAN_Tsuboyama_2023_2L33.csv": {
+      "bytes": 130788,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1329
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ISDH_STAAW_Tsuboyama_2023_2LHR.csv": {
+      "bytes": 165575,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1944
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KCNE1_HUMAN_Muhammad_2023_expression.csv": {
+      "bytes": 348639,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2339
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KCNE1_HUMAN_Muhammad_2023_function.csv": {
+      "bytes": 345069,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2315
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KCNH2_HUMAN_Kozek_2020.csv": {
+      "bytes": 236079,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 200
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KCNJ2_MOUSE_Coyote-Maestas_2022_function.csv": {
+      "bytes": 3127001,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6963
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KCNJ2_MOUSE_Coyote-Maestas_2022_surface.csv": {
+      "bytes": 3106932,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6917
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/KKA2_KLEPN_Melnikov_2014.csv": {
+      "bytes": 1389215,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4960
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/LGK_LIPST_Klesmith_2015.csv": {
+      "bytes": 3595385,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7890
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/LYAM1_HUMAN_Elazar_2016.csv": {
+      "bytes": 143761,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 359
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MAFG_MOUSE_Tsuboyama_2023_1K1V.csv": {
+      "bytes": 100932,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1429
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MBD11_ARATH_Tsuboyama_2023_6ACV.csv": {
+      "bytes": 202402,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2116
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MET_HUMAN_Estevam_2023.csv": {
+      "bytes": 1692707,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5393
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MK01_HUMAN_Brenan_2016.csv": {
+      "bytes": 2606319,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6809
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MLAC_ECOLI_MacRae_2023.csv": {
+      "bytes": 940039,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4007
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MSH2_HUMAN_Jia_2020.csv": {
+      "bytes": 15876280
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MTH3_HAEAE_RockahShmuel_2015.csv": {
+      "bytes": 610198,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1777
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MTHR_HUMAN_Weile_2021.csv": {
+      "bytes": 8375562,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 12464
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/MYO3_YEAST_Tsuboyama_2023_2BTT.csv": {
+      "bytes": 303001,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3297
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NCAP_I34A1_Doud_2015.csv": {
+      "bytes": 4969501,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 9462
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NKX31_HUMAN_Tsuboyama_2023_2L9R.csv": {
+      "bytes": 226670,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2482
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NPC1_HUMAN_Erwood_2022_HEK293T.csv": {
+      "bytes": 827864,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 637
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NPC1_HUMAN_Erwood_2022_RPE1.csv": {
+      "bytes": 81917,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 63
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NRAM_I33A0_Jiang_2016.csv": {
+      "bytes": 143331,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 298
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NUD15_HUMAN_Suiter_2020.csv": {
+      "bytes": 531037,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2844
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NUSA_ECOLI_Tsuboyama_2023_1WCL.csv": {
+      "bytes": 199260,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2028
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/NUSG_MYCTU_Tsuboyama_2023_2MI6.csv": {
+      "bytes": 115189,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1380
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OBSCN_HUMAN_Tsuboyama_2023_1V1C.csv": {
+      "bytes": 305491,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3197
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/ODP2_GEOSE_Tsuboyama_2023_1W4G.csv": {
+      "bytes": 83537,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1134
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OPSD_HUMAN_Wan_2019.csv": {
+      "bytes": 61997,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 165
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OTC_HUMAN_Lo_2023.csv": {
+      "bytes": 581787,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1570
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OTU7A_HUMAN_Tsuboyama_2023_2L2D.csv": {
+      "bytes": 44090,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 635
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OXDA_RHOTO_Vanella_2023_activity.csv": {
+      "bytes": 2506834,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6396
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/OXDA_RHOTO_Vanella_2023_expression.csv": {
+      "bytes": 2651865,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 6769
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/P53_HUMAN_Giacomelli_2018_Null_Etoposide.csv": {
+      "bytes": 3136039,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7467
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/P53_HUMAN_Giacomelli_2018_Null_Nutlin.csv": {
+      "bytes": 3136948,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7467
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/P53_HUMAN_Giacomelli_2018_WT_Nutlin.csv": {
+      "bytes": 3136570,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7467
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/P53_HUMAN_Kotler_2018.csv": {
+      "bytes": 437223,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1048
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/P84126_THETH_Chan_2017.csv": {
+      "bytes": 419335,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1519
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PABP_YEAST_Melamed_2013.csv": {
+      "bytes": 22804660
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PAI1_HUMAN_Huttinger_2021.csv": {
+      "bytes": 2261327,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5345
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PA_I34A1_Wu_2015.csv": {
+      "bytes": 1341910,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1820
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PHOT_CHLRE_Chen_2023.csv": {
+      "bytes": 30004693
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PIN1_HUMAN_Tsuboyama_2023_1I6C.csv": {
+      "bytes": 53750,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 802
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PITX2_HUMAN_Tsuboyama_2023_2L7M.csv": {
+      "bytes": 149325,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1824
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PKN1_HUMAN_Tsuboyama_2023_1URF.csv": {
+      "bytes": 127880,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1301
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/POLG_CXB3N_Mattenberger_2021.csv": {
+      "bytes": 34757848
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/POLG_DEN26_Suphatrakul_2023.csv": {
+      "bytes": 15669411
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/POLG_HCVJF_Qi_2014.csv": {
+      "bytes": 4974885,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1630
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/POLG_PESV_Tsuboyama_2023_2MXD.csv": {
+      "bytes": 432771,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5130
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PPARG_HUMAN_Majithia_2016.csv": {
+      "bytes": 4981194,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 9576
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PPM1D_HUMAN_Miller_2022.csv": {
+      "bytes": 4894106,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7889
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PR40A_HUMAN_Tsuboyama_2023_1UZC.csv": {
+      "bytes": 188231,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2033
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PRKN_HUMAN_Clausen_2023.csv": {
+      "bytes": 4305910,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 8756
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PSAE_PICP2_Tsuboyama_2023_1PSE.csv": {
+      "bytes": 152116,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1579
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PTEN_HUMAN_Matreyek_2021.csv": {
+      "bytes": 2184896,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5083
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/PTEN_HUMAN_Mighell_2018.csv": {
+      "bytes": 3088566,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 7260
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q2N0S5_9HIV1_Haddox_2018.csv": {
+      "bytes": 11232481
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q53Z42_HUMAN_McShan_2019_binding-TAPBPR.csv": {
+      "bytes": 1274864,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3344
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q53Z42_HUMAN_McShan_2019_expression.csv": {
+      "bytes": 1274490,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3344
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q59976_STRSQ_Romero_2015.csv": {
+      "bytes": 1552983,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2999
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q6WV12_9MAXI_Somermeyer_2022.csv": {
+      "bytes": 8109961,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 31401
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q837P4_ENTFA_Meier_2023.csv": {
+      "bytes": 429225,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 697
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q837P5_ENTFA_Meier_2023.csv": {
+      "bytes": 446604,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 747
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/Q8WTC7_9CNID_Somermeyer_2022.csv": {
+      "bytes": 9237184
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/R1AB_SARS2_Flynn_2022.csv": {
+      "bytes": 1904966,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 5725
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RAD_ANTMA_Tsuboyama_2023_2CJJ.csv": {
+      "bytes": 74840,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 912
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RAF1_HUMAN_Zinkus-Boltz_2019.csv": {
+      "bytes": 200716,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 297
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RASH_HUMAN_Bandaru_2017.csv": {
+      "bytes": 660853,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3134
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RASK_HUMAN_Weng_2022_abundance.csv": {
+      "bytes": 5712458,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 26012
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RASK_HUMAN_Weng_2022_binding-DARPin_K55.csv": {
+      "bytes": 5463987,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 24873
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RBP1_HUMAN_Tsuboyama_2023_2KWH.csv": {
+      "bytes": 107193,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1332
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RCD1_ARATH_Tsuboyama_2023_5OAO.csv": {
+      "bytes": 107827,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1261
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RCRO_LAMBD_Tsuboyama_2023_1ORC.csv": {
+      "bytes": 211022,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2278
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RD23A_HUMAN_Tsuboyama_2023_1IFY.csv": {
+      "bytes": 73966,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1019
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RDRP_I33A0_Li_2023.csv": {
+      "bytes": 9410456
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/REV_HV1H2_Fernandes_2016.csv": {
+      "bytes": 301503,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2147
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RFAH_ECOLI_Tsuboyama_2023_2LCL.csv": {
+      "bytes": 111149,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1326
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RL20_AQUAE_Tsuboyama_2023_1GYZ.csv": {
+      "bytes": 127666,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1461
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RL40A_YEAST_Mavor_2016.csv": {
+      "bytes": 185249,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1253
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RL40A_YEAST_Roscoe_2013.csv": {
+      "bytes": 184959,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1195
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RL40A_YEAST_Roscoe_2014.csv": {
+      "bytes": 204724,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1380
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RNC_ECOLI_Weeks_2023.csv": {
+      "bytes": 1056996,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 4277
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RPC1_BP434_Tsuboyama_2023_1R69.csv": {
+      "bytes": 130641,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1459
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RPC1_LAMBD_Li_2019_high-expression.csv": {
+      "bytes": 90563,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 351
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RPC1_LAMBD_Li_2019_low-expression.csv": {
+      "bytes": 90565,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 351
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/RS15_GEOSE_Tsuboyama_2023_1A32.csv": {
+      "bytes": 107882,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1195
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/S22A1_HUMAN_Yee_2023_abundance.csv": {
+      "bytes": 5630422,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 9803
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/S22A1_HUMAN_Yee_2023_activity.csv": {
+      "bytes": 5796217,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 10094
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SAV1_MOUSE_Tsuboyama_2023_2YSB.csv": {
+      "bytes": 69507,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 965
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SBI_STAAM_Tsuboyama_2023_2JVG.csv": {
+      "bytes": 85578,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1025
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SC6A4_HUMAN_Young_2021.csv": {
+      "bytes": 7552894,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 11576
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SCIN_STAAR_Tsuboyama_2023_2QFF.csv": {
+      "bytes": 118149,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1212
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SCN5A_HUMAN_Glazer_2019.csv": {
+      "bytes": 455311,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 224
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SDA_BACSU_Tsuboyama_2023_1PV0.csv": {
+      "bytes": 206442,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2770
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SERC_HUMAN_Xie_2023.csv": {
+      "bytes": 759544,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1914
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SHOC2_HUMAN_Kwon_2022.csv": {
+      "bytes": 6685995,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 10972
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SOX30_HUMAN_Tsuboyama_2023_7JJK.csv": {
+      "bytes": 85309,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1010
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPA_STAAU_Tsuboyama_2023_1LP1.csv": {
+      "bytes": 179155,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2105
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPG1_STRSG_Olson_2014.csv": {
+      "bytes": 258413726
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPG1_STRSG_Wu_2016.csv": {
+      "bytes": 72860422
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPG2_STRSG_Tsuboyama_2023_5UBS.csv": {
+      "bytes": 122847,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1451
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPIKE_SARS2_Starr_2020_binding.csv": {
+      "bytes": 4896132,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3802
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPIKE_SARS2_Starr_2020_expression.csv": {
+      "bytes": 4891059,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3798
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SPTN1_CHICK_Tsuboyama_2023_1TUD.csv": {
+      "bytes": 289865,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3201
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SQSTM_MOUSE_Tsuboyama_2023_2RRU.csv": {
+      "bytes": 47690,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 707
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SR43C_ARATH_Tsuboyama_2023_2N88.csv": {
+      "bytes": 122856,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1583
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SRBS1_HUMAN_Tsuboyama_2023_2O2W.csv": {
+      "bytes": 148685,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1556
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SRC_HUMAN_Ahler_2019.csv": {
+      "bytes": 1883026,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3372
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SRC_HUMAN_Chakraborty_2023_binding-DAS_25uM.csv": {
+      "bytes": 2027332,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3637
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SRC_HUMAN_Nguyen_2022.csv": {
+      "bytes": 1900602,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3366
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SUMO1_HUMAN_Weile_2017.csv": {
+      "bytes": 207299,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1700
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/SYUA_HUMAN_Newberry_2020.csv": {
+      "bytes": 416743,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2497
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TADBP_HUMAN_Bolognesi_2019.csv": {
+      "bytes": 528863,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1196
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TAT_HV1BR_Fernandes_2016.csv": {
+      "bytes": 173944,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1577
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TCRG1_MOUSE_Tsuboyama_2023_1E0L.csv": {
+      "bytes": 70330,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1058
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/THO1_YEAST_Tsuboyama_2023_2WQG.csv": {
+      "bytes": 90490,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1279
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TNKS2_HUMAN_Tsuboyama_2023_5JRT.csv": {
+      "bytes": 129830,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1479
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TPK1_HUMAN_Weile_2017.csv": {
+      "bytes": 840554,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3181
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TPMT_HUMAN_Matreyek_2018.csv": {
+      "bytes": 972049,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3648
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TPOR_HUMAN_Bridgford_2020.csv": {
+      "bytes": 373059,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 562
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TRPC_SACS2_Chan_2017.csv": {
+      "bytes": 410643,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1519
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/TRPC_THEMA_Chan_2017.csv": {
+      "bytes": 416453,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1519
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/UBC9_HUMAN_Weile_2017.csv": {
+      "bytes": 462958,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2563
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/UBE4B_HUMAN_Tsuboyama_2023_3L1X.csv": {
+      "bytes": 361882,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 3622
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/UBE4B_MOUSE_Starita_2013.csv": {
+      "bytes": 1075549,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 899
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/UBR5_HUMAN_Tsuboyama_2023_1I2T.csv": {
+      "bytes": 125853,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1453
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/VG08_BPP22_Tsuboyama_2023_2GP8.csv": {
+      "bytes": 48778,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 723
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/VILI_CHICK_Tsuboyama_2023_1YU5.csv": {
+      "bytes": 244349,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2568
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/VKOR1_HUMAN_Chiasson_2020_abundance.csv": {
+      "bytes": 510816,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2695
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/VKOR1_HUMAN_Chiasson_2020_activity.csv": {
+      "bytes": 132039,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 697
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/VRPI_BPT7_Tsuboyama_2023_2WNM.csv": {
+      "bytes": 87335,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1047
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/YAIA_ECOLI_Tsuboyama_2023_2KVT.csv": {
+      "bytes": 154773,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 1890
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/YAP1_HUMAN_Araya_2012.csv": {
+      "bytes": 5381227,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 10075
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_ProteinGym_Substitutions/YNZC_BACSU_Tsuboyama_2023_2JVD.csv": {
+      "bytes": 160231,
+      "header": "mutant,mutated_sequence,DMS_score,DMS_score_bin",
+      "rows": 2300
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/DMS_substitutions.mmseqs_filtered.reannotated.csv": {
+      "bytes": 207931,
+      "header": ",DMS_index,DMS_id,DMS_filename,UniProt_ID,taxon,source_organism,target_seq,seq_len,includes_multiple_mutants,DMS_total_number_mutants,DMS_number_single_mutants,DMS_number_multiple_mutants,DMS_binarization_cutoff,DMS_binarization_method,first_author,title,year,jo,region_mutated,molecule_name,selection_assay,selection_type,raw_DMS_filename,raw_DMS_phenotype_name,raw_DMS_directionality,raw_DMS_mutant",
+      "rows": 217
+    },
+    "Figure5_CASP_ProteinGym/ProteinGym/SBS_model_spearman_rho.csv": {
+      "bytes": 406055,
+      "header": ",SPG1_STRSG_Olson_2014,SPIKE_SARS2_Starr_2020_binding,SCIN_STAAR_Tsuboyama_2023_2QFF,A0A247D711_LISMN_Stadelmann_2021,YAIA_ECOLI_Tsuboyama_2023_2KVT,P53_HUMAN_Giacomelli_2018_Null_Nutlin,PTEN_HUMAN_Mighell_2018,SRC_HUMAN_Chakraborty_2023_binding-DAS_25uM,MET_HUMAN_Estevam_2023,PHOT_CHLRE_Chen_2023,SRC_HUMAN_Ahler_2019,R1AB_SARS2_Flynn_2022,HXK4_HUMAN_Gersing_2023_abundance,TPMT_HUMAN_Matreyek_2018",
+      "rows": 95
+    }
+  }
+}

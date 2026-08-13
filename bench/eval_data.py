@@ -348,7 +348,13 @@ def inventory(root: Path, tree_depth: int = 3) -> dict[str, Any]:
         if not path.is_file():
             continue
         rel = path.relative_to(root)
-        key = str(Path(*rel.parts[:tree_depth]).parent if len(rel.parts) > tree_depth else rel.parent)
+        # A file deeper than `tree_depth` is counted against its ancestor *at*
+        # that depth, not the one above it. Taking `.parent` of the truncated
+        # path drops a level and folds sibling directories into their shared
+        # parent -- which silently hid the ProteinGym MSA directories, the ones
+        # the staging ticket exists to ask about.
+        parts = rel.parts
+        key = str(Path(*parts[:tree_depth]) if len(parts) > tree_depth else rel.parent)
         entry = tree.setdefault(key, {"files": 0, "bytes": 0})
         entry["files"] += 1
         entry["bytes"] += path.stat().st_size
