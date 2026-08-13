@@ -157,9 +157,13 @@ class Progress:
             pct = 100 * self.done / self.total
             remaining = (self.total - self.done) / rate if rate else 0.0
             line += f" / {self._scale(self.total)} ({pct:.0f}%), {remaining / 60:.1f} min left"
-        suffix = "GB/s" if self.unit == "B" else f"{self.unit}/s"
-        divisor = 1e9 if self.unit == "B" else 1.0
-        print(f"{line}, {rate / divisor:.2f} {suffix}", flush=True)
+        # MB/s, not GB/s: the throttled sources this pulls from run at single
+        # digit MB/s, and a rate column that reads 0.00 for the whole transfer
+        # tells you nothing about whether it is moving.
+        if self.unit == "B":
+            print(f"{line}, {rate / 1e6:.1f} MB/s", flush=True)
+        else:
+            print(f"{line}, {rate:.1f} {self.unit}/s", flush=True)
 
 
 def fetch(source: Source, into: Path) -> tuple[Path, int, str]:
