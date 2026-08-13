@@ -1,6 +1,4 @@
-import os
 from functools import partial
-from glob import glob
 from math import exp
 from pathlib import Path
 
@@ -376,39 +374,32 @@ class MSAPairformer(Module):
         return self.core_stack.zero.device
 
     ###### Load model ######
+    # Pinned so a replication run can't silently pick up new weights pushed to
+    # the Hub default branch. Canonical id -- "yakiyama/MSA-Pairformer" is a
+    # redirect to this.
+    PRETRAINED_REPO_ID = "yoakiyama/MSA-Pairformer"
+    PRETRAINED_REVISION = "7563e77a87536b5572f91683c39073ef348639a4"
+
     @classmethod
     def from_pretrained(
         cls,
         device: torch.device | None = None,
         weights_dir: str | None = None,
+        revision: str | None = None,
     ):
         if device is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        loaded = False
-        if weights_dir is not None:
-            # If weights have already been saved
-            weights_files_l = glob(os.path.join(weights_dir, "*/snapshots/*/*"))
-            if (
-                any(os.path.basename(p) == "model_cuex.bin" for p in weights_files_l) and 
-                any(os.path.basename(p) == "confind_contact.bin" for p in weights_files_l) and
-                any(os.path.basename(p) == "contact.bin" for p in weights_files_l) #and
-                # any([os.path.basename(p) == "mrf_head.bin" for p in weights_files_l])
-            ):
-                main_weights_path = next(p for p in weights_files_l if os.path.basename(p) == 'model_cuex.bin')
-                checkpoint = torch.load(main_weights_path, weights_only=True, map_location=device)
-                confind_contact_path = next(p for p in weights_files_l if os.path.basename(p) == 'confind_contact.bin')
-                confind_contact_checkpoint = torch.load(confind_contact_path, weights_only=True, map_location=device)
-                cb_contact_path = next(p for p in weights_files_l  if os.path.basename(p) == 'contact.bin')
-                cb_contact_checkpoint = torch.load(cb_contact_path, weights_only=True, map_location=device)
-                # mrf_head_path = [p for p in weights_files_l if os.path.basename(p) == 'mrf_head.bin'][0]
-                # mrf_head_checkpoint = torch.load(mrf_head_path, weights_only=True, map_location=device)
-                loaded = True
-        if not loaded:
-            path = Path(snapshot_download(repo_id="yakiyama/MSA-Pairformer", cache_dir=weights_dir))
-            checkpoint = torch.load(path / "model_cuex.bin", weights_only=True, map_location=device)
-            confind_contact_checkpoint = torch.load(path / "confind_contact.bin", weights_only=True, map_location=device)
-            cb_contact_checkpoint = torch.load(path / "contact.bin", weights_only=True, map_location=device)
-            # mrf_head_checkpoint = torch.load(path / "mrf_head.bin", weights_only=True, map_location=device)
+        # snapshot_download caches by revision under weights_dir itself, so this
+        # can't silently serve files from a different revision than requested.
+        path = Path(snapshot_download(
+            repo_id=cls.PRETRAINED_REPO_ID,
+            revision=revision or cls.PRETRAINED_REVISION,
+            cache_dir=weights_dir,
+        ))
+        checkpoint = torch.load(path / "model_cuex.bin", weights_only=True, map_location=device)
+        confind_contact_checkpoint = torch.load(path / "confind_contact.bin", weights_only=True, map_location=device)
+        cb_contact_checkpoint = torch.load(path / "contact.bin", weights_only=True, map_location=device)
+        # mrf_head_checkpoint = torch.load(path / "mrf_head.bin", weights_only=True, map_location=device)
         checkpoint.update(confind_contact_checkpoint)
         checkpoint.update(cb_contact_checkpoint)
         # checkpoint.update(mrf_head_checkpoint)

@@ -126,7 +126,7 @@ def _setup_tools():
 [MSA Pairformer](https://www.cell.com/cell/fulltext/S0092-8674(26)00749-X) is an MSA-based protein language model that can model the coevolution of interacting proteins. In this repository, we provide the model source code, a Google Colab notebook for quick experimentation, and notebooks and scripts to reproduce the results of our manuscript. We are excited to deliver this tool to the community and to see all of its applications as a tool to study and engineer biology.
 
 ### Getting started with MSA Pairformer <a name="getting-started"></a>
-The model's weights can be downloaded from Huggingface under [HuggingFace/yakiyama/MSA-Pairformer](https://huggingface.co/yakiyama/MSA-Pairformer/).
+The model's weights can be downloaded from Huggingface under [HuggingFace/yoakiyama/MSA-Pairformer](https://huggingface.co/yoakiyama/MSA-Pairformer/). `from_pretrained` pins a fixed revision so results stay reproducible; pass `revision=` to override it.
 ```py
 import torch
 import numpy as np
