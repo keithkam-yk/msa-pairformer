@@ -12,15 +12,11 @@ Three coordinate frames complicate the design: model frame (alignment columns), 
 
 ## Decisions
 
-### D1: Two records unified by Projection
+### D1: Two records, Projection for contacts only
 
-`ContactTarget` (Figure 2 and CASP15) and `DMSTarget` (ProteinGym). Each carries a `Projection` that maps model-frame positions to structure-frame positions. `Projection` is a base class exposing three members — `project_pred(NDArray) -> NDArray`, `project_truth(NDArray) -> NDArray`, and a `chain_break` property — with three concrete frozen-dataclass subtypes:
+`ContactTarget` (Figure 2 and CASP15) carries a `Projection` — two index arrays (`pred_idx`, `truth_idx`) that select scored-frame positions from model-frame and structure-frame arrays, plus an optional `chain_break` position already in the scored frame. Adapters convert benchmark-specific representations (Figure 2's boolean mask pair, CASP15's index list) into index arrays at construction time, so the scoring core has one code path.
 
-- `MaskPairProjection` (Figure 2): two boolean masks of different lengths (`msa_mask` in model frame, `cif_mask` in structure frame), optional `chain_break_model` position.
-- `IndexProjection` (CASP15): integer index list into model-frame columns; truth side is identity (no `cif_mask` field — its absence is the declaration).
-- `OffsetProjection` (ProteinGym): scalar offset between model-frame and structure-frame numbering.
-
-The chain break is stored in the model frame on `MaskPairProjection`. `Projection.chain_break` returns the break in the scored frame (defaults to `None` for monomers). Callers never convert manually.
+`DMSTarget` (ProteinGym) carries a plain `offset: int` instead of a Projection. ProteinGym scores per-position logits, not pairwise contact matrices — there is no matrix to slice, just a numbering alignment between DMS variant positions and MSA columns.
 
 ### D2: UnknownPolicy on the record
 
@@ -38,7 +34,7 @@ An adapter owns a `PairformerConfig` that specifies model identity, weights revi
 
 ### D5: Pydantic for config, dataclasses for records
 
-Frozen `@dataclass` for data records (`ContactTarget`, `DMSTarget`, `Projection` subtypes) — they carry numpy arrays, and pydantic v2 would require `arbitrary_types_allowed` plus per-field validators for no gain. `pydantic_settings.BaseSettings` with `env_prefix="MSA_PAIRFORMER_EVAL_"` for runtime config (`EvalSettings`). No YAML, no untyped dicts. Pydantic is behind the `eval` optional extra; records use only stdlib + numpy.
+Frozen `@dataclass` for data records (`ContactTarget`, `DMSTarget`, `Projection`) — they carry numpy arrays, and pydantic v2 would require `arbitrary_types_allowed` plus per-field validators for no gain. `pydantic_settings.BaseSettings` with `env_prefix="MSA_PAIRFORMER_EVAL_"` for runtime config (`EvalSettings`). No YAML, no untyped dicts. Pydantic is behind the `eval` optional extra; records use only stdlib + numpy.
 
 ### D6: Package layout
 
