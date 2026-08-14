@@ -1,10 +1,10 @@
 benchmark,metric,model,corpus,category,value,tolerance,n_targets,averaging,source_notebook,source_cell
-figure2,median_interface_p_at_k,msa_pairformer,,,0.521008,0.02,,median,Figure2_MSAPairformer.ipynb,12
-figure2,median_interface_p_at_k,msa_transformer,,,0.192547,0.02,,median,Figure2_MSAPairformer.ipynb,12
-figure2,median_interface_p_at_k,inverse_covariance,,,0.086957,0.02,,median,Figure2_MSAPairformer.ipynb,12
-figure2,median_interface_p_at_k,glm2,,,0.025862,0.02,,median,Figure2_MSAPairformer.ipynb,12
-figure2,median_interface_p_at_k,e1,,,0.013889,0.02,,median,Figure2_MSAPairformer.ipynb,12
-figure2,median_interface_p_at_k,esmc,,,0.008850,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,msa_pairformer,,,0.521008,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,msa_transformer,,,0.192547,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,inverse_covariance,,,0.086957,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,glm2,,,0.025862,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,e1,,,0.013889,0.02,,median,Figure2_MSAPairformer.ipynb,12
+ppi,median_interface_p_at_k,esmc,,,0.008850,0.02,,median,Figure2_MSAPairformer.ipynb,12
 casp15,median_long_range_p_at_l,msa_pairformer,logan,,0.706849,0.02,45,median,Figure5A_CASP15.ipynb,34
 casp15,median_long_range_p_at_l,msa_pairformer,uniref,,0.660274,0.02,45,median,Figure5A_CASP15.ipynb,34
 casp15,median_long_range_p_at_l,msa_transformer,logan,,0.552734,0.02,45,median,Figure5A_CASP15.ipynb,34

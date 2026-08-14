@@ -63,7 +63,7 @@ DATA_ROOT = "/root/data"
 VOLUME_NAME = "msa-pairformer-eval-data"
 volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
-# No torch, no GPU: this is I/O. numpy is here because the Figure 2 and CASP15
+# No torch, no GPU: this is I/O. numpy is here because the PPI and CASP15
 # ground truth are pickled arrays, and `inventory` has to be able to load them
 # to report their keys rather than guessing from the opcode stream.
 image = (
