@@ -24,14 +24,9 @@ Ground-truth `-1` means "no structure." The paper's notebooks zero these before 
 
 `UnknownPolicy` is an enum field on `ContactTarget`, not a scoring-function parameter. Each benchmark manifest sets it once; the scoring core reads it.
 
-### D3: Calibrated as a separate Protocol
+### D3: No calibration port
 
-Three options were considered:
-- A method on `ContactPredictor` that raises `NotImplementedError` for uncalibrated models — rejected: violates LSP, forces callers to try/except.
-- A third port `CalibratedPredictor` — rejected: overweight for one optional capability.
-- **Chosen**: a separate runtime-checkable `Calibrated` Protocol. An adapter may satisfy both `ContactPredictor` and `Calibrated`. Callers use `isinstance` to check before calling calibration methods.
-
-This is consistent with the map's standing decision: "calibration metrics are an optional capability, not part of the port."
+Dropped. No published benchmark number depends on calibrated probabilities — P@K/P@L use rankings only, ProteinGym uses Spearman. The violin-plot probability analysis in Figure 2 is a supplementary visualization, not a scored metric. If calibration analysis is needed later, a `Calibrated` Protocol can be added in one session without changing the existing ports.
 
 ### D4: One adapter = one PairformerConfig
 
@@ -47,7 +42,7 @@ An adapter owns a `PairformerConfig` that specifies model identity, weights revi
 msa_pairformer/evaluate/          # namespace package (no __init__.py) — unchanged
     records.py                    # ContactTarget, DMSTarget, Projection, UnknownPolicy
     config.py                     # SamplingConfig, PairformerConfig, EvalSettings
-    ports.py                      # ContactPredictor, VariantScorer, Calibrated
+    ports.py                      # ContactPredictor, VariantScorer
     core/                         # subpackage (has __init__.py, exports public API)
         __init__.py
         precision.py              # Region, select_pairs, p_at_k, p_at_l
