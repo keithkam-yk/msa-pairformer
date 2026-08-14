@@ -6,15 +6,15 @@ Accepted
 
 ## Context
 
-The eval module must reproduce three benchmarks (Figure 2 hetero-oligomer contact, CASP15 long-range contact, ProteinGym zero-shot DMS) and later accept variant models during training. The existing `evaluate/` code is untyped, mixes scoring with plotting, and uses pickled dicts for data. The map's standing decisions fix two ports and a numpy-only scoring core; this ADR pins the remaining interface choices.
+The eval module must reproduce three benchmarks (PPI hetero-oligomer contact, CASP15 long-range contact, ProteinGym zero-shot DMS) and later accept variant models during training. The existing `evaluate/` code is untyped, mixes scoring with plotting, and uses pickled dicts for data. The map's standing decisions fix two ports and a numpy-only scoring core; this ADR pins the remaining interface choices.
 
-Three coordinate frames complicate the design: model frame (alignment columns), structure frame (deposited residues), and scored frame (positions both resolve). The mapping between model and structure frame differs per benchmark — Figure 2 uses a boolean mask pair, CASP15 uses an index list, ProteinGym uses a scalar offset.
+Three coordinate frames complicate the design: model frame (alignment columns), structure frame (deposited residues), and scored frame (positions both resolve). The mapping between model and structure frame differs per benchmark — PPI uses a boolean mask pair, CASP15 uses an index list, ProteinGym uses a scalar offset.
 
 ## Decisions
 
 ### D1: Two records, Projection for contacts only
 
-`ContactTarget` (Figure 2 and CASP15) carries a `Projection` — two index arrays (`pred_idx`, `truth_idx`) that select scored-frame positions from model-frame and structure-frame arrays, plus an optional `chain_break` position already in the scored frame. Adapters convert benchmark-specific representations (Figure 2's boolean mask pair, CASP15's index list) into index arrays at construction time, so the scoring core has one code path.
+`ContactTarget` (PPI and CASP15) carries a `Projection` — two index arrays (`pred_idx`, `truth_idx`) that select scored-frame positions from model-frame and structure-frame arrays, plus an optional `chain_break` position already in the scored frame. Adapters convert benchmark-specific representations (PPI's boolean mask pair, CASP15's index list) into index arrays at construction time, so the scoring core has one code path.
 
 `DMSTarget` (ProteinGym) carries a plain `offset: int` instead of a Projection. ProteinGym scores per-position logits, not pairwise contact matrices — there is no matrix to slice, just a numbering alignment between DMS variant positions and MSA columns.
 
@@ -63,4 +63,4 @@ msa_pairformer/evaluate/          # namespace package (no __init__.py) — uncha
 - New `eval` extra in `pyproject.toml`: `pydantic-settings>=2.3` (for `config.py` only; `records.py` uses stdlib + numpy).
 - New modules must be classified in `tests/test_imports.py`'s `NOT_TIER_0` table.
 - The scoring core (`core/precision.py`) is pure numpy and testable on hand-built matrices with no GPU.
-- Metric implementation bodies belong to tickets #11 (Figure 2), #12 (CASP15), #13 (ProteinGym) — not this ADR.
+- Metric implementation bodies belong to tickets #11 (PPI), #12 (CASP15), #13 (ProteinGym) — not this ADR.
