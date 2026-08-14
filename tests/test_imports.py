@@ -156,6 +156,7 @@ NOT_TIER_0 = {
     "evaluate/plots.py": "matplotlib",
     "evaluate/coevolution.py": "jacobian extra: jax",
     "evaluate/proteingym.py": "proteingym extra: numba, pandas",
+    "evaluate/records.py": "eval module data records, not on the inference path",
     "training/datamodule.py": "training extra: lightning. Builds MSADataset, so Bio.SeqIO and scipy too",
     "training/module.py": "training extra: lightning, torchmetrics",
 }

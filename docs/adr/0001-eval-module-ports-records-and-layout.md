@@ -12,11 +12,11 @@ Three coordinate frames complicate the design: model frame (alignment columns), 
 
 ## Decisions
 
-### D1: Two records unified by Projection
+### D1: Two records, Projection for contacts only
 
-`ContactTarget` (Figure 2 and CASP15) and `DMSTarget` (ProteinGym). Each carries a `Projection` that maps model-frame positions to structure-frame positions. `Projection` hides the mask-pair vs index-list vs offset representation behind a common interface.
+`ContactTarget` (Figure 2 and CASP15) carries a `Projection` — two index arrays (`pred_idx`, `truth_idx`) that select scored-frame positions from model-frame and structure-frame arrays, plus an optional `chain_break` position already in the scored frame. Adapters convert benchmark-specific representations (Figure 2's boolean mask pair, CASP15's index list) into index arrays at construction time, so the scoring core has one code path.
 
-The chain break is stored in the model frame on the record. `Projection` exposes a `chain_break` property that returns the break in the scored frame. Callers never convert manually.
+`DMSTarget` (ProteinGym) carries a plain `offset: int` instead of a Projection. ProteinGym scores per-position logits, not pairwise contact matrices — there is no matrix to slice, just a numbering alignment between DMS variant positions and MSA columns.
 
 ### D2: UnknownPolicy on the record
 
@@ -32,9 +32,9 @@ Dropped. No published benchmark number depends on calibrated probabilities — P
 
 An adapter owns a `PairformerConfig` that specifies model identity, weights revision, device, and query-bias-ablation state. CASP15's qba-on / qba-off comparison becomes two named adapters, not one adapter with a variant-returning method. Predictions are returned in the model frame; the scoring core projects them via `Projection`.
 
-### D5: Pydantic for all configuration
+### D5: Pydantic for config, dataclasses for records
 
-`pydantic.BaseModel` for data records (`ContactTarget`, `DMSTarget`, `Projection`). `pydantic_settings.BaseSettings` with `env_prefix="MSA_PAIRFORMER_EVAL_"` for runtime config (`EvalSettings`). No YAML, no untyped dicts. Both are behind a new `eval` optional extra.
+Frozen `@dataclass` for data records (`ContactTarget`, `DMSTarget`, `Projection`) — they carry numpy arrays, and pydantic v2 would require `arbitrary_types_allowed` plus per-field validators for no gain. `pydantic_settings.BaseSettings` with `env_prefix="MSA_PAIRFORMER_EVAL_"` for runtime config (`EvalSettings`). No YAML, no untyped dicts. Pydantic is behind the `eval` optional extra; records use only stdlib + numpy.
 
 ### D6: Package layout
 
@@ -60,7 +60,7 @@ msa_pairformer/evaluate/          # namespace package (no __init__.py) — uncha
 
 ## Consequences
 
-- New `eval` extra in `pyproject.toml`: `pydantic>=2.7`, `pydantic-settings>=2.3`.
+- New `eval` extra in `pyproject.toml`: `pydantic-settings>=2.3` (for `config.py` only; `records.py` uses stdlib + numpy).
 - New modules must be classified in `tests/test_imports.py`'s `NOT_TIER_0` table.
 - The scoring core (`core/precision.py`) is pure numpy and testable on hand-built matrices with no GPU.
 - Metric implementation bodies belong to tickets #11 (Figure 2), #12 (CASP15), #13 (ProteinGym) — not this ADR.
